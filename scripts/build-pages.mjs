@@ -5,6 +5,10 @@
  *   /breeding/<slug>/     one page per Pal: the pairs that make it, and what it
  *                         makes with everything else
  *   /pals/                the Paldex grid — element, rarity, work suitability
+ *   /passives/            the passives a species always hatches with
+ *   /passives/<slug>/     one page per passive: which Pals carry it
+ *   /mutations/           the 85 variant forms, by family
+ *   /mutations/<family>/  Cryst, Ignis, Noct, Lux, Terra, Primo, Botan, Aqua
  *   /guides/              guide index
  *   /guides/<slug>/       the guides written in content/guides/
  *   sitemap.xml, robots.txt
@@ -32,6 +36,7 @@ const [pals, passives, combos] = await Promise.all([
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const dex = (p) => '#' + String(p.dex).padStart(3, '0');
 const n = (x) => x.toLocaleString('en-US');
+const pairs = (k) => `${n(k)} pair${k === 1 ? '' : 's'}`;
 
 // ---- indexes --------------------------------------------------------------
 const byChild = new Map();   // child -> [[a,b], ...]
@@ -140,8 +145,8 @@ ${body}
         <h4>Database</h4>
         <ul>
           <li><a href="/pals/">Pal List</a></li>
-          <li><a href="/guides/palworld-breeding-formula/">Passive Skills</a></li>
-          <li><a href="/#calculator">Mutations</a></li>
+          <li><a href="/passives/">Passive Skills</a></li>
+          <li><a href="/mutations/">Mutations</a></li>
         </ul>
       </div>
       <div>
@@ -214,6 +219,14 @@ function palPage(p, i) {
 
     ${Object.keys(p.work).length ? `<p class="worklist"><span class="worklist__label">Work suitability</span>${workList(p)}</p>` : ''}
 
+    ${(p.passives ?? []).length ? `<p class="worklist"><span class="worklist__label">Always hatches with</span>${(p.passives ?? []).map((x) => `<a class="work" href="/passives/${passiveIndex[x].slug}/">${esc(passiveIndex[x].name)}</a>`).join('')}</p>` : ''}
+    ${p.variant ? (() => {
+      const f = families.find((x) => x.members.some(([q]) => q === p));
+      return f && f.members.length >= FAMILY_MIN
+        ? `<p class="note"><strong>${esc(p.name)}</strong> is a variant form. See <a href="/mutations/${f.slug}/">all ${f.members.length} ${esc(f.name)} Pals</a> or the <a href="/mutations/">full list of ${variants.length} variants</a>.</p>`
+        : `<p class="note"><strong>${esc(p.name)}</strong> is a variant form — see the <a href="/mutations/">full list of ${variants.length} variants</a>.</p>`;
+    })() : ''}
+
     <h2>How to breed ${esc(p.name)}</h2>
     <p>Pair the two Pals in a Breeding Farm with cake in the feed box. Parent order never matters — ${esc(pals[parents[0][0]].name)} + ${esc(pals[parents[0][1]].name)} and ${esc(pals[parents[0][1]].name)} + ${esc(pals[parents[0][0]].name)} both hatch ${esc(p.name)}.</p>
 
@@ -242,7 +255,7 @@ ${childRows}
 
     ${related.length ? `<h2>Other ${esc((p.elements ?? ['similar'])[0])} Pals</h2>
     <div class="pal-grid pal-grid--compact">
-      ${related.map((q) => `<a class="pal-card" href="/breeding/${q.slug}/">${icon(q)}<strong>${esc(q.name)}</strong><small>${n(parentsOf(pals.indexOf(q)).length)} pairs</small></a>`).join('\n      ')}
+      ${related.map((q) => `<a class="pal-card" href="/breeding/${q.slug}/">${icon(q)}<strong>${esc(q.name)}</strong><small>${pairs(parentsOf(pals.indexOf(q)).length)}</small></a>`).join('\n      ')}
     </div>` : ''}
 `;
 
@@ -303,6 +316,10 @@ function palsIndex() {
 
   const body = `    <h1>All Palworld Pals</h1>
     <p class="lede">All ${pals.length} Pals in the v1.0 Paldeck, including ${pals.filter((p) => p.variant).length} variant forms, with element and work suitability on the rebalanced 1.0 scale. Every card opens that Pal's breeding combinations.</p>
+    <div class="card-list" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));margin-bottom:26px">
+      <a class="guide-card" href="/mutations/"><strong>Variant Pals</strong><span>All ${variants.length} mutations, by family</span></a>
+      <a class="guide-card" href="/passives/"><strong>Passive Skills</strong><span>The ${passiveIndex.length} passives guaranteed by species</span></a>
+    </div>
     <div class="pal-grid">
       ${cards}
     </div>
@@ -355,11 +372,287 @@ async function guides() {
   return written;
 }
 
+// ---- /passives/ -----------------------------------------------------------
+// Only the passives a species always hatches with are in the dataset — the
+// full in-game passive list is much longer, and the rest are rolled at random
+// rather than tied to a Pal, so they cannot be looked up this way.
+
+const slugify = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+const passiveIndex = passives.map((skill, i) => ({
+  ...skill,
+  slug: slugify(skill.name),
+  carriers: pals.map((p, pi) => [p, pi]).filter(([p]) => (p.passives ?? []).includes(i)),
+}));
+
+{
+  const dupes = passiveIndex.map((s) => s.slug).filter((s, i, a) => a.indexOf(s) !== i);
+  if (dupes.length) throw new Error(`duplicate passive slug: ${dupes.join(', ')}`);
+}
+
+const RANK_LABEL = {
+  4: 'Rank 4 — highest tier',
+  3: 'Rank 3',
+  2: 'Rank 2',
+  1: 'Rank 1',
+  '-1': 'Rank −1 — negative trait',
+};
+const rankLabel = (r) => RANK_LABEL[r] ?? `Rank ${r}`;
+
+const palCardWithPairs = (p) =>
+  `<a class="pal-card" href="/breeding/${p.slug}/">${icon(p)}<strong>${esc(p.name)}</strong><small>${pairs(parentsOf(pals.indexOf(p)).length)}</small></a>`;
+
+function passivePage(skill) {
+  const carriers = [...skill.carriers].sort((a, b) => a[0].dex - b[0].dex);
+  const cheapest = [...carriers].sort((a, b) =>
+    parentsOf(b[1]).length - parentsOf(a[1]).length || a[0].rarity - b[0].rarity)[0];
+  const negative = skill.rank < 0;
+  const siblings = passiveIndex.filter((s) => s.rank === skill.rank && s !== skill).slice(0, 8);
+
+  const many = carriers.length > 1;
+  const lede = negative
+    ? `${esc(skill.name)} is a negative passive: ${many ? `the ${carriers.length} Pals below always hatch with it` : `${esc(carriers[0][0].name)} always hatches with it`}, so it travels into the egg whenever one of them is a parent. Worth knowing before you put one in the Breeding Farm.`
+    : `${many ? `${carriers.length} Pals always hatch with` : `${esc(carriers[0][0].name)} always hatches with`} <strong>${esc(skill.name)}</strong> in Palworld 1.0. Breeding from one of them is the reliable way to get the skill onto a line, because it is on the parent already instead of being rolled at random.`;
+
+  const body = `    <h1>Palworld ${esc(skill.name)} Passive Skill</h1>
+    <p class="lede">${lede}</p>
+
+    <div class="factbar">
+      <span class="fact"><small>Tier</small>${rankLabel(skill.rank)}</span>
+      <span class="fact"><small>Pals with it</small>${carriers.length}</span>
+      <span class="fact"><small>Most breedable carrier</small>${esc(cheapest[0].name)}</span>
+    </div>
+
+    <h2>${many ? `Pals that always have ${esc(skill.name)}` : `The Pal that always has ${esc(skill.name)}`}</h2>
+    <p>Every Pal below hatches with ${esc(skill.name)} attached, whether you catch it or breed it. The number on each card is how many parent pairs produce that Pal.</p>
+    <div class="pal-grid pal-grid--compact">
+      ${carriers.map(([p]) => palCardWithPairs(p)).join('\n      ')}
+    </div>
+
+    <h2>${negative ? `How to avoid passing on ${esc(skill.name)}` : `How to breed ${esc(skill.name)} into a line`}</h2>
+    ${negative
+      ? `<p>A passive on a parent goes into the pool the egg draws from, so the surest way to keep ${esc(skill.name)} out of a line is to keep its carriers out of the Breeding Farm. If one of them is the only route to the Pal you want, plan an extra generation: breed the child you need, then pair that child onward and keep the egg that came out clean.</p>`
+      : `<p>Start from a carrier. ${esc(cheapest[0].name)} is the one most pairs lead to — ${n(parentsOf(cheapest[1]).length)} parent ${parentsOf(cheapest[1]).length === 1 ? 'pair produces' : 'pairs produce'} it — so it is usually the cheapest way to get ${esc(skill.name)} into your ranch. From there, pair the carrier with the Pal you are building and keep the eggs that inherit the skill.</p>
+    <p>Both parents contribute to the pool, so two carriers are better than one when you are stacking several passives at once. The <a href="/#calculator">Passives tab in the calculator</a> filters the whole Paldeck down to the Pals that guarantee the skills you pick.</p>`}
+
+    <div class="callout">
+      <p><strong>What this list covers.</strong> These are the passives tied to a species — a Pal of this kind always hatches with the skill. Palworld also rolls other passives at random on any egg; those are not attached to a Pal and so cannot be looked up here.</p>
+    </div>
+
+    ${siblings.length ? `<h2>Other ${rankLabel(skill.rank).toLowerCase().startsWith('rank') ? rankLabel(skill.rank).split(' —')[0].toLowerCase() : 'similar'} passives</h2>
+    <div class="card-list">
+      ${siblings.map((s) => `<a class="guide-card" href="/passives/${s.slug}/"><strong>${esc(s.name)}</strong><span>${s.carriers.length} ${s.carriers.length === 1 ? 'Pal always hatches' : 'Pals always hatch'} with it</span></a>`).join('\n      ')}
+    </div>` : ''}
+`;
+
+  return layout({
+    title: `Palworld ${skill.name} Passive — Which Pals Always Have It`,
+    description: `Every Palworld 1.0 Pal that always hatches with the ${skill.name} passive skill, and how to breed the skill into a line. Built from game data.`,
+    path: `/passives/${skill.slug}/`,
+    crumbs: [{ label: 'Home', href: '/' }, { label: 'Passives', href: '/passives/' }, { label: skill.name }],
+    body,
+  });
+}
+
+function passivesIndex() {
+  const ranks = [...new Set(passiveIndex.map((s) => s.rank))].sort((a, b) => b - a);
+  const carrierCount = new Set(passiveIndex.flatMap((s) => s.carriers.map(([, i]) => i))).size;
+
+  const sections = ranks.map((r) => {
+    const group = passiveIndex.filter((s) => s.rank === r).sort((a, b) => b.carriers.length - a.carriers.length);
+    return `    <h2>${rankLabel(r)}</h2>
+    <div class="table-scroll">
+      <table class="combo-table">
+        <thead><tr><th>Passive skill</th><th>Pals that always have it</th><th class="num">Count</th></tr></thead>
+        <tbody>
+${group.map((s) => `          <tr><td><a href="/passives/${s.slug}/">${esc(s.name)}</a></td><td>${s.carriers.slice(0, 4).map(([p]) => `<a href="/breeding/${p.slug}/">${esc(p.name)}</a>`).join(', ')}${s.carriers.length > 4 ? ` <span style="color:var(--fg-muted)">+${s.carriers.length - 4} more</span>` : ''}</td><td class="num">${s.carriers.length}</td></tr>`).join('\n')}
+        </tbody>
+      </table>
+    </div>`;
+  }).join('\n\n');
+
+  const body = `    <h1>Palworld Passive Skills by Pal</h1>
+    <p class="lede">${passiveIndex.length} passive skills in Palworld 1.0 are tied to a species: a Pal of that kind always hatches with the skill attached. ${carrierCount} Pals carry one. Those are the skills you can plan a breeding project around, because they are guaranteed rather than rolled.</p>
+
+    <div class="factbar">
+      <span class="fact"><small>Species passives</small>${passiveIndex.length}</span>
+      <span class="fact"><small>Pals carrying one</small>${carrierCount}</span>
+      <span class="fact"><small>Top-tier passives</small>${passiveIndex.filter((x) => x.rank === 4).length}</span>
+    </div>
+
+    <h2>How passive skills are inherited</h2>
+    <p>Both parents contribute their passives to the pool an egg draws from, and the egg can also roll skills neither parent had. Nothing here is guaranteed on the child — what is guaranteed is the <em>parent</em>: a Kingpaca always hatches with Heavyweight, so pairing one puts Heavyweight in the pool every single time instead of hoping for a roll.</p>
+    <p>That is why a four-passive project usually starts by breeding the carriers rather than the target. Pick the skills you want, find the Pals that guarantee them, and work the target species in last.</p>
+
+${sections}
+
+    <div class="callout">
+      <p><strong>Not the full passive list.</strong> Palworld has many more passives than the ${passiveIndex.length} here. The rest are rolled at random on the egg and are not attached to any species, so there is no Pal to breed for — this page covers only the ones you can plan around.</p>
+    </div>
+
+    <h2>Breed for a passive</h2>
+    <p>The <a href="/#calculator">Passives tab in the breeding calculator</a> takes the skills you want and returns the Pals that guarantee them, with the parent pairs that produce each one.</p>
+`;
+
+  return layout({
+    title: 'Palworld Passive Skills — Which Pals Always Have Them',
+    description: `All ${passiveIndex.length} Palworld 1.0 passive skills that are guaranteed by species, the ${carrierCount} Pals that carry them, and how to breed a skill into a line.`,
+    path: '/passives/',
+    crumbs: [{ label: 'Home', href: '/' }, { label: 'Passives' }],
+    body,
+  });
+}
+
+// ---- /mutations/ ----------------------------------------------------------
+// Variant forms are separate Paldeck entries with their own breeding pairs.
+// They are grouped by the suffix the game gives them, and the element list of
+// each family is read off the data rather than assumed.
+
+const variants = pals.map((p, i) => [p, i]).filter(([p]) => p.variant);
+
+const FAMILY_MIN = 4;   // below this a family is a footnote, not a page
+const familyOf = ([p]) => (p.name.includes(' ') ? p.name.split(' ').pop() : 'Other');
+
+const families = [...new Map(variants.map((v) => [familyOf(v), null])).keys()]
+  .map((name) => {
+    const members = variants.filter((v) => familyOf(v) === name)
+      .sort((a, b) => a[0].dex - b[0].dex);
+    const elements = [...new Set(members.flatMap(([p]) => p.elements ?? []))];
+    // The element the whole family shares is the one every member has.
+    const shared = elements.filter((e) => members.every(([p]) => (p.elements ?? []).includes(e)));
+    return { name, slug: slugify(name), members, elements, shared };
+  })
+  .sort((a, b) => b.members.length - a.members.length);
+
+const familyLede = (f) => f.shared.length
+  ? `Every ${esc(f.name)} form is ${f.shared.map((e) => esc(e)).join(' and ')}-type`
+  : `The ${esc(f.name)} forms cover ${f.elements.map((e) => esc(e)).join(', ')}`;
+
+function familyPage(f) {
+  const cards = f.members.map(([p, i]) =>
+    `<a class="pal-card" href="/breeding/${p.slug}/">${icon(p)}<strong>${esc(p.name)}</strong><small>${pairs(parentsOf(i).length)}</small></a>`).join('\n      ');
+
+  const easiest = [...f.members].sort((a, b) => parentsOf(b[1]).length - parentsOf(a[1]).length)[0];
+  const hardest = [...f.members].sort((a, b) => parentsOf(a[1]).length - parentsOf(b[1]).length)[0];
+  // Some families are produced by fixed recipes, so every member has the same
+  // number of pairs — printing "easiest" and "hardest" would name the same Pal.
+  const uniformPairs = parentsOf(easiest[1]).length === parentsOf(hardest[1]).length;
+
+  const rows = f.members.map(([p, i]) => {
+    const base = pals.find((q) => !q.variant && q.dex === p.dex);
+    return `          <tr><td>${palCell(p)}</td><td>${base ? palCell(base) : '<span style="color:var(--fg-muted)">&mdash;</span>'}</td><td><span class="chips">${elChips(p)}</span></td><td class="num">${p.rarity}</td><td class="num">${n(parentsOf(i).length)}</td></tr>`;
+  }).join('\n');
+
+  const body = `    <h1>Palworld ${esc(f.name)} Pals — All ${f.members.length} Variants</h1>
+    <p class="lede">${familyLede(f)}. All ${f.members.length} are separate Paldeck entries with their own breeding pairs, so you breed for the variant directly rather than transforming the base Pal.</p>
+
+    <div class="factbar">
+      <span class="fact"><small>Variants</small>${f.members.length}</span>
+      <span class="fact"><small>${f.shared.length ? 'Shared element' : 'Elements'}</small>${f.shared.length ? f.shared.map((e) => esc(e)).join(' / ') : f.elements.length}</span>
+      ${uniformPairs
+        ? `<span class="fact"><small>Parent pairs each</small>${n(parentsOf(easiest[1]).length)}</span>`
+        : `<span class="fact"><small>Easiest to breed</small>${esc(easiest[0].name)}</span>
+      <span class="fact"><small>Hardest to breed</small>${esc(hardest[0].name)}</span>`}
+    </div>
+
+    <div class="pal-grid pal-grid--compact">
+      ${cards}
+    </div>
+
+    <h2>Every ${esc(f.name)} variant and its base form</h2>
+    <div class="table-scroll">
+      <table class="combo-table">
+        <thead><tr><th>Variant</th><th>Base Pal</th><th>Element</th><th class="num">Rarity</th><th class="num">Parent pairs</th></tr></thead>
+        <tbody>
+${rows}
+        </tbody>
+      </table>
+    </div>
+
+    <h2>How to breed a ${esc(f.name)} Pal</h2>
+    <p>A variant is bred like any other Pal: pick it as the target and the calculator returns the pairs that produce it. The pairs belong to the variant, not to the base Pal. ${uniformPairs
+      ? `Every ${esc(f.name)} form comes from the same small set — ${pairs(parentsOf(easiest[1]).length)} each — which is what a fixed recipe looks like in the data.`
+      : `${esc(easiest[0].name)} comes from ${pairs(parentsOf(easiest[1]).length)}, while ${esc(hardest[0].name)} comes from ${n(parentsOf(hardest[1]).length)}.`} Open any Pal above to see them listed cheapest first.</p>
+
+    <h2>Other variant families</h2>
+    <div class="card-list">
+      ${families.filter((x) => x !== f && x.members.length >= FAMILY_MIN)
+        .map((x) => `<a class="guide-card" href="/mutations/${x.slug}/"><strong>${esc(x.name)} Pals</strong><span>${x.members.length} variants · ${x.shared.length ? x.shared.join(' and ') + '-type' : x.elements.join(', ')}</span></a>`).join('\n      ')}
+    </div>
+`;
+
+  return layout({
+    title: `Palworld ${f.name} Pals — All ${f.members.length} Variants & How to Breed Them`,
+    description: `Every ${f.name} variant in Palworld 1.0, its base Pal, element and rarity, with the number of parent pairs that produce each one.`,
+    path: `/mutations/${f.slug}/`,
+    crumbs: [{ label: 'Home', href: '/' }, { label: 'Mutations', href: '/mutations/' }, { label: `${f.name} Pals` }],
+    body,
+  });
+}
+
+// The extremes are worth stating on the hub page, and they have to come from
+// the data rather than from an assumption about which family is common.
+const mostPairs = [...variants].sort((a, b) => parentsOf(b[1]).length - parentsOf(a[1]).length)[0];
+const selfOnly = variants.filter(([, i]) => {
+  const ps = parentsOf(i);
+  return ps.length === 1 && ps[0][0] === i && ps[0][1] === i;
+});
+
+function mutationsIndex() {
+  const big = families.filter((f) => f.members.length >= FAMILY_MIN);
+  const small = families.filter((f) => f.members.length < FAMILY_MIN);
+
+  const section = (f) => `    <h2 id="${f.slug}">${esc(f.name)} — ${f.members.length} variant${f.members.length === 1 ? '' : 's'}</h2>
+    <p>${familyLede(f)}.${f.members.length >= FAMILY_MIN ? ` <a href="/mutations/${f.slug}/">All ${f.members.length} ${esc(f.name)} Pals &rarr;</a>` : ''}</p>
+    <div class="pal-grid pal-grid--compact">
+      ${f.members.map(([p, i]) => `<a class="pal-card" href="/breeding/${p.slug}/">${icon(p)}<strong>${esc(p.name)}</strong><small>${pairs(parentsOf(i).length)}</small></a>`).join('\n      ')}
+    </div>`;
+
+  const body = `    <h1>Palworld Variant Pals — All ${variants.length} Mutations</h1>
+    <p class="lede">Palworld 1.0 has ${variants.length} variant forms across ${families.length} families. Each one is its own Paldeck entry with its own element, stats and breeding pairs — a Cryst form is not an Ice-coated version of the base Pal, it is a different Pal that you breed for directly.</p>
+
+    <div class="factbar">
+      <span class="fact"><small>Variant Pals</small>${variants.length}</span>
+      <span class="fact"><small>Families</small>${families.length}</span>
+      <span class="fact"><small>Share of the Paldeck</small>${Math.round((variants.length / pals.length) * 100)}%</span>
+    </div>
+
+    <h2>What a variant actually is</h2>
+    <p>There is no mutation step and no item that converts a Pal. The variant sits in the Paldeck next to its base form, usually with a different element and a different rarity, and it is produced by its own set of parent pairs. How reachable they are varies enormously: ${esc(mostPairs[0].name)} comes from ${pairs(parentsOf(mostPairs[1]).length)}, while ${selfOnly.length} variants — ${selfOnly.map(([q]) => esc(q.name)).join(', ')} — breed only from themselves, so the first one has to be caught in the wild.</p>
+    <p>Because the pairs belong to the variant rather than to the base Pal, looking up "Jormuntide" tells you nothing about Jormuntide Ignis. Open the variant itself.</p>
+
+${big.map(section).join('\n\n')}
+
+    <h2>Smaller variant families</h2>
+    <p>${small.every((f) => f.members.length === 1) ? 'These families have a single member each.' : `Families with fewer than ${FAMILY_MIN} members, listed together.`}</p>
+    <div class="pal-grid pal-grid--compact">
+      ${small.flatMap((f) => f.members).sort((a, b) => a[0].dex - b[0].dex)
+        .map(([p, i]) => `<a class="pal-card" href="/breeding/${p.slug}/">${icon(p)}<strong>${esc(p.name)}</strong><small>${pairs(parentsOf(i).length)}</small></a>`).join('\n      ')}
+    </div>
+
+    <h2>Breed a variant</h2>
+    <p>Pick the variant as your target in the <a href="/#calculator">breeding calculator</a> and it returns every pair that produces it, cheapest first. The Mutations tab lists the variant forms on their own if you would rather browse than search.</p>
+`;
+
+  return layout({
+    title: `Palworld Variant Pals — All ${variants.length} Mutations in 1.0`,
+    description: `Every variant Pal in Palworld 1.0 — Cryst, Ignis, Noct, Lux, Terra and the rest — with its element, rarity and how many parent pairs produce it.`,
+    path: '/mutations/',
+    crumbs: [{ label: 'Home', href: '/' }, { label: 'Mutations' }],
+    body,
+  });
+}
+
 // ---- write ----------------------------------------------------------------
 const files = [
   ['breeding/index.html', breedingIndex()],
   ['pals/index.html', palsIndex()],
   ...pals.map((p, i) => [`breeding/${p.slug}/index.html`, palPage(p, i)]),
+  ['passives/index.html', passivesIndex()],
+  ...passiveIndex.map((s) => [`passives/${s.slug}/index.html`, passivePage(s)]),
+  ['mutations/index.html', mutationsIndex()],
+  ...families.filter((f) => f.members.length >= FAMILY_MIN)
+    .map((f) => [`mutations/${f.slug}/index.html`, familyPage(f)]),
   ...(await guides()),
 ];
 
@@ -368,6 +661,12 @@ const urls = [
   ['/breeding/', '0.9', 'weekly'],
   ['/pals/', '0.8', 'weekly'],
   ['/guides/', '0.7', 'monthly'],
+  ['/passives/', '0.8', 'weekly'],
+  ['/mutations/', '0.8', 'weekly'],
+  ...files.filter(([f]) => f.startsWith('passives/') && f !== 'passives/index.html')
+    .map(([f]) => ['/' + f.replace('index.html', ''), '0.6', 'monthly']),
+  ...files.filter(([f]) => f.startsWith('mutations/') && f !== 'mutations/index.html')
+    .map(([f]) => ['/' + f.replace('index.html', ''), '0.6', 'monthly']),
   ...files.filter(([f]) => f.startsWith('breeding/') && f !== 'breeding/index.html')
     .map(([f]) => ['/' + f.replace('index.html', ''), '0.7', 'monthly']),
   ...files.filter(([f]) => f.startsWith('guides/') && f !== 'guides/index.html')

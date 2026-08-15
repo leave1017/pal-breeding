@@ -209,6 +209,8 @@ html[data-theme="dark"] .chip--dragon{background:#42184a;color:#eda2e3}
   font-size:12px;font-weight:700;color:var(--fg-muted);
   background:var(--bg-cyan);padding:4px 10px;border-radius:999px;
 }
+a.work{color:var(--cyan-deep)}
+a.work:hover{background:var(--cyan);color:var(--fg);text-decoration:none}
 .worklist--card{margin:0;gap:4px}
 .worklist--card .work{font-size:10.5px;padding:2px 7px}
 

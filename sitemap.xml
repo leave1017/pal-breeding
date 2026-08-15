@@ -4,6 +4,39 @@
   <url><loc>https://palbreeding.net/breeding/</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
   <url><loc>https://palbreeding.net/pals/</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://palbreeding.net/guides/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://palbreeding.net/passives/</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://palbreeding.net/mutations/</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://palbreeding.net/passives/eternal-flame/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://palbreeding.net/passives/invader/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://palbreeding.net/passives/legend/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://palbreeding.net/passives/lunker/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://palbreeding.net/passives/savior/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://palbreeding.net/passives/siren-of-the-void/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://palbreeding.net/passives/celestial-emperor/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://palbreeding.net/passives/divine-dragon/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://palbreeding.net/passives/earth-emperor/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://palbreeding.net/passives/flame-emperor/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://palbreeding.net/passives/ice-emperor/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://palbreeding.net/passives/lord-of-lightning/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://palbreeding.net/passives/lord-of-the-sea/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://palbreeding.net/passives/lord-of-the-underworld/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://palbreeding.net/passives/spirit-emperor/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://palbreeding.net/passives/heavyweight/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://palbreeding.net/passives/abnormal/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://palbreeding.net/passives/hard-skin/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://palbreeding.net/passives/hooligan/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://palbreeding.net/passives/otherworldly-cells/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://palbreeding.net/passives/sadist/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://palbreeding.net/passives/coward/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://palbreeding.net/passives/glutton/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://palbreeding.net/mutations/cryst/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://palbreeding.net/mutations/ignis/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://palbreeding.net/mutations/noct/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://palbreeding.net/mutations/lux/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://palbreeding.net/mutations/terra/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://palbreeding.net/mutations/primo/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://palbreeding.net/mutations/botan/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://palbreeding.net/mutations/aqua/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://palbreeding.net/breeding/lamball/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://palbreeding.net/breeding/cattiva/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://palbreeding.net/breeding/chikipi/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
