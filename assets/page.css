@@ -44,10 +44,7 @@ p,ul,ol{margin:0}
 .nav{display:flex;align-items:center;gap:18px;height:70px}
 .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px;color:var(--fg);letter-spacing:-.02em}
 .brand:hover{text-decoration:none}
-.brand__mark{
-  width:34px;height:34px;border-radius:12px;flex:none;display:grid;place-items:center;font-size:17px;
-  background:linear-gradient(140deg,var(--accent),var(--cyan));
-}
+.brand__mark{width:34px;height:34px;flex:none;display:block}
 .nav__links{display:flex;gap:4px;margin-left:auto}
 .nav__links a{padding:8px 14px;border-radius:999px;font-size:15px;color:var(--fg-muted);transition:all .2s}
 .nav__links a:hover{background:var(--cyan);color:var(--fg);text-decoration:none}

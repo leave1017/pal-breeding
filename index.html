@@ -14,7 +14,11 @@
 <meta property="og:description" content="Find the child of any two Pals, every parent combo for a target Pal, shortest breeding path, passive skill filters and mutation combos. Built from Palworld v1.0 game data.">
 <meta property="og:url" content="https://palbreeding.net/">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥚</text></svg>">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#fceb55">
 
 <style>
 /* ============ Design tokens — "Soft Modern Utility" ============ */
@@ -113,11 +117,7 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 }
 .nav{display:flex;align-items:center;gap:18px;height:70px}
 .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px;letter-spacing:-.02em}
-.brand__mark{
-  width:34px;height:34px;border-radius:12px;flex:none;
-  background:linear-gradient(140deg,var(--accent),var(--cyan));
-  display:grid;place-items:center;font-size:17px;
-}
+.brand__mark{width:34px;height:34px;flex:none;display:block}
 .nav__links{display:flex;gap:4px;margin-left:14px}
 .nav__links a{
   padding:8px 14px;border-radius:999px;font-size:15px;font-weight:600;color:var(--fg-muted);
@@ -423,7 +423,7 @@ html[data-theme="dark"] .badge--electric{background:#3d3316;color:#fde047}
   <div class="wrap">
     <nav class="nav" aria-label="Main">
       <a class="brand" href="/">
-        <span class="brand__mark" aria-hidden="true">🥚</span>
+        <img class="brand__mark" src="/android-chrome-192x192.png" alt="" width="34" height="34">
         <span>PalBreeding.net</span>
       </a>
       <div class="nav__links">
@@ -707,7 +707,7 @@ html[data-theme="dark"] .badge--electric{background:#3d3316;color:#fde047}
   <div class="wrap">
     <div class="foot-grid">
       <div>
-        <a class="brand" href="/"><span class="brand__mark" aria-hidden="true">🥚</span><span>PalBreeding.net</span></a>
+        <a class="brand" href="/"><img class="brand__mark" src="/android-chrome-192x192.png" alt="" width="34" height="34"><span>PalBreeding.net</span></a>
         <p style="color:var(--fg-muted);font-size:15px;margin-top:12px;max-width:36ch">A free Palworld 1.0 breeding calculator and Pal database. Breeding data extracted from Palworld v1.0 game files.</p>
       </div>
       <div>
