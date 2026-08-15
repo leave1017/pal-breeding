@@ -57,7 +57,7 @@ const WORK_LABEL = {
 };
 
 // ---- shared chrome --------------------------------------------------------
-const NAV = [['/', 'Calculator'], ['/breeding/', 'Breeding'], ['/pals/', 'Pals'], ['/guides/', 'Guides']];
+const NAV = [['/', 'Calculator'], ['/breeding/', 'Breeding Combos'], ['/pals/', 'All Pals'], ['/guides/', 'Guide']];
 
 function layout({ title, description, path, crumbs, body, extraLd = [] }) {
   const url = `${SITE}${path}`;
@@ -90,7 +90,7 @@ function layout({ title, description, path, crumbs, body, extraLd = [] }) {
 <link rel="canonical" href="${url}">
 <link rel="manifest" href="/manifest.json">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="PalBreeding.net">
+<meta property="og:site_name" content="PalLineage">
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(description)}">
 <meta property="og:url" content="${url}">
@@ -106,7 +106,7 @@ function layout({ title, description, path, crumbs, body, extraLd = [] }) {
     <nav class="nav" aria-label="Main">
       <a class="brand" href="/">
         <img class="brand__mark" src="/android-chrome-192x192.png" alt="" width="34" height="34">
-        <span>PalBreeding.net</span>
+        <span>PalLineage</span>
       </a>
       <div class="nav__right"><div class="nav__links">${nav}</div></div>
     </nav>
@@ -122,8 +122,37 @@ ${body}
 
 <footer class="site-footer">
   <div class="wrap wrap--wide">
-    <span>&copy; 2026 PalBreeding.net &middot; <a href="/about/">About</a> &middot; <a href="/contact/">Contact</a> &middot; <a href="/privacy/">Privacy</a> &middot; <a href="/terms/">Terms</a></span>
-    <span>Unofficial fan-made tool. Not affiliated with or endorsed by Pocketpair, Inc.</span>
+    <div class="foot-grid">
+      <div>
+        <h4>Tools</h4>
+        <ul>
+          <li><a href="/">Breeding Calculator</a></li>
+          <li><a href="/breeding/">Breeding Combos</a></li>
+          <li><a href="/pals/">All Pals</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Database</h4>
+        <ul>
+          <li><a href="/pals/">Pal List</a></li>
+          <li><a href="/guides/palworld-breeding-formula/">Passive Skills</a></li>
+          <li><a href="/#calculator">Mutations</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>PalLineage</h4>
+        <ul>
+          <li><a href="/about/">About</a></li>
+          <li><a href="/guides/">Guide</a></li>
+          <li><a href="/privacy/">Privacy</a></li>
+          <li><a href="/contact/">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-note">
+      <span>PalLineage &middot; Palworld 1.0 breeding data from game files &middot; &copy; 2026</span>
+      <span>Unofficial fan-made tool. Not affiliated with or endorsed by Pocketpair, Inc.</span>
+    </div>
   </div>
 </footer>
 ${[breadcrumbLd, ...extraLd].map((ld) => `<script type="application/ld+json">\n${JSON.stringify(ld)}\n</script>`).join('\n')}
