@@ -8,17 +8,21 @@ Missing icons never break the grid, so a partial set is fine.
 `eidrolon-ignis`, `gumoss-flower`. Slugs are unique per Pal, which the number
 files are not: variants share their base form's Paldex number.
 
-## Filling this folder
+## Where these came from
 
-```bash
-node scripts/fetch-icons.mjs          # downloads what is missing
-node scripts/fetch-icons.mjs --force  # re-downloads everything
-```
+All 299 are in the repo already, taken from the icon set bundled with
+[Palworld Pal Editor](https://github.com/KrisCris/Palworld-Pal-Editor), whose
+files are named by the game's internal codename — the same key `data/pals.json`
+carries — and resized here to 128px webp (about 3.7 KB each, 1.1 MB for the set).
 
-The script reads icon URLs from the same dataset the element data comes from and
-saves the images here. Files are committed to the repo rather than hot-linked, so
-the site does not depend on — or spend — another site's bandwidth. Re-running it
-only fetches what is absent, so an interrupted run just needs running again.
+`scripts/fetch-icons.mjs` downloads from paldb's CDN instead, and stays as a
+fallback for Pals a future patch adds. That CDN refused every request from both
+this project's build environment and from GitHub Actions runners, which is why
+the committed set comes from the GitHub-hosted mirror.
+
+Two names differ between the sets: `BluePlatypus` is filed as `Blueplatypus`,
+and Gumoss Flower has no icon of its own, so it uses the base form's. The
+conversion falls back from `Internal_Variant` to `Internal` for that reason.
 
 ## Before you run it
 

@@ -6,7 +6,7 @@
  * Run: node scripts/build-preview.mjs [outfile]
  */
 
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile, writeFile, readdir } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -46,13 +46,27 @@ if (frameOpen < 0 || frameClose < 0) throw new Error('Could not find the calcula
 
 const inlined = page.slice(0, frameOpen) + toolMarkup + page.slice(frameClose);
 
+// A single file cannot fetch sibling images, so Pal art is inlined as data URIs.
+const iconDir = resolve(ROOT, 'assets/pals');
+const iconFiles = (await readdir(iconDir)).filter((f) => f.endsWith('.webp'));
+const icons = Object.fromEntries(await Promise.all(iconFiles.map(async (f) => [
+  f.replace('.webp', ''),
+  `data:image/webp;base64,${(await readFile(resolve(iconDir, f))).toString('base64')}`,
+])));
+
 const withAssets = inlined
   .replace('</head>', `<style>\n/* --- inlined from tool/calculator.html --- */\n${toolCss}\n</style>\n</head>`)
   .replace('</body>', [
     '<script id="paldata" type="application/json">',
     JSON.stringify({ pals: JSON.parse(pals), passives: JSON.parse(passives), combos: JSON.parse(combos) }),
     '</script>',
-    '<script>window.__PALDATA__ = JSON.parse(document.getElementById("paldata").textContent);</script>',
+    '<script id="palicons" type="application/json">',
+    JSON.stringify(icons),
+    '</script>',
+    '<script>',
+    'window.__PALDATA__ = JSON.parse(document.getElementById("paldata").textContent);',
+    'window.__PALICONS__ = JSON.parse(document.getElementById("palicons").textContent);',
+    '</script>',
     `<script>\n${toolJs}\n</script>`,
     '</body>',
   ].join('\n'));

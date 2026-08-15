@@ -104,7 +104,11 @@ a{color:var(--cyan-deep);font-weight:700;text-decoration:none}
   background:var(--input-bg);border:1px solid var(--border);
   display:grid;place-items:center;
 }
-.art img{width:100%;height:100%;object-fit:contain;display:block}
+.art img{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;
+  opacity:0;transition:opacity .15s ease-in-out;background:var(--card);
+}
+.art img.is-loaded{opacity:1}
 .art__no{font-size:15px;font-weight:800;color:var(--fg-muted);font-variant-numeric:tabular-nums}
 .art--sm{width:34px;height:34px;border-radius:11px}
 .art--sm .art__no{font-size:12px}
@@ -435,14 +439,21 @@ html[data-theme="dark"] .w-Farming{color:#a3e635}
   function art(i, size = '') {
     const p = state.pals[i];
     const box = el('div', { className: `art${size}` }, el('span', { className: 'art__no', textContent: p.dex }));
-    const img = el('img', { alt: '', loading: 'lazy', src: `../assets/pals/${p.slug}.webp` });
+    // The image goes into the DOM straight away: a detached lazy image is never
+    // in the viewport, so the browser would never start loading it. It fades in
+    // over the number tile once decoded, and removes itself if no file exists.
+    // Single-file preview builds hand the images over inline; the served site
+    // loads them from assets/pals/.
+    const inlineIcon = window.__PALICONS__?.[p.slug];
+    const img = el('img', { alt: '', loading: 'lazy', src: inlineIcon ?? `../assets/pals/${p.slug}.webp` });
     let triedDex = false;
+    img.addEventListener('load', () => img.classList.add('is-loaded'));
     img.addEventListener('error', () => {
       if (triedDex) { img.remove(); return; }
       triedDex = true;
       img.src = `../assets/pals/${String(p.dex).padStart(3, '0')}.webp`;
     });
-    img.addEventListener('load', () => box.replaceChildren(img));
+    box.append(img);
     return box;
   }
 
