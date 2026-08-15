@@ -395,3 +395,121 @@ html[data-theme="dark"] .fchip.chip--dragon{background:#42184a;color:#eda2e3}
   .filterbar{padding:14px;gap:11px}
   .reveal.is-capped{max-height:2200px}
 }
+
+
+/* ============ Icon cards (the /pals/ grid) ============ */
+/* Attributes ride along as glyphs rather than words: the same hand-drawn
+   sprite the calculator uses, so a Pal reads identically in both places. And
+   a glyph costs the page no body text, which a row of "Handiwork 1
+   Transporting 1 Farming 1" very much does. */
+.pgrid{
+  display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;margin:4px 0 6px;
+}
+.pcard{
+  position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;
+  background:var(--card);border:1px solid var(--border-soft);border-radius:var(--r-card);
+  padding:14px 8px 12px;text-align:center;color:var(--fg);transition:all .15s;
+}
+.pcard:hover{
+  transform:translateY(-2px);box-shadow:var(--shadow-soft);
+  border-color:var(--accent);text-decoration:none;z-index:5;
+}
+.pcard__art{
+  width:64px;height:64px;border-radius:16px;background:var(--bg-cyan);
+  object-fit:contain;margin-bottom:2px;
+}
+.pcard:hover .pcard__art{background:var(--bg-cream)}
+.pcard__name{font-size:13px;font-weight:800;line-height:1.2;letter-spacing:-.01em}
+.pcard__dex{font-size:10.5px;font-weight:700;color:var(--fg-muted);font-variant-numeric:tabular-nums}
+.pcard__el{display:flex;gap:4px;margin-top:4px}
+.pcard__work{
+  display:flex;flex-wrap:wrap;justify-content:center;gap:2px 5px;margin-top:4px;
+  font-size:10px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--fg-muted);
+}
+.pcard__job{display:inline-flex;align-items:center;gap:2px}
+
+/* The tooltip text lives in an attribute, so it renders instantly, styles with
+   the rest of the site, and adds nothing to the page's word count. */
+.pcard[data-tip]::after{
+  content:attr(data-tip);
+  position:absolute;left:50%;bottom:calc(100% + 6px);transform:translateX(-50%);
+  min-width:150px;max-width:230px;padding:8px 11px;border-radius:12px;
+  background:var(--fg);color:var(--bg);font-size:11.5px;font-weight:600;line-height:1.45;
+  opacity:0;visibility:hidden;transition:opacity .14s;pointer-events:none;z-index:10;
+}
+.pcard:hover[data-tip]::after,.pcard:focus-visible[data-tip]::after{opacity:1;visibility:visible}
+.pgrid > .pcard:nth-child(6n+1)[data-tip]::after{left:0;transform:none}
+.pgrid > .pcard:nth-child(6n)[data-tip]::after{left:auto;right:0;transform:none}
+
+.sortbar{display:flex;align-items:center;gap:8px;margin:0 0 12px;flex-wrap:wrap}
+.sortbar label{font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--fg-muted)}
+.sortbar select{
+  font:inherit;font-size:13.5px;font-weight:700;color:var(--fg);
+  background:var(--card);border:1px solid var(--border);border-radius:999px;padding:7px 14px;
+}
+
+@media (max-width:1000px){ .pgrid{grid-template-columns:repeat(4,minmax(0,1fr))} }
+@media (max-width:640px){
+  .pgrid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .pcard{padding:11px 5px 9px}
+  .pcard__art{width:52px;height:52px;border-radius:13px}
+  .pcard__name{font-size:11.5px}
+  /* Touch has no hover, so the tooltip never fires — the glyphs on the card
+     already carry everything essential. */
+  .pcard[data-tip]::after{display:none}
+}
+
+/* ============ Attribute glyph colours (shared with the calculator) ============ */
+.w-Kindling{color:#ea580c}
+.w-Watering{color:#0ea5e9}
+.w-Planting{color:#16a34a}
+.w-GenerateElectricity{color:#ca8a04}
+.w-Handiwork{color:#b45309}
+.w-Gathering{color:#059669}
+.w-Lumbering{color:#92400e}
+.w-Mining{color:#475569}
+.w-MedicineProduction{color:#7c3aed}
+.w-Cooling{color:#0891b2}
+.w-Transporting{color:#a16207}
+.w-Farming{color:#65a30d}
+html[data-theme="dark"] .w-Kindling{color:#fb923c}
+html[data-theme="dark"] .w-Watering{color:#7dd3fc}
+html[data-theme="dark"] .w-Planting{color:#4ade80}
+html[data-theme="dark"] .w-GenerateElectricity{color:#fde047}
+html[data-theme="dark"] .w-Handiwork{color:#fbbf24}
+html[data-theme="dark"] .w-Gathering{color:#34d399}
+html[data-theme="dark"] .w-Lumbering{color:#d6a35c}
+html[data-theme="dark"] .w-Mining{color:#cbd5e1}
+html[data-theme="dark"] .w-MedicineProduction{color:#c4b5fd}
+html[data-theme="dark"] .w-Cooling{color:#67e8f9}
+html[data-theme="dark"] .w-Transporting{color:#e0b872}
+html[data-theme="dark"] .w-Farming{color:#a3e635}
+
+/* Element tiles and glyph fill modes, mirrored from the calculator so a Pal
+   looks the same in the grid as it does in the tool. Some glyphs are drawn as
+   fills and some as strokes; each needs the matching mode to read at 12px. */
+.el{width:19px;height:19px;border-radius:7px;display:grid;place-items:center;flex:none}
+.el svg{width:12px;height:12px}
+.el--fill svg{fill:currentColor;stroke:none}
+.el--line svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.el-Neutral{background:#e2e8f0;color:#475569}
+.el-Fire{background:#ffe4d3;color:#c2410c}
+.el-Water{background:#d6ecfd;color:#0369a1}
+.el-Electric{background:#fdf0c2;color:#a16207}
+.el-Grass{background:#d8f3df;color:#15803d}
+.el-Ground{background:#eee2cf;color:#92400e}
+.el-Ice{background:#d3f1f7;color:#0e7490}
+.el-Dark{background:#e2ddf9;color:#6d28d9}
+.el-Dragon{background:#f7dcf1;color:#a21caf}
+html[data-theme="dark"] .el-Neutral{background:#33415580;color:#cbd5e1}
+html[data-theme="dark"] .el-Fire{background:#7c2d1280;color:#fdba74}
+html[data-theme="dark"] .el-Water{background:#0c4a6e80;color:#7dd3fc}
+html[data-theme="dark"] .el-Electric{background:#71360780;color:#fde047}
+html[data-theme="dark"] .el-Grass{background:#14532d80;color:#86efac}
+html[data-theme="dark"] .el-Ground{background:#78350f80;color:#e5c39a}
+html[data-theme="dark"] .el-Ice{background:#155e7580;color:#67e8f9}
+html[data-theme="dark"] .el-Dark{background:#4c1d9580;color:#c4b5fd}
+html[data-theme="dark"] .el-Dragon{background:#701a7580;color:#f0abfc}
+.pcard__job svg{width:13px;height:13px;flex:none}
+.pcard__job--fill svg{fill:currentColor;stroke:none}
+.pcard__job--line svg{fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}

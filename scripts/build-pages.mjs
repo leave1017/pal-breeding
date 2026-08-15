@@ -33,6 +33,10 @@ const [pals, passives, combos] = await Promise.all([
   read('data/pals.json'), read('data/passives.json'), read('data/combos.json'),
 ]);
 
+// Inlined rather than referenced: a <use href="file.svg#id"> costs an extra
+// round trip and is inconsistent across browsers for same-document sprites.
+const SPRITE = await readFile(resolve(ROOT, 'assets/sprite.svg'), 'utf8');
+
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const dex = (p) => '#' + String(p.dex).padStart(3, '0');
 const n = (x) => x.toLocaleString('en-US');
@@ -66,7 +70,7 @@ const WORK_LABEL = {
 // ---- shared chrome --------------------------------------------------------
 const NAV = [['/', 'Calculator'], ['/breeding/', 'Breeding Combos'], ['/pals/', 'All Pals'], ['/guides/', 'Guide']];
 
-function layout({ title, description, path, crumbs, body, extraLd = [], scripts = [], pageType = 'WebPage' }) {
+function layout({ title, description, path, crumbs, body, extraLd = [], scripts = [], pageType = 'WebPage', sprite = false }) {
   const url = `${SITE}${path}`;
   // The home link is only current on the home page; the section links are
   // current for anything beneath them.
@@ -147,6 +151,7 @@ ${scripts.map((src) => `<script src="${src}" defer></script>`).join('\n')}
   </div>
 </header>
 
+${sprite ? SPRITE : ''}
 <main>
   <div class="wrap wrap--wide">
     <nav class="crumbs" aria-label="Breadcrumb">${trail}</nav>
@@ -292,21 +297,32 @@ ${childRows}
   });
 }
 
-// ---- hub filter bar -------------------------------------------------------
-// Both hubs render every row server-side and let the same script hide and
-// reorder them, so the 299 links stay in the HTML while the visitor sees a
-// short list. Filtering that removed rows from the document would cost the
-// Pal pages their strongest internal links.
+// ---- hub listings --------------------------------------------------------
+// Both hubs ship 30 items in the HTML and fetch the other 269 as a fragment
+// rendered by the same template below. That keeps the pages readable at a
+// glance, keeps the body text short enough for the keyword to carry weight,
+// and still puts real content in front of a crawler that runs no scripts.
+
+const SERVER_ROWS = 30;
 
 const ELEMENT_ORDER = ['Neutral', 'Fire', 'Water', 'Electric', 'Grass', 'Ground', 'Ice', 'Dark', 'Dragon'];
 const ELEMENT_COUNT = Object.fromEntries(ELEMENT_ORDER.map((e) =>
   [e, pals.filter((p) => (p.elements ?? []).includes(e)).length]));
-
 const WORK_COUNT = Object.fromEntries(Object.keys(WORK_LABEL).map((w) =>
   [w, pals.filter((p) => p.work[w]).length]));
 
-/** Everything the client script needs to filter a row without re-deriving it. */
-const rowAttrs = (p, i, extra = {}) => [
+// Fill vs stroke per glyph, same table the calculator uses.
+const EL_STYLE = { Ice: 'line', Ground: 'fill' };
+const WORK_STYLE = {
+  Kindling: 'fill', Watering: 'fill', Planting: 'line', GenerateElectricity: 'fill',
+  Handiwork: 'fill', Gathering: 'fill', Lumbering: 'line', Mining: 'line',
+  MedicineProduction: 'line', Cooling: 'line', Transporting: 'line', Farming: 'line',
+};
+const glyph = (id) => `<svg aria-hidden="true" viewBox="0 0 24 24"><use href="#${id}"/></svg>`;
+
+/** Everything the client script filters on, read straight off the element. */
+const dataAttrs = (p, extra = {}) => [
+  `data-item`,
   `data-name="${esc(p.name)}"`,
   `data-dex="${p.dex}"`,
   `data-el="${(p.elements ?? []).join(' ')}"`,
@@ -317,134 +333,178 @@ const rowAttrs = (p, i, extra = {}) => [
   ...Object.entries(extra).map(([k, v]) => `data-${k}="${v}"`),
 ].join(' ');
 
-function filterBar({ search, elements = true, work = false, flags = [] }) {
-  return `    <div class="filterbar">
-      <div class="filterbar__top">
-        <input class="filterbar__search" type="search" data-search placeholder="${esc(search)}" aria-label="${esc(search)}">
-        <span class="filterbar__count"><strong data-count>${pals.length}</strong> Pals</span>
-        <button class="filterbar__reset" type="button" data-reset>Reset</button>
-      </div>
-      ${elements ? `<div class="filterbar__row">
-        <span class="filterbar__label">Element</span>
-        ${ELEMENT_ORDER.map((e) => `<button class="fchip chip--${e.toLowerCase()}" type="button" data-element="${e}" aria-pressed="false">${e} <span style="opacity:.6">${ELEMENT_COUNT[e]}</span></button>`).join('\n        ')}
-      </div>` : ''}
-      ${work ? `<div class="filterbar__row">
-        <span class="filterbar__label">Work</span>
-        ${Object.keys(WORK_LABEL).map((w) => `<button class="fchip" type="button" data-work="${w}" aria-pressed="false">${WORK_LABEL[w]} <span style="opacity:.6">${WORK_COUNT[w]}</span></button>`).join('\n        ')}
-      </div>` : ''}
-      ${flags.length ? `<div class="filterbar__row">
-        <span class="filterbar__label">Show only</span>
-        ${flags.map(([key, label]) => `<button class="fchip" type="button" data-flag="${key}" aria-pressed="false">${label}</button>`).join('\n        ')}
-      </div>` : ''}
-    </div>`;
+/** /pals/ card. Element and job are glyphs; the tooltip text is an attribute,
+ *  so it costs the page nothing in body copy and still reads instantly. */
+function palCard(p, i) {
+  const jobs = Object.entries(p.work);
+  const tip = [
+    (p.elements ?? []).join(' / ') || 'No element',
+    `Rarity ${p.rarity}`,
+    jobs.length ? jobs.map(([k, v]) => `${WORK_LABEL[k]} ${v}`).join(', ') : 'No work suitability',
+  ].join(' · ');
+
+  return `<a class="pcard" href="/breeding/${p.slug}/" ${dataAttrs(p, { pairs: parentsOf(i).length, flags: p.variant ? 'variant' : '' })} data-tip="${esc(tip)}" aria-label="${esc(`${p.name}, ${dex(p)}. ${tip}`)}">`
+    + `<img class="pcard__art" src="/assets/pals/${p.slug}.webp" alt="" width="64" height="64" loading="lazy">`
+    + `<strong class="pcard__name">${esc(p.name)}</strong>`
+    + `<span class="pcard__dex">${dex(p)}</span>`
+    + `<span class="pcard__el">${(p.elements ?? []).map((e) =>
+        `<span class="el el--${EL_STYLE[e] ?? 'fill'} el-${e}">${glyph(`e-${e}`)}</span>`).join('')}</span>`
+    + (jobs.length ? `<span class="pcard__work">${jobs.map(([k, v]) =>
+        `<span class="pcard__job pcard__job--${WORK_STYLE[k]} w-${k}">${glyph(`w-${k}`)}${v}</span>`).join('')}</span>` : '')
+    + `</a>`;
 }
 
-/* The cap and the "show all" control are added by the script, not baked into
-   the markup: without JS the full table renders, which is the right fallback
-   for a reader and costs a crawler nothing. */
-const hubTable = ({ bar, table }) => `    <div data-table-filter>
+/** /breeding/ row. The numbers stay in columns — comparing 1,280 against
+ *  1,229 is the whole point of this page, and a grid makes that harder. */
+function comboRow(p, i) {
+  const count = parentsOf(i).length;
+  const kids = new Set(childrenOf(i).map(([, c]) => c)).size;
+  const flags = [p.variant ? 'variant' : '', count === 1 ? 'single' : ''].filter(Boolean).join(' ');
+  return `<tr ${dataAttrs(p, { pairs: count, kids, flags })}>`
+    + `<td>${palCell(p)}</td><td><span class="chips">${elChips(p)}</span></td>`
+    + `<td class="num">${p.rarity}</td><td class="num">${n(p.power)}</td>`
+    + `<td class="num">${n(count)}</td><td class="num">${n(kids)}</td></tr>`;
+}
+
+function filterBar({ search, elements = true, work = false, flags = [], sort = null }) {
+  return `      <div class="filterbar">
+        <div class="filterbar__top">
+          <input class="filterbar__search" type="search" data-search placeholder="${esc(search)}" aria-label="${esc(search)}">
+          <span class="filterbar__count"><strong data-count>${pals.length}</strong> Pals</span>
+          <button class="filterbar__reset" type="button" data-reset>Reset</button>
+        </div>
+        ${elements ? `<div class="filterbar__row">
+          <span class="filterbar__label">Element</span>
+          ${ELEMENT_ORDER.map((e) => `<button class="fchip chip--${e.toLowerCase()}" type="button" data-element="${e}" aria-pressed="false">${e} <span style="opacity:.6">${ELEMENT_COUNT[e]}</span></button>`).join('\n          ')}
+        </div>` : ''}
+        ${work ? `<div class="filterbar__row">
+          <span class="filterbar__label">Work</span>
+          ${Object.keys(WORK_LABEL).map((w) => `<button class="fchip" type="button" data-work="${w}" aria-pressed="false">${WORK_LABEL[w]} <span style="opacity:.6">${WORK_COUNT[w]}</span></button>`).join('\n          ')}
+        </div>` : ''}
+        ${flags.length ? `<div class="filterbar__row">
+          <span class="filterbar__label">Show only</span>
+          ${flags.map(([key, label]) => `<button class="fchip" type="button" data-flag="${key}" aria-pressed="false">${label}</button>`).join('\n          ')}
+        </div>` : ''}
+        ${sort ? `<div class="filterbar__row sortbar">
+          <label for="sortby">Sort</label>
+          <select id="sortby" data-sortby>${sort.map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}</select>
+        </div>` : ''}
+      </div>`;
+}
+
+const hubShell = ({ src, bar, listing }) => `    <div data-table-filter data-src="${src}">
 ${bar}
       <div class="reveal" data-reveal>
-${table}
+${listing}
       </div>
       <p class="table-empty" data-empty hidden>No Pal matches those filters. <button class="filterbar__reset" type="button" data-reset>Clear them</button></p>
       <p class="reveal__more"><button type="button" data-more hidden>Show all ${pals.length}</button></p>
     </div>`;
 
 // ---- /breeding/ -----------------------------------------------------------
+const rankedByPairs = pals.map((p, i) => ({ p, i, count: parentsOf(i).length }))
+  .sort((a, b) => b.count - a.count);
+const singlePair = rankedByPairs.filter((r) => r.count === 1);
+const medianPairs = rankedByPairs[Math.floor(rankedByPairs.length / 2)].count;
+
 function breedingIndex() {
-  const ranked = pals.map((p, i) => ({ p, i, count: parentsOf(i).length }))
-    .sort((a, b) => b.count - a.count);
-  const single = ranked.filter((r) => r.count === 1);
-  const top = ranked.slice(0, 6);
-  const median = ranked[Math.floor(ranked.length / 2)].count;
-
-  const rows = ranked.map(({ p, i, count }) => {
-    const kids = new Set(childrenOf(i).map(([, c]) => c)).size;
-    return `          <tr ${rowAttrs(p, i, { pairs: count, kids })} data-flags="${[p.variant ? 'variant' : '', count === 1 ? 'single' : ''].filter(Boolean).join(' ')}">
-            <td>${palCell(p)}</td><td><span class="chips">${elChips(p)}</span></td>
-            <td class="num">${p.rarity}</td><td class="num">${n(p.power)}</td>
-            <td class="num">${n(count)}</td><td class="num">${n(kids)}</td>
-          </tr>`;
-  }).join('\n');
-
-  const table = `      <div class="table-scroll">
-        <table class="combo-table">
-          <thead><tr>
-            <th data-sort="name">Pal</th>
-            <th>Element</th>
-            <th class="num" data-sort="rarity">Rarity</th>
-            <th class="num" data-sort="power" data-desc>Breeding power</th>
-            <th class="num" data-sort="pairs" data-desc>Parent pairs</th>
-            <th class="num" data-sort="kids" data-desc>Breeds into</th>
-          </tr></thead>
-          <tbody>
-${rows}
-          </tbody>
-        </table>
-      </div>`;
+  const top = rankedByPairs.slice(0, 5);
+  const listing = `        <div class="table-scroll">
+          <table class="combo-table">
+            <thead><tr>
+              <th data-sort="name">Pal</th>
+              <th>Element</th>
+              <th class="num" data-sort="rarity">Rarity</th>
+              <th class="num" data-sort="power" data-desc>Breeding power</th>
+              <th class="num" data-sort="pairs" data-desc>Parent pairs</th>
+              <th class="num" data-sort="kids" data-desc>Breeds into</th>
+            </tr></thead>
+            <tbody data-items>
+${rankedByPairs.slice(0, SERVER_ROWS).map(({ p, i }) => '              ' + comboRow(p, i)).join('\n')}
+            </tbody>
+          </table>
+        </div>`;
 
   const faq = [
-    ['How many breeding combinations are there in Palworld 1.0?',
-      `There are ${n(combos.combos.length)} breeding combinations across the ${pals.length} Pals in the v1.0 Paldeck. Two of them depend on the parents' genders; every other combination gives the same child whichever way round you put the parents.`],
-    ['Which Pal has the most breeding combinations?',
-      `${top[0].p.name}, with ${n(top[0].count)} parent pairs. ${top[1].p.name} (${n(top[1].count)}) and ${top[2].p.name} (${n(top[2].count)}) are next. A high count means the Pal is easy to reach — almost anything you own will get you there eventually.`],
-    ['Which Pals have only one breeding combination?',
-      `${single.length} of them. Most are top-tier Pals that only breed true — pairing two of the same species — so the first one has to be caught in the wild before breeding can help. Filter the table by "One pair only" to see the full list.`],
-    ['Does the order of the parents change the combination?',
-      'No. A + B and B + A produce the same child, so each pair only needs checking once. That is why the table below counts pairs rather than ordered combinations.'],
+    ['How many Palworld breeding combinations are there in 1.0?',
+      `${n(combos.combos.length)}, across the ${pals.length} Pals in the v1.0 Paldeck. Two of them hatch differently depending on which parent is male and which is female; the other ${n(combos.combos.length - 2)} give the same egg either way round.`],
+    ['Which Pal has the most Palworld breeding combinations?',
+      `${top[0].p.name}, at ${n(top[0].count)} parent pairs — roughly one in every thirty-five combinations in the game ends in a ${top[0].p.name}. ${top[1].p.name} and ${top[2].p.name} follow with ${n(top[1].count)} and ${n(top[2].count)}.`],
+    ['Do Palworld breeding combinations depend on parent order?',
+      'No. A + B and B + A hatch the same Pal, which is why this page counts pairs rather than ordered combinations — counting both directions would double the number without adding a single new result.'],
+    ['Which Pals cannot be bred from two different species?',
+      `${singlePair.length} of them, including Frostallion, Necromus, Selyne and Xenolord. Each breeds true and nothing else: the only pair that produces one is two of the same Pal. Catch the first, and the pair sustains itself from then on. The "One pair only" filter lists all ${singlePair.length}.`],
     ['What is breeding power?',
-      'Every Pal has a hidden breeding power value. The game averages the two parents’ values and picks the Pal whose own value sits closest to that average, which is how a fixed table can exist at all. It is the "Breeding power" column in the table, and the formula is worked through in the guide.'],
-    ['Is this list updated for the current patch?',
-      'Yes. The whole table is regenerated from the Palworld v1.0 game files after each patch, so the combination counts here match what the game does rather than what a pre-1.0 list used to say.'],
+      'A hidden number every Pal carries. The game averages the two parents’ values and hatches whichever Pal sits closest to that average, breaking ties by a fixed order. It is the column labelled Breeding power, and it is why the table has any pattern at all.'],
+    ['Are these Palworld breeding combinations current?',
+      'Yes. The whole set is regenerated from the v1.0 game files after each patch, so nothing here is left over from a pre-1.0 list that quietly stopped being true.'],
+    ['Is there a faster way than scrolling this table?',
+      'Search for the Pal you want and open its page — it lists every pair that produces it, cheapest first. If you already own two Pals and just want to know what they make, the calculator answers that in one click.'],
+    ['Do variant forms have their own breeding combinations?',
+      `They do, and this catches people out constantly. A variant is a separate Paldeck entry, so the Palworld breeding combinations that hatch Jormuntide Ignis share nothing with the ones that hatch Jormuntide. All ${pals.filter((p) => p.variant).length} variants are breedable; each has its own list.`],
+    ['Does element or gender affect what an egg hatches into?',
+      'Element does not — a Fire parent and a Water parent can produce a Grass child, because the table works off breeding power rather than typing. Gender matters for exactly two pairs in the game and nothing else; every other combination gives the same result whichever way the parents fall.'],
+    ['Where does this data come from?',
+      'The v1.0 game data tables, by way of an open-source project that extracts them, cross-checked against a second independent dataset. The build fails outright if the two disagree on any Pal, which is a blunt way of catching a bad import before it reaches the site.'],
   ];
 
   const body = `    <h1>All Palworld Breeding Combinations</h1>
-    <p class="lede">Every breeding combination in Palworld 1.0, in one searchable table: ${n(combos.combos.length)} parent pairs across ${pals.length} Pals, generated from the game's own breeding data. Search for a Pal, filter by element, or sort by how many combinations produce it — then open any Pal for the full list of pairs.</p>
+    <p class="lede">All ${n(combos.combos.length)} Palworld breeding combinations in v1.0, pulled straight from the game files and laid out so you can actually use them. Search for a Pal, narrow by element, or sort by how many pairs reach it. Each row opens onto that Pal’s full list.</p>
 
     <div class="factbar">
       <span class="fact"><small>Breeding combinations</small>${n(combos.combos.length)}</span>
       <span class="fact"><small>Pals covered</small>${pals.length}</span>
-      <span class="fact"><small>Median pairs per Pal</small>${n(median)}</span>
-      <span class="fact"><small>Bred from one pair only</small>${single.length}</span>
+      <span class="fact"><small>Median pairs per Pal</small>${n(medianPairs)}</span>
+      <span class="fact"><small>Bred from one pair only</small>${singlePair.length}</span>
     </div>
 
     <h2>How to Search Palworld Breeding Combinations</h2>
-    <p>Type a Pal's name or Paldex number to jump straight to it — partial spellings work, so "anb" finds Anubis. The element chips narrow the table by type and stack, so picking two shows only the Pals that carry both. <strong>Variant forms</strong> and <strong>One pair only</strong> isolate the ${pals.filter((p) => p.variant).length} variants and the ${single.length} Pals that cannot be bred from two different species. Any column header sorts the table, and every row opens that Pal's full list of parent pairs.</p>
+    <p>The table below holds every Palworld breeding combination in the game, so the search box is the fastest way in. Type a name or a Paldeck number and it narrows as you go. Half-remembered spelling is fine — "anb" finds Anubis. The element chips stack, so choosing Ice and then Dragon leaves only the two Pals carrying both. <strong>Variant forms</strong> pulls up the ${pals.filter((p) => p.variant).length} Cryst, Ignis, Noct, Lux and Terra entries; <strong>One pair only</strong> isolates the ${singlePair.length} Pals breeding cannot reach from scratch. Click any column header to sort by it.</p>
 
-${hubTable({
+${hubShell({
+    src: '/data/hub-breeding.html',
     bar: filterBar({
       search: 'Search by name, number or element…',
       flags: [['variant', 'Variant forms'], ['single', 'One pair only']],
     }),
-    table,
+    listing,
   })}
 
     <h2>How Palworld Breeding Combinations Work</h2>
-    <p>A breeding combination in Palworld is a fixed result, not a roll. Put a male and a female in a Breeding Farm with cake in the feed box and the egg they produce is decided by a table the game ships with — which is why every combination on this page can be looked up in advance instead of tested.</p>
-    <p>The table is order-independent. ${top[0].p.name} bred with ${top[1].p.name} and ${top[1].p.name} bred with ${top[0].p.name} give the same child, so a pair only ever needs checking once. That also means the ${n(combos.combos.length)} combinations here are unordered pairs: counting both directions would double the number without adding a single new result.</p>
-    <h3>Breeding power, and why the table looks arbitrary</h3>
-    <p>Each Pal carries a hidden breeding power value — the <strong>Breeding power</strong> column above. The game averages the two parents' values and hatches the Pal whose own value lands closest to that average, with a fixed priority order breaking ties. That single rule generates most of the ${n(combos.combos.length)} combinations; the rest are hand-placed exceptions, including the variant forms and the two pairs whose result depends on gender. The <a href="/guides/palworld-breeding-formula/">breeding formula guide</a> works through it with the numbers.</p>
-    <h3>Reading the table</h3>
-    <p><strong>Parent pairs</strong> is how many different combinations produce that Pal — high means easy to reach. <strong>Breeds into</strong> is the opposite direction: how many different children that Pal can father or mother. Sort by either column to flip the table between "what is cheap to get" and "what is useful to own".</p>
+    <p>Breeding in Palworld is not a dice roll. Put a male and a female in a Breeding Farm, drop cake in the feed box, and the egg that comes out was decided before you started — the game ships a fixed table, and every one of these Palworld breeding combinations is a row in it. That is the only reason a calculator can exist.</p>
+    <p>Order never matters. Pair ${top[0].p.name} with ${top[1].p.name} or ${top[1].p.name} with ${top[0].p.name} and the same egg hatches, so a pair is worth checking once and no more. Two combinations in the whole game break that rule and depend on parent gender.</p>
 
-    <h2>Pals With the Most Breeding Combinations</h2>
-    <p>These are the Pals almost any pairing can reach. If one of them is your target, you probably already own the parents:</p>
+    <h3>Breeding power, and why the table looks random</h3>
+    <p>Every Pal carries a hidden value the community calls breeding power — the column in the table above. Values run from ${n(Math.min(...pals.map((p) => p.power)))} to ${n(Math.max(...pals.map((p) => p.power)))}. The game averages the two parents’ numbers and hatches whichever Pal lands nearest that average, with a fixed priority order settling ties.</p>
+    <p>One rule, ${n(combos.combos.length)} results. It explains most of them, anyway: the variant forms and a handful of set recipes are placed by hand and ignore the arithmetic entirely. The <a href="/guides/palworld-breeding-formula/">formula guide</a> walks through it with real numbers, including how far the rule actually gets you.</p>
+
+    <h3>Where the variant forms sit</h3>
+    <p>The ${pals.filter((p) => p.variant).length} variants are the exception that trips people up. Jormuntide Ignis is not Jormuntide wearing a different coat — it is a separate Paldeck entry with its own element line and its own parents, and the pairs that produce it have nothing to do with the pairs that produce the base form. So the Palworld breeding combinations for a variant have to be looked up on their own; guessing from the base Pal gets you nowhere. Use the <strong>Variant forms</strong> filter to see the whole set at once.</p>
+
+    <h3>Reading the columns</h3>
+    <p><strong>Parent pairs</strong> counts how many combinations produce that Pal — a big number means almost anything you own can get you one. <strong>Breeds into</strong> runs the other way: how many different children that Pal can father or mother. Sorting by one and then the other flips the table between "what is cheap to obtain" and "what is worth keeping around".</p>
+
+    <h2>Which Pals Have the Most Palworld Breeding Combinations</h2>
+    <p>Sort by parent pairs and the top of the list barely changes: five Pals sit far above the rest.</p>
     <ul>
       ${top.map(({ p, count }) => `<li><a href="/breeding/${p.slug}/">${esc(p.name)}</a> — ${pairs(count)}</li>`).join('\n      ')}
     </ul>
-    <p>The median Pal sits at ${n(median)} pairs, so anything above a few hundred is genuinely easy to breed toward. Sorting the table by <strong>Parent pairs</strong> gives the full ranking.</p>
+    <p>The median Pal comes from ${n(medianPairs)} of the ${n(combos.combos.length)} Palworld breeding combinations, so anything in the hundreds is genuinely easy to breed toward. If ${top[0].p.name} is what you need, you almost certainly own the parents already — check the pair you have rather than hunting for a specific recipe.</p>
 
-    <h2>Pals With Only One Breeding Combination</h2>
-    <p>At the other end, ${single.length} Pals are produced by exactly one combination. Most of them breed true — the only pair that makes one is two of the same species — so breeding cannot get you the first one. Catch it, then the pair becomes self-sustaining:</p>
+    <h2>The ${singlePair.length} Pals Breeding Cannot Give You</h2>
+    <p>At the far end sit ${singlePair.length} Pals produced by exactly one pair, and in nearly every case that pair is the Pal with itself. No amount of breeding conjures the first one; you have to catch it. After that the pair sustains itself, which is how people end up with a stable of Frostallions.</p>
     <div class="pal-grid pal-grid--compact">
-      ${single.slice(0, 12).map(({ p, i }) => `<a class="pal-card" href="/breeding/${p.slug}/">${icon(p)}<strong>${esc(p.name)}</strong><small>${pairs(parentsOf(i).length)}</small></a>`).join('\n      ')}
+      ${singlePair.slice(0, 8).map(({ p, i }) => `<a class="pal-card" href="/breeding/${p.slug}/">${icon(p)}<strong>${esc(p.name)}</strong><small>${pairs(parentsOf(i).length)}</small></a>`).join('\n      ')}
     </div>
-    <p>Use the <strong>One pair only</strong> filter above for all ${single.length}.</p>
 
-    <h2>Breeding Combinations by Element</h2>
-    <p>The element filter narrows the table to one type at a time, which is the quickest way to plan around a work assignment or a boss fight. Dark is the largest group at ${ELEMENT_COUNT.Dark} Pals, followed by Grass and Water at ${ELEMENT_COUNT.Grass} and ${ELEMENT_COUNT.Water}; Electric and Dragon are the smallest at ${ELEMENT_COUNT.Electric} each. ${pals.filter((p) => (p.elements ?? []).length > 1).length} Pals carry two elements, so selecting two filters together shows only the Pals that have both — Ice and Dragon, for instance, or Fire and Dark.</p>
-    <p>Element does not affect what a pair produces. It is a property of the Pal you are breeding toward, not a rule the breeding table follows, so a Fire parent and a Water parent can perfectly well hatch a Grass child.</p>
+    <h2>Palworld Breeding Combinations by Element</h2>
+    <p>Element is a property of the Pal you are aiming at, not a rule the table follows — a Fire parent and a Water parent will happily hatch something Grass. It is still the fastest filter when you are breeding for a job rather than a specific Pal. Dark is the biggest group at ${ELEMENT_COUNT.Dark}, Grass and Water tie at ${ELEMENT_COUNT.Grass}, and Electric and Dragon are the thin ones at ${ELEMENT_COUNT.Electric} apiece. ${pals.filter((p) => (p.elements ?? []).length > 1).length} Pals carry two elements, so stacking two chips finds the overlap — a quick way to see which Palworld breeding combinations end in, say, something that both cools and flies.</p>
+
+    <h2>Turning Palworld Breeding Combinations Into a Plan</h2>
+    <p>Knowing every pair is not the same as knowing what to do next, and this is where most breeding projects go sideways. The usual mistake is starting from the Pal you want and working backwards one generation at a time, which burns cake on eggs you did not need.</p>
+    <p>Work the other way. Open the target’s page and look at the cheapest pairs — they are sorted by the parents’ combined rarity, so the practical answer sits at the top rather than buried. If one of those parents is something you already own, you are one egg away and the rest of the table is noise. If it is not, take the parent you are missing and repeat: what are <em>its</em> cheapest pairs, and do you own one of those?</p>
+    <p>Two or three passes usually land on something in your ranch. The Palworld breeding combinations that matter to you are a handful out of ${n(combos.combos.length)}, and they are the ones connecting what you have to what you want. Everything else on this page is context. When the chain runs more than three deep, hand it to the shortest-path tool instead — it walks the whole graph and returns the fewest eggs rather than the first route that works.</p>
+    <p>One more habit worth forming: check what a Pal <em>breeds into</em> before you release a spare. A Pal with a high Breeds into count is a useful parent for projects you have not started yet, and re-catching one later costs more than the box slot it was taking up.</p>
 
     <h2>Palworld Breeding Combinations FAQ</h2>
     <div class="faq-list">
@@ -456,7 +516,7 @@ ${hubTable({
 
   return layout({
     title: `Palworld Breeding Combinations — All ${n(combos.combos.length)} Pairs | PalLineage`,
-    description: `Every Palworld 1.0 breeding combination in one searchable table: ${n(combos.combos.length)} parent pairs across ${pals.length} Pals, filterable by element and sortable by how many combinations produce each Pal.`,
+    description: `All ${n(combos.combos.length)} Palworld breeding combinations for v1.0 in one searchable table. Filter by element, sort by how many pairs reach a Pal, and open any Pal for its full list.`,
     path: '/breeding/',
     pageType: 'CollectionPage',
     crumbs: [{ label: 'Home', href: '/' }, { label: 'Breeding Combos' }],
@@ -477,44 +537,35 @@ function palsIndex() {
   const variantCount = pals.filter((p) => p.variant).length;
   const dual = pals.filter((p) => (p.elements ?? []).length > 1).length;
   const workRanked = Object.entries(WORK_COUNT).sort((a, b) => b[1] - a[1]);
+  const rarest = workRanked[workRanked.length - 1];
 
-  const rows = pals.map((p, i) => `          <tr ${rowAttrs(p, i, { pairs: parentsOf(i).length })} data-flags="${p.variant ? 'variant' : ''}">
-            <td>${palCell(p)}</td><td class="num">${dex(p)}</td>
-            <td><span class="chips">${elChips(p)}</span></td>
-            <td class="num">${p.rarity}</td>
-            <td><span class="worklist worklist--card">${workList(p) || '<span style="color:var(--fg-muted)">&mdash;</span>'}</span></td>
-          </tr>`).join('\n');
-
-  const table = `      <div class="table-scroll">
-        <table class="combo-table">
-          <thead><tr>
-            <th data-sort="name">Pal</th>
-            <th class="num" data-sort="dex">Paldex</th>
-            <th>Element</th>
-            <th class="num" data-sort="rarity">Rarity</th>
-            <th>Work suitability</th>
-          </tr></thead>
-          <tbody>
-${rows}
-          </tbody>
-        </table>
-      </div>`;
+  const listing = `        <div class="pgrid" data-items data-grid>
+${pals.slice(0, SERVER_ROWS).map((p, i) => '          ' + palCard(p, i)).join('\n')}
+        </div>`;
 
   const faq = [
-    ['How many Pals are there in Palworld 1.0?',
-      `${pals.length}, counting the ${variantCount} variant forms as separate Paldex entries — which the game does, because each one has its own element, stats and breeding pairs.`],
+    ['How many Pals are in Palworld 1.0?',
+      `${pals.length}, counting the ${variantCount} variant forms the Paldeck lists separately. It does list them separately, and it is right to — a Cryst form has its own element, its own stats and its own parent pairs.`],
     ['What do the work suitability numbers mean?',
-      `Each Pal has a level from 1 upward in the work types it can do, and a higher level means faster work at that job. ${workRanked[0][1]} Pals can do ${WORK_LABEL[workRanked[0][0]]}, making it the most common suitability; ${WORK_LABEL[workRanked[workRanked.length - 1][0]]} is the rarest at ${workRanked[workRanked.length - 1][1]}.`],
+      `The level a Pal works a job at, and higher is faster. ${WORK_LABEL[workRanked[0][0]]} is the most common by a distance — ${workRanked[0][1]} Pals can do it — while only ${rarest[1]} can handle ${WORK_LABEL[rarest[0]]}. Those scarce jobs are the ones worth planning a breeding project around.`],
     ['What does rarity actually affect?',
-      'Rarity is a catch-and-value rating, not a power rating. On this site it doubles as a cost signal: the breeding pages sort parent pairs by the two parents’ combined rarity, so the cheapest way to reach a Pal floats to the top.'],
+      'It rates the Pal, not the difficulty of breeding one. Plenty of high-rarity Pals come from hundreds of pairs. On this site rarity doubles as a cost signal: parent pairs are ranked by the two parents’ combined rarity, so cheap options float to the top.'],
     ['Which Pals have two elements?',
-      `${dual} of them. Selecting two element filters at once shows only the Pals that carry both, which is the fastest way to find something like an Ice/Dragon or a Fire/Dark Pal.`],
+      `${dual} of them. Select two element filters at once and the grid shows only the Pals carrying both — the quickest route to an Ice/Dragon or a Fire/Dark.`],
     ['Can every Pal be bred?',
-      `Nearly. A handful are produced by exactly one pair — themselves — so the first one has to be caught. Every other Pal, variants included, is reachable through the <a href="/breeding/">breeding combinations</a>.`],
+      `Nearly. ${singlePair.length} come from a single pair — themselves — so the first has to be caught. Everything else, variants included, is reachable through the <a href="/breeding/">breeding combinations</a>.`],
+    ['Why do some Pals show no work icons?',
+      'A few are combat-only and have no base jobs at all. They still breed normally; they just will not do anything useful back at your base.'],
+    ['Which Palworld Pals are best for a new base?',
+      'Anything with Handiwork and Transporting, which between them cover most of what a young base spends its time on — and they are the two most widely available jobs, so you will not have to breed for them. Kindling and Electricity are the early gaps worth planning around, since far fewer Pals can do either.'],
+    ['Does this list include the variant forms?',
+      `Yes, all ${variantCount} of them, listed as their own entries. Filter by <strong>Variant forms</strong> to see only those. They are separate Palworld Pals with separate stats and separate parents, not skins.`],
+    ['Where do the numbers come from?',
+      'The v1.0 game data tables, joined against a second independent dataset. The build refuses to finish if the two disagree about any Pal’s work suitability, so a bad import fails loudly instead of quietly shipping wrong levels.'],
   ];
 
   const body = `    <h1>All Palworld Pals</h1>
-    <p class="lede">All ${pals.length} Pals in the Palworld 1.0 Paldeck, including ${variantCount} variant forms, with element, rarity and all twelve work suitabilities on the rebalanced 1.0 scale. Search by name or number, filter by element and job, or sort the list — every Pal opens onto its breeding combinations.</p>
+    <p class="lede">The full v1.0 Paldeck — ${pals.length} Palworld Pals including ${variantCount} variant forms, each with its element, rarity and every job it can work. Search by name or number, filter by element and job, and open any Pal to see how to breed one.</p>
 
     <div class="factbar">
       <span class="fact"><small>Pals</small>${pals.length}</span>
@@ -523,37 +574,51 @@ ${rows}
       <span class="fact"><small>Work types</small>${Object.keys(WORK_LABEL).length}</span>
     </div>
 
-    <h2>How to Search the Palworld Pal List</h2>
-    <p>Search by name or Paldex number, or type an element or a job — "fire" and "mining" both work as queries. The element and work chips stack with each other, so Dragon plus Kindling narrows ${pals.length} Pals down to four. Sort by name, Paldex number or rarity from the column headers, and open any Pal to see how to breed it.</p>
+    <h2>How to Search the Palworld Pals List</h2>
+    <p>Names, Paldeck numbers, elements and job names all work as queries — type "fire" or "mining" and the grid answers. The chips stack rather than replace each other, so Dragon plus Kindling cuts ${pals.length} Pals down to four. Hover a card for the full read-out of element, rarity and work levels; the icons on the card carry the same information at a glance once you know them.</p>
 
-${hubTable({
+${hubShell({
+    src: '/data/hub-pals.html',
     bar: filterBar({
       search: 'Search by name, number, element or job…',
       work: true,
       flags: [['variant', 'Variant forms']],
+      sort: [['dex', 'Paldeck order'], ['name', 'Name A–Z'], ['rarity:desc', 'Rarity, high first'], ['pairs:desc', 'Easiest to breed']],
     }),
-    table,
+    listing,
   })}
 
-    <h2>How to Read the Pal List</h2>
-    <p>Every row is one Paldex entry. <strong>Element</strong> decides what a Pal is strong and weak against in a fight; ${dual} Pals carry two. <strong>Rarity</strong> runs from common catches up to the boss-tier Pals, and on this site it doubles as a breeding cost signal — parent pairs are ranked by the two parents' combined rarity, so a low number means a cheap pair. <strong>Work suitability</strong> lists the jobs a Pal can do at your base and how good it is at each.</p>
-    <p>Variant forms sit in the list next to their base Pal rather than replacing it. A Cryst or an Ignis form is a different Pal with its own element and its own parent pairs, which is why all ${variantCount} of them are listed separately here and covered on the <a href="/mutations/">variants page</a>.</p>
+    <h2>How to Read a Palworld Pal Card</h2>
+    <p>The coloured glyphs under each name are the Pal’s elements. Below them sit its jobs, each with the level it works at. A Pal showing a flame at 3 kindles a furnace faster than one at 1, and that gap is the whole reason people breed for specific Pals instead of catching whatever wanders past.</p>
+    <p>Variants sit in the grid beside their base form rather than replacing it. Jormuntide and Jormuntide Ignis are two different Pals with two different element lines and two different sets of parents — looking up one tells you nothing about the other. All ${variantCount} are covered on the <a href="/mutations/">variants page</a>.</p>
+
+    <h3>The number under the name</h3>
+    <p>That is the Paldeck entry, and it doubles as a search term — typing 139 gets you Anubis without spelling it. Variants share the number of their base form, which is why you will see two cards reading #121 with different art. The Paldeck order is also the default sort here, so the grid opens the way the in-game list does rather than in some ranking you did not ask for.</p>
 
     <h2>Palworld Pals by Element</h2>
-    <p>Nine elements cover the Paldeck: ${ELEMENT_ORDER.map((e) => `${e} (${ELEMENT_COUNT[e]})`).join(', ')}. Selecting two at once narrows the list to the Pals that carry both. Element decides combat matchups and, for a few jobs, which work a Pal can do at all — a Fire Pal for Kindling, a Water Pal for Watering.</p>
+    <p>Nine elements cover the Paldeck, and the Palworld Pals are spread unevenly across them: ${ELEMENT_ORDER.map((e) => `${e} (${ELEMENT_COUNT[e]})`).join(', ')}. Element decides combat matchups, and for two jobs it decides eligibility outright — only a Fire Pal kindles, only a Water Pal waters. ${dual} Pals carry two, which is where the interesting combinations live: an Ice/Dragon works a cooler and still hits like a dragon.</p>
 
     <h2>Work Suitability in Palworld 1.0</h2>
-    <p>Twelve work types run a base, and 1.0 rebalanced the levels across all ${pals.length} Pals. ${workRanked.slice(0, 3).map(([w, c]) => `${WORK_LABEL[w]} (${c} Pals)`).join(', ')} are the most widely covered; ${workRanked.slice(-3).map(([w, c]) => `${WORK_LABEL[w]} (${c})`).join(', ')} are the scarcest, which is what makes a good breeding target worth planning for. Use the work filters above to see who can do a job, then open the Pal to find out how to breed one.</p>
+    <p>Twelve jobs keep a base running, and 1.0 rebalanced the levels across all ${pals.length} Palworld Pals. Coverage is lopsided. ${workRanked.slice(0, 3).map(([w, c]) => `${WORK_LABEL[w]} sits at ${c} Pals`).join(', ')} — you will never struggle to staff those. At the other end, ${workRanked.slice(-3).map(([w, c]) => `${WORK_LABEL[w]} (${c})`).join(', ')} are thin enough that a good one is worth a breeding project of its own. Filter by the job, sort by how easy each option is to breed, and start from the top.</p>
 
-    <h2>Rarity in Palworld 1.0</h2>
-    <p>Rarity is a rating on the Pal itself rather than a measure of how hard it is to breed — plenty of high-rarity Pals come from hundreds of parent pairs, and a few common ones come from almost none. When you are planning a breeding project, the number that matters is on the <a href="/breeding/">breeding combinations page</a>: how many pairs produce the Pal.</p>
+    <h2>Choosing Palworld Pals for a Base Job</h2>
+    <p>Most people arrive here with a gap to fill rather than a Pal in mind: the furnace is idle, or nothing on the team can plant. The grid answers that directly — filter by the job, and what is left is every Pal that can do it.</p>
+    <p>Then read the levels, because they are not decoration. A Pal working Kindling at 3 feeds a furnace roughly three times as fast as one at 1, and across a full base that difference decides whether production keeps up with you or falls behind. Sort by <em>Easiest to breed</em> once you have the shortlist and the practical candidates rise to the top: among the Palworld Pals that can do a job, the one reachable from hundreds of parent pairs beats the marginally better one you would have to hunt across the map.</p>
+    <p>Watch the second job slot too. A Pal covering three jobs at level 2 is often worth more at a base than a specialist at 4, because it keeps working when the queue shifts. The cards show every job a Pal has, so that trade-off is visible before you commit to breeding one.</p>
+
+    <h2>Rarity, and What It Is Not</h2>
+    <p>Rarity describes the Pal. It says nothing about how hard one is to hatch, and treating the two as the same thing is the most common mistake people make reading a list of Palworld Pals. Some rarity-8 Pals fall out of hundreds of different pairings while a common one takes a specific recipe. When you are planning, the number that matters is on the <a href="/breeding/">breeding combinations page</a>: how many pairs actually produce it.</p>
+
+    <h2>From the Pal List to a Breeding Plan</h2>
+    <p>Finding the Pal you want is the easy half. Getting one is the other half, and it is why every card here links through to that Pal’s breeding page rather than to a stat sheet.</p>
+    <p>That page answers the only question that matters once you have chosen: which two Palworld Pals do you put in the farm. Pairs are listed cheapest first by the parents’ combined rarity, so if you already own something near the top you are one egg away. If the Pal you want turns out to come from a single pair — ${singlePair.length} of them do — the page says so plainly, and you know to go catch one instead of wasting cake finding out the hard way.</p>
 
     <h2>Palworld Pals FAQ</h2>
     <div class="faq-list">
       ${faq.map(([q, a]) => `<h3>${esc(q)}</h3>\n      <p>${a}</p>`).join('\n      ')}
     </div>
 
-    <div class="card-list" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));margin-top:30px">
+    <div class="card-list" style="grid-template-columns:repeat(auto-fit,minmax(250px,1fr));margin-top:30px">
       <a class="guide-card" href="/breeding/"><strong>Breeding Combinations</strong><span>All ${n(combos.combos.length)} pairs, by Pal</span></a>
       <a class="guide-card" href="/mutations/"><strong>Variant Pals</strong><span>All ${variantCount} mutations, by family</span></a>
       <a class="guide-card" href="/passives/"><strong>Passive Skills</strong><span>The ${passiveIndex.length} passives guaranteed by species</span></a>
@@ -562,12 +627,13 @@ ${hubTable({
 
   return layout({
     title: `All ${pals.length} Palworld Pals — Elements & Rarity | PalLineage`,
-    description: `Every Pal in the Palworld 1.0 Paldeck with element, rarity and all twelve work suitabilities. Searchable and filterable, with each Pal linked to its breeding combinations.`,
+    description: `Every Pal in the Palworld 1.0 Paldeck with element, rarity and all twelve work suitabilities, searchable and filterable, each linked to its breeding combinations.`,
     path: '/pals/',
     pageType: 'CollectionPage',
     crumbs: [{ label: 'Home', href: '/' }, { label: 'All Pals' }],
     body,
     scripts: ['/assets/table-filter.js'],
+    sprite: true,
     extraLd: [{
       '@context': 'https://schema.org', '@type': 'FAQPage',
       mainEntity: faq.map(([q, a]) => ({
@@ -577,6 +643,12 @@ ${hubTable({
     }],
   });
 }
+
+/** The 269 items the pages do not ship inline, same templates as above. */
+const hubFragments = () => [
+  ['data/hub-breeding.html', rankedByPairs.slice(SERVER_ROWS).map(({ p, i }) => comboRow(p, i)).join('\n') + '\n'],
+  ['data/hub-pals.html', pals.slice(SERVER_ROWS).map((p, i) => palCard(p, i + SERVER_ROWS)).join('\n') + '\n'],
+];
 
 // ---- /guides/ -------------------------------------------------------------
 async function guides() {
@@ -912,6 +984,7 @@ const files = [
   ...families.filter((f) => f.members.length >= FAMILY_MIN)
     .map((f) => [`mutations/${f.slug}/index.html`, familyPage(f)]),
   ...(await guides()),
+  ...hubFragments(),
 ];
 
 const urls = [
