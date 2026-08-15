@@ -14,6 +14,11 @@
 <meta property="og:description" content="Find the child of any two Pals, every parent combo for a target Pal, shortest breeding path, passive skill filters and mutation combos. Built from Palworld v1.0 game data.">
 <meta property="og:url" content="https://palbreeding.net/">
 <meta name="twitter:card" content="summary_large_image">
+<meta property="og:image" content="https://palbreeding.net/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="PalLineage — Palworld 1.0 breeding calculator, 44,849 combinations across 299 Pals">
+<meta name="twitter:image" content="https://palbreeding.net/og-image.png">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
@@ -533,7 +538,7 @@ html[data-theme="dark"] .badge--electric{background:#3d3316;color:#fde047}
   <div class="wrap">
     <div class="section-head">
       <span class="eyebrow">What's inside</span>
-      <p class="h2" style="margin-top:14px;font-size:30px">Six tools, one v1.0 dataset</p>
+      <h2 class="h2" style="margin-top:14px;font-size:30px">Six Palworld Breeding Tools, One v1.0 Dataset</h2>
       <p class="lede">Five ways to query the same v1.0 breeding data, depending on what you already know and what you are trying to hatch.</p>
     </div>
 
@@ -597,7 +602,7 @@ html[data-theme="dark"] .badge--electric{background:#3d3316;color:#fde047}
   <div class="wrap">
     <div class="section-head">
       <span class="eyebrow">Visual mode</span>
-      <p class="h2" style="margin-top:14px;font-size:28px">Lineage at a glance</p>
+      <h2 class="h2" style="margin-top:14px;font-size:28px">Palworld Breeding Tree — Lineage at a Glance</h2>
       <p class="lede">Expand any Pal into a tree and follow its lineage down two or three generations. Useful when one breeding project feeds another and you want to see the whole chain at once. <a href="#calculator" style="font-weight:700;color:var(--cyan-deep)">Open the full breeding tree →</a></p>
     </div>
     <div class="calc-shell">
@@ -775,9 +780,43 @@ html[data-theme="dark"] .badge--electric{background:#3d3316;color:#fde047}
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://palbreeding.net/#organization",
+      "name": "PalLineage",
+      "url": "https://palbreeding.net/",
+      "description": "PalLineage builds free Palworld tools from the game's own data files: a breeding calculator, the full combination tables, a Pal database, the variant forms and the passives guaranteed by species.",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://palbreeding.net/android-chrome-512x512.png",
+        "width": 512,
+        "height": 512
+      },
+      "disambiguatingDescription": "Unofficial fan-made project. Not affiliated with or endorsed by Pocketpair, Inc."
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://palbreeding.net/#website",
+      "name": "PalLineage",
+      "alternateName": "PalLineage — Palworld Breeding Calculator",
+      "url": "https://palbreeding.net/",
+      "inLanguage": "en",
+      "publisher": { "@id": "https://palbreeding.net/#organization" }
+    }
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
   "@type": "WebApplication",
+  "@id": "https://palbreeding.net/#calculator",
   "name": "PalLineage — Palworld Breeding Calculator",
   "url": "https://palbreeding.net/",
+  "isPartOf": { "@id": "https://palbreeding.net/#website" },
+  "publisher": { "@id": "https://palbreeding.net/#organization" },
   "applicationCategory": "GameApplication",
   "operatingSystem": "Any (web browser)",
   "description": "Free Palworld 1.0 breeding calculator: find any child, every parent combo, and the shortest breeding path. Filter by passive skills and explore mutations. Built from v1.0 game data.",

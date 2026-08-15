@@ -64,7 +64,7 @@ const WORK_LABEL = {
 // ---- shared chrome --------------------------------------------------------
 const NAV = [['/', 'Calculator'], ['/breeding/', 'Breeding Combos'], ['/pals/', 'All Pals'], ['/guides/', 'Guide']];
 
-function layout({ title, description, path, crumbs, body, extraLd = [], scripts = [] }) {
+function layout({ title, description, path, crumbs, body, extraLd = [], scripts = [], pageType = 'WebPage' }) {
   const url = `${SITE}${path}`;
   // The home link is only current on the home page; the section links are
   // current for anything beneath them.
@@ -84,6 +84,21 @@ function layout({ title, description, path, crumbs, body, extraLd = [], scripts 
     })),
   };
 
+  // The homepage declares the Organization and WebSite nodes; every other page
+  // points back at them by @id so the whole site reads as one entity.
+  const pageLd = {
+    '@context': 'https://schema.org',
+    '@type': pageType,
+    '@id': url,
+    url,
+    name: title,
+    description,
+    inLanguage: 'en',
+    isPartOf: { '@id': `${SITE}/#website` },
+    publisher: { '@id': `${SITE}/#organization` },
+    breadcrumb: { '@type': 'BreadcrumbList', itemListElement: breadcrumbLd.itemListElement },
+  };
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -99,6 +114,12 @@ function layout({ title, description, path, crumbs, body, extraLd = [], scripts 
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(description)}">
 <meta property="og:url" content="${url}">
+<meta property="og:image" content="${SITE}/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="PalLineage — Palworld 1.0 breeding calculator, ${n(combos.combos.length)} combinations across ${pals.length} Pals">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="${SITE}/og-image.png">
 <link rel="stylesheet" href="/assets/page.css">
 <script src="/assets/theme.js"></script>
 ${scripts.map((src) => `<script src="${src}" defer></script>`).join('\n')}
@@ -166,7 +187,7 @@ ${body}
     </div>
   </div>
 </footer>
-${[breadcrumbLd, ...extraLd].map((ld) => `<script type="application/ld+json">\n${JSON.stringify(ld)}\n</script>`).join('\n')}
+${[pageLd, breadcrumbLd, ...extraLd].map((ld) => `<script type="application/ld+json">\n${JSON.stringify(ld)}\n</script>`).join('\n')}
 </body>
 </html>
 `;
@@ -432,6 +453,7 @@ ${hubTable({
     title: `Palworld Breeding Combinations — All ${n(combos.combos.length)} Pairs for ${pals.length} Pals`,
     description: `Every Palworld 1.0 breeding combination in one searchable table: ${n(combos.combos.length)} parent pairs across ${pals.length} Pals, filterable by element and sortable by how many combinations produce each Pal.`,
     path: '/breeding/',
+    pageType: 'CollectionPage',
     crumbs: [{ label: 'Home', href: '/' }, { label: 'Breeding Combos' }],
     body,
     scripts: ['/assets/table-filter.js'],
@@ -534,6 +556,7 @@ ${hubTable({
     title: `All ${pals.length} Palworld Pals — Elements, Rarity & Work Suitability`,
     description: `Every Pal in the Palworld 1.0 Paldeck with element, rarity and all twelve work suitabilities. Searchable and filterable, with each Pal linked to its breeding combinations.`,
     path: '/pals/',
+    pageType: 'CollectionPage',
     crumbs: [{ label: 'Home', href: '/' }, { label: 'All Pals' }],
     body,
     scripts: ['/assets/table-filter.js'],
@@ -568,6 +591,10 @@ async function guides() {
         '@context': 'https://schema.org', '@type': 'Article',
         headline: g.h1, description: g.description,
         mainEntityOfPage: `${SITE}/guides/${g.slug}/`,
+        inLanguage: 'en',
+        image: `${SITE}/og-image.png`,
+        publisher: { '@id': `${SITE}/#organization` },
+        isPartOf: { '@id': `${SITE}/#website` },
       }],
     })]);
   }
@@ -576,6 +603,7 @@ async function guides() {
     title: 'Palworld Breeding Guides',
     description: 'How breeding works in Palworld 1.0: the formula behind the calculator, and how to plan a breeding project.',
     path: '/guides/',
+    pageType: 'CollectionPage',
     crumbs: [{ label: 'Home', href: '/' }, { label: 'Guides' }],
     body: `    <h1>Palworld Breeding Guides</h1>
     <p class="lede">What is actually going on underneath the calculator, and how to use it without wasting eggs.</p>
@@ -712,6 +740,7 @@ ${sections}
     title: 'Palworld Passive Skills — Which Pals Always Have Them',
     description: `All ${passiveIndex.length} Palworld 1.0 passive skills that are guaranteed by species, the ${carrierCount} Pals that carry them, and how to breed a skill into a line.`,
     path: '/passives/',
+    pageType: 'CollectionPage',
     crumbs: [{ label: 'Home', href: '/' }, { label: 'Passives' }],
     body,
   });
@@ -852,6 +881,7 @@ ${big.map(section).join('\n\n')}
     title: `Palworld Variant Pals — All ${variants.length} Mutations in 1.0`,
     description: `Every variant Pal in Palworld 1.0 — Cryst, Ignis, Noct, Lux, Terra and the rest — with its element, rarity and how many parent pairs produce it.`,
     path: '/mutations/',
+    pageType: 'CollectionPage',
     crumbs: [{ label: 'Home', href: '/' }, { label: 'Mutations' }],
     body,
   });
