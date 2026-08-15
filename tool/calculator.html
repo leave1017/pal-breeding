@@ -186,11 +186,16 @@ a{color:var(--cyan-deep);font-weight:700;text-decoration:none}
 
   // ---------------------------------------------------------------- data ----
   async function load() {
-    const [pals, passives, combos] = await Promise.all([
-      fetch('../data/pals.json').then((r) => r.json()),
-      fetch('../data/passives.json').then((r) => r.json()),
-      fetch('../data/combos.json').then((r) => r.json()),
-    ]);
+    // Single-file preview builds inline the dataset instead of serving it,
+    // which also lets the tool run straight off the filesystem.
+    const inline = window.__PALDATA__;
+    const [pals, passives, combos] = inline
+      ? [inline.pals, inline.passives, inline.combos]
+      : await Promise.all([
+          fetch('../data/pals.json').then((r) => r.json()),
+          fetch('../data/passives.json').then((r) => r.json()),
+          fetch('../data/combos.json').then((r) => r.json()),
+        ]);
     state.pals = pals;
     state.passives = passives;
     state.adj = pals.map(() => []);
