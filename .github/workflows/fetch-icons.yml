@@ -3,7 +3,7 @@ name: Fetch Pal icons
 # Run from the Actions tab: Fetch Pal icons -> Run workflow.
 # Downloads any missing Pal artwork into assets/pals/ and commits it, so the
 # icon set can be filled without a local checkout. Re-running only fetches what
-# is absent, so an interrupted run is safe to repeat.
+# is absent, so an interrupted or partial run is safe to repeat.
 on:
   workflow_dispatch:
     inputs:
@@ -19,16 +19,29 @@ jobs:
   fetch:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
+
+      # One request with the response headers printed, so a blocked CDN is
+      # diagnosed from the log instead of guessed at.
+      - name: Check the image host
+        continue-on-error: true
+        run: |
+          curl -sS -o /dev/null -D - \
+            -H 'user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0 Safari/537.36' \
+            -H 'referer: https://paldb.cc/' \
+            'https://cdn.paldb.cc/image/Pal/Texture/PalIcon/Normal/T_SheepBall_icon_normal.webp'
 
       - name: Download icons
         run: node scripts/fetch-icons.mjs ${{ inputs.force && '--force' || '' }}
 
+      # Runs even after a partial failure: whatever downloaded is worth keeping,
+      # and the next run picks up only what is still missing.
       - name: Commit icons
+        if: always()
         run: |
           if [ -z "$(git status --porcelain assets/pals)" ]; then
             echo "No new icons — nothing to commit."
@@ -39,3 +52,4 @@ jobs:
           git add assets/pals
           git commit -m "Add Pal icons fetched by workflow"
           git push
+          echo "Committed $(git show --stat --oneline HEAD | tail -1)"

@@ -28,13 +28,23 @@ const FORCE = process.argv.includes('--force');
 const CONCURRENCY = 6;   // polite: this is someone else's CDN
 const RETRIES = 3;
 
+// A bare script user-agent gets 403'd by most image CDNs, so identify as a
+// browser loading the image from the page it belongs to.
+const HEADERS = {
+  'user-agent':
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0 Safari/537.36',
+  accept: 'image/avif,image/webp,image/png,image/*,*/*;q=0.8',
+  'accept-language': 'en-US,en;q=0.9',
+  referer: 'https://paldb.cc/',
+};
+
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function download(url) {
   for (let attempt = 1; attempt <= RETRIES; attempt++) {
     try {
-      const res = await fetch(url, { headers: { 'user-agent': 'palbreeding.net icon fetch' } });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const res = await fetch(url, { headers: HEADERS, redirect: 'follow' });
+      if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`.trim());
       const type = res.headers.get('content-type') ?? '';
       if (!type.startsWith('image/')) throw new Error(`not an image (${type})`);
       return Buffer.from(await res.arrayBuffer());
@@ -90,7 +100,20 @@ if (missingUrl.length) {
   console.log(`No icon URL for ${missingUrl.length}: ${missingUrl.map((j) => j.name).join(', ')}`);
 }
 if (failed.length) {
-  console.log(`\nFailed (${failed.length}) — re-run to retry just these:`);
-  failed.forEach((f) => console.log(`  ${f}`));
+  // Partial failures are normal — the grid falls back to a number tile and the
+  // next run retries only what is still missing. Group by cause so a blanket
+  // block (403 for every Pal) is obvious rather than buried in 299 lines.
+  const byReason = failed.reduce((m, f) => {
+    const reason = f.slice(f.indexOf(': ') + 2);
+    return m.set(reason, (m.get(reason) ?? 0) + 1);
+  }, new Map());
+  console.log(`\nFailed: ${failed.length}. Re-run to retry just these.`);
+  [...byReason].sort((a, b) => b[1] - a[1]).forEach(([reason, n]) => console.log(`  ${n} x ${reason}`));
+  console.log(`  first few: ${failed.slice(0, 5).join(' | ')}`);
+}
+
+// Only a run that downloaded nothing at all is a failure worth stopping for.
+if (done === 0 && jobs.length === 0 && queue.length > 0) {
+  console.error('\nEvery download failed — nothing to commit.');
   process.exitCode = 1;
 }
