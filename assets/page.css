@@ -100,3 +100,115 @@ main strong{color:var(--fg)}
   h1{font-size:28px}
   main{padding:36px 0 56px}
 }
+
+/* ============ Generated pages: tables, grids, fact bars ============ */
+.wrap--wide{max-width:1180px}
+
+.factbar{
+  display:flex;flex-wrap:wrap;gap:10px;margin:22px 0 26px;
+}
+.fact{
+  display:flex;flex-direction:column;gap:2px;
+  background:var(--bg-cyan);border-radius:14px;padding:10px 16px;
+  font-size:16px;font-weight:800;color:var(--fg);font-variant-numeric:tabular-nums;
+}
+.fact small{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--fg-muted)}
+
+/* Element chips reuse the calculator's palette so a Pal reads the same
+   everywhere on the site. */
+.chips{display:inline-flex;gap:5px;flex-wrap:wrap}
+.chip{
+  display:inline-block;font-size:11px;font-weight:800;letter-spacing:.02em;
+  padding:3px 9px;border-radius:999px;background:var(--border-soft);color:var(--fg-muted);
+}
+.chip--neutral{background:#e2e8f0;color:#475569}
+.chip--fire{background:#ffe4d3;color:#c2410c}
+.chip--water{background:#d6ecfd;color:#0369a1}
+.chip--electric{background:#fdf0c2;color:#a16207}
+.chip--grass{background:#d8f3df;color:#15803d}
+.chip--ground{background:#eee2cf;color:#92400e}
+.chip--ice{background:#d3f1f7;color:#0e7490}
+.chip--dark{background:#e2ddf9;color:#6d28d9}
+.chip--dragon{background:#f7dcf1;color:#a21caf}
+
+.worklist{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:22px}
+.worklist__label{font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--fg-muted);margin-right:4px}
+.work{
+  font-size:12px;font-weight:700;color:var(--fg-muted);
+  background:var(--bg-cyan);padding:4px 10px;border-radius:999px;
+}
+.worklist--card{margin:0;gap:4px}
+.worklist--card .work{font-size:10.5px;padding:2px 7px}
+
+/* Tables scroll inside their own box, so a long row never widens the page. */
+.table-scroll{
+  overflow-x:auto;border:1px solid var(--border-soft);border-radius:var(--r-card);
+  background:var(--card);margin-bottom:16px;
+}
+.combo-table{width:100%;border-collapse:collapse;font-size:14.5px}
+.combo-table caption{
+  text-align:left;padding:16px 18px 10px;font-size:13px;font-weight:700;color:var(--fg-muted);
+}
+.combo-table th{
+  text-align:left;font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--fg-muted);padding:8px 18px;border-bottom:1px solid var(--border);white-space:nowrap;
+}
+.combo-table td{padding:6px 18px;border-bottom:1px solid var(--border-soft)}
+.combo-table tr:last-child td{border-bottom:0}
+.combo-table tbody tr:hover{background:var(--bg-cyan)}
+.combo-table .num{text-align:right;font-variant-numeric:tabular-nums;color:var(--fg-muted);font-weight:700}
+.combo-table .op{color:var(--fg-muted);font-weight:700;text-align:center;width:1%}
+
+.p-cell{
+  display:flex;align-items:center;gap:9px;font-weight:700;color:var(--fg);
+  white-space:nowrap;
+}
+.p-cell:hover{color:var(--cyan-deep);text-decoration:none}
+.p-icon{
+  width:40px;height:40px;flex:none;border-radius:11px;
+  background:var(--bg-cyan);object-fit:contain;
+}
+
+.pal-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin:8px 0 30px;
+}
+.pal-grid--compact{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
+.pal-card{
+  display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center;
+  background:var(--card);border:1px solid var(--border-soft);border-radius:var(--r-card);
+  padding:14px 10px;transition:all .15s;color:var(--fg);
+}
+.pal-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-soft);border-color:#67c9e6;text-decoration:none}
+.pal-card strong{font-size:13.5px;line-height:1.25}
+.pal-card small{font-size:11px;color:var(--fg-muted);font-weight:700;font-variant-numeric:tabular-nums}
+.pal-card .p-icon{width:56px;height:56px;border-radius:15px}
+
+.card-list{display:grid;gap:12px;margin:8px 0 30px}
+.guide-card{
+  display:flex;flex-direction:column;gap:4px;
+  background:var(--card);border:1px solid var(--border-soft);border-radius:var(--r-card);
+  padding:20px 22px;transition:all .15s;color:var(--fg);
+}
+.guide-card:hover{box-shadow:var(--shadow-soft);border-color:#67c9e6;text-decoration:none}
+.guide-card strong{font-size:18px}
+.guide-card span{color:var(--fg-muted);font-size:14.5px}
+
+.lede{font-size:17px;color:var(--fg-muted);max-width:75ch;margin-bottom:8px}
+.note{font-size:14px;color:var(--fg-muted);margin-bottom:26px}
+.code{
+  background:var(--bg-cyan);border-radius:12px;padding:14px 18px;overflow-x:auto;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:14px;font-weight:600;color:var(--fg);
+}
+.btn{
+  display:inline-flex;align-items:center;gap:8px;border-radius:999px;
+  padding:12px 24px;font-weight:700;font-size:15px;transition:all .2s;
+}
+.btn--primary{background:var(--accent);color:var(--accent-ink)}
+.btn--primary:hover{transform:translateY(-2px);text-decoration:none}
+
+@media (max-width:640px){
+  .combo-table th,.combo-table td{padding:6px 12px}
+  .p-icon{width:32px;height:32px;border-radius:9px}
+  .pal-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:9px}
+  .fact{padding:8px 13px;font-size:15px}
+}

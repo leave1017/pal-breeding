@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Palworld Breeding Formula 1.0 — How the Game Picks the Child</title>
+<meta name="description" content="Palworld decides the child from a hidden breeding power, not from chance. The formula, the exceptions, and how far it actually gets you — measured against all 44,849 combinations.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://palbreeding.net/guides/palworld-breeding-formula/">
+<link rel="manifest" href="/manifest.json">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="PalBreeding.net">
+<meta property="og:title" content="Palworld Breeding Formula 1.0 — How the Game Picks the Child">
+<meta property="og:description" content="Palworld decides the child from a hidden breeding power, not from chance. The formula, the exceptions, and how far it actually gets you — measured against all 44,849 combinations.">
+<meta property="og:url" content="https://palbreeding.net/guides/palworld-breeding-formula/">
+<link rel="stylesheet" href="/assets/page.css">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#fceb55">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <nav class="nav" aria-label="Main">
+      <a class="brand" href="/">
+        <img class="brand__mark" src="/android-chrome-192x192.png" alt="" width="34" height="34">
+        <span>PalBreeding.net</span>
+      </a>
+      <div class="nav__right"><div class="nav__links"><a href="/">Calculator</a><a href="/breeding/">Breeding</a><a href="/pals/">Pals</a><a href="/guides/" aria-current="page">Guides</a></div></div>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap wrap--wide">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span class="sep" aria-hidden="true">/</span><a href="/guides/">Guides</a><span class="sep" aria-hidden="true">/</span><span aria-current="page">Breeding formula</span></nav>
+    <h1>How the Palworld Breeding Formula Works</h1>
+    <p class="lede">Breeding in Palworld is not random. The game runs a short piece of arithmetic on two hidden numbers, and the egg follows from it. Here is the formula, and the parts of the table it does not explain.</p>
+    <h2>Every Pal has a hidden breeding power</h2>
+    <p>Each Pal carries a value the community calls <strong>CombiRank</strong> — a plain sorting number with nothing to do with combat stats. Powerful late-game Pals sit at the low end, common starters at the high end.</p>
+
+    <h2>The formula</h2>
+    <p>Given two parents, the game works out a target:</p>
+    <pre class="code">child power = floor((power of parent A + power of parent B + 1) / 2)</pre>
+    <p>It then picks the breedable Pal whose own power sits closest to that target. When two are equally close, the one with the higher internal priority wins. That is the whole rule — no dice roll, which is why a calculator can tell you the answer before you spend the cake.</p>
+
+    <h2>Three things override it</h2>
+    <ul>
+      <li><strong>Same species</strong> — two of the same Pal always produce that Pal, whatever the arithmetic says.</li>
+      <li><strong>Fixed recipes</strong> — certain pairs are hard-coded to a specific child and ignore the formula entirely.</li>
+      <li><strong>Parent gender</strong> — two pairs in the v1.0 table produce a different child depending on which parent is male.</li>
+    </ul>
+
+    <h2>How much of the table the formula explains</h2>
+    <p>We ran the formula against all 44,849 combinations in the v1.0 data and compared its answer to the game's:</p>
+    <div class="table-scroll"><table class="combo-table">
+      <thead><tr><th>Candidate pool</th><th class="num">Formula matches the game</th></tr></thead>
+      <tbody>
+        <tr><td>All 299 Pals</td><td class="num">67.0%</td></tr>
+        <tr><td>Excluding the 85 variant forms</td><td class="num">92.4%</td></tr>
+      </tbody>
+    </table></div>
+    <p>The jump matters: <strong>variant forms are not candidates for the arithmetic</strong>. Lux, Cryst, Ignis, Terra and Noct Pals are reached through fixed recipes, not by averaging. Leave them in the pool and a quarter of your predictions come out wrong.</p>
+    <p>The remaining 7.6% are the fixed recipes. There is no pattern to derive there — they have to be looked up, which is why this site ships the full table rather than computing it in your browser.</p>
+
+    <h2>What this means when you are planning</h2>
+    <ul>
+      <li>Two parents with similar power produce something near them. Reaching a much rarer Pal means pulling the average, which usually takes more than one generation.</li>
+      <li>Because the result is fixed, a chain can be planned end to end before you catch anything — that is what <a href="/#calculator">Shortest Route</a> does.</li>
+      <li>Parent order is irrelevant everywhere except the two gender-dependent pairs, so a pair only ever needs checking once.</li>
+    </ul>
+
+    <h2>Where the numbers come from</h2>
+    <p>The breeding table and each Pal's breeding power are generated from the Palworld v1.0 game files, by way of the open-source <a href="https://github.com/tylercamp/palcalc" rel="noopener">Pal Calc</a> project. Element data comes from a second dataset, and the build refuses to run unless both sources agree on work suitability for all 299 Pals. More on that in <a href="/about/">About</a>.</p>
+
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap wrap--wide">
+    <span>&copy; 2026 PalBreeding.net &middot; <a href="/about/">About</a> &middot; <a href="/contact/">Contact</a> &middot; <a href="/privacy/">Privacy</a> &middot; <a href="/terms/">Terms</a></span>
+    <span>Unofficial fan-made tool. Not affiliated with or endorsed by Pocketpair, Inc.</span>
+  </div>
+</footer>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://palbreeding.net/"},{"@type":"ListItem","position":2,"name":"Guides","item":"https://palbreeding.net/guides/"},{"@type":"ListItem","position":3,"name":"Breeding formula","item":"https://palbreeding.net/guides/palworld-breeding-formula/"}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Article","headline":"How the Palworld Breeding Formula Works","description":"Palworld decides the child from a hidden breeding power, not from chance. The formula, the exceptions, and how far it actually gets you — measured against all 44,849 combinations.","mainEntityOfPage":"https://palbreeding.net/guides/palworld-breeding-formula/"}
+</script>
+</body>
+</html>
