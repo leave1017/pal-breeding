@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Breeding Calculator — PalBreeding.net</title>
+<!-- Embedded widget: the parent page is the one that should rank, so this
+     document stays out of the index while still passing links through. -->
+<meta name="robots" content="noindex, follow">
+
+<style>
+/* Tokens mirror the parent page so the embed reads as one surface.
+   Keep this block in sync with index.html if the palette changes. */
+:root{
+  --bg:#ffffff; --bg-cyan:#f4fbfe; --bg-cream:#fdf8e6; --card:#ffffff;
+  --fg:#1e293b; --fg-muted:#64748b; --accent:#fceb55; --accent-ink:#1e293b;
+  --cyan:#ccecf6; --cyan-deep:#0e7490; --border:#e2e8f0; --border-soft:#f1f5f9;
+  --input-bg:#f8fafc;
+  --shadow-soft:0 10px 40px -10px rgba(15,23,42,.08);
+  --shadow-lift:0 18px 50px -12px rgba(15,23,42,.14);
+  --r-card:24px; --r-box:16px; --r-input:12px;
+}
+html[data-theme="dark"]{
+  --bg:#0f172a; --bg-cyan:#101f33; --bg-cream:#1a1a2e; --card:#16213a;
+  --fg:#e8eef7; --fg-muted:#94a3b8; --cyan:#1e4a5f; --cyan-deep:#7dd3e8;
+  --border:#25344d; --border-soft:#1d2b42; --input-bg:#111c30;
+  --shadow-soft:0 10px 40px -10px rgba(0,0,0,.5);
+  --shadow-lift:0 18px 50px -12px rgba(0,0,0,.6);
+}
+*,*::before,*::after{box-sizing:border-box}
+body{
+  margin:0;background:transparent;color:var(--fg);
+  font-family:'Plus Jakarta Sans',Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased;
+}
+h2,h3,h4{margin:0;font-weight:800;letter-spacing:-.02em;line-height:1.2}
+p{margin:0}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+a{color:var(--cyan-deep);font-weight:700;text-decoration:none}
+
+.shell{
+  background:var(--card);border:1px solid var(--border-soft);border-radius:var(--r-card);
+  box-shadow:var(--shadow-lift);padding:30px;
+}
+.tabs{display:flex;gap:6px;padding:6px;background:var(--bg-cyan);border-radius:999px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{
+  flex:1;white-space:nowrap;padding:11px 18px;border-radius:999px;
+  font-weight:700;font-size:15px;color:var(--fg-muted);transition:all .2s ease-in-out;
+}
+.tabs button:hover{color:var(--fg)}
+.tabs button[aria-selected="true"]{background:var(--card);color:var(--fg);box-shadow:var(--shadow-soft)}
+
+.grid{display:grid;grid-template-columns:340px 1fr;gap:28px;align-items:start;padding-top:28px}
+.field{margin-bottom:16px;position:relative}
+.field__label{display:block;font-size:13px;font-weight:700;color:var(--fg-muted);margin-bottom:7px}
+.input,select.input{
+  width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:var(--r-input);
+  padding:14px 16px;font-size:15px;font-weight:600;color:var(--fg);font-family:inherit;
+  transition:border-color .2s,box-shadow .2s;
+}
+.input:focus{outline:none;border-color:#67c9e6;box-shadow:0 0 0 4px rgba(204,236,246,.55)}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:9px;width:100%;
+  border-radius:999px;font-weight:700;font-size:15px;padding:13px 26px;
+  background:var(--accent);color:var(--accent-ink);transition:all .2s ease-in-out;
+}
+.btn:hover{transform:translateY(-2px);filter:brightness(1.04)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+/* Combobox */
+.combo-list{
+  position:absolute;z-index:20;top:100%;left:0;right:0;margin-top:6px;max-height:280px;overflow-y:auto;
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r-box);
+  box-shadow:var(--shadow-lift);padding:6px;
+}
+.combo-list[hidden]{display:none}
+.combo-list button{
+  display:flex;width:100%;gap:10px;align-items:center;padding:9px 12px;border-radius:10px;
+  font-size:15px;font-weight:600;text-align:left;
+}
+.combo-list button:hover,.combo-list button[data-active="true"]{background:var(--cyan)}
+.combo-list .dex{color:var(--fg-muted);font-size:13px;font-weight:700;min-width:42px}
+
+.tags{display:flex;flex-wrap:wrap;gap:8px}
+.tag{
+  padding:7px 15px;border-radius:999px;background:var(--input-bg);border:1px solid var(--border);
+  font-size:14px;font-weight:600;transition:all .2s ease-in-out;
+}
+.tag:hover{background:var(--cyan);border-color:transparent}
+.trending{margin-top:24px;padding-top:22px;border-top:1px solid var(--border-soft)}
+.trending h4{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--fg-muted);margin-bottom:12px}
+
+.result-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.result-head h3{font-size:20px}
+.pill{font-size:13px;font-weight:700;color:var(--fg-muted);background:var(--input-bg);padding:6px 13px;border-radius:999px;border:1px solid var(--border)}
+.rows{display:grid;gap:10px;max-height:520px;overflow-y:auto}
+.row{
+  display:grid;grid-template-columns:1fr auto 1fr auto;gap:12px;align-items:center;
+  border:1px solid var(--border);border-radius:var(--r-box);padding:14px 18px;background:var(--card);
+}
+.row:hover{border-color:#67c9e6;box-shadow:var(--shadow-soft)}
+.pal{display:flex;align-items:center;gap:11px;min-width:0}
+.pal__avatar{
+  width:38px;height:38px;border-radius:12px;flex:none;display:grid;place-items:center;
+  background:var(--input-bg);border:1px solid var(--border);font-size:13px;font-weight:800;color:var(--fg-muted);
+}
+.pal__name{font-weight:700;font-size:15px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pal__no{font-size:12px;color:var(--fg-muted);font-weight:600}
+.plus{color:var(--fg-muted);font-weight:700}
+.badge{font-size:11px;font-weight:800;padding:4px 10px;border-radius:999px;text-transform:uppercase;background:var(--cyan);color:var(--cyan-deep)}
+.badge--variant{background:var(--accent);color:var(--accent-ink)}
+
+.child-card{background:var(--bg-cream);border-radius:var(--r-card);padding:30px;text-align:center}
+.child-card__avatar{
+  width:88px;height:88px;border-radius:26px;margin:0 auto 16px;display:grid;place-items:center;
+  background:var(--card);font-size:22px;font-weight:800;box-shadow:var(--shadow-soft);color:var(--fg-muted);
+}
+.child-card h3{font-size:28px;margin-bottom:6px}
+.child-card p{color:var(--fg-muted);font-size:15px}
+.chips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:16px 0 4px}
+
+.path{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.step{
+  display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);
+  border-radius:999px;padding:8px 16px 8px 8px;font-weight:700;font-size:15px;
+}
+.step--goal{background:var(--accent);border-color:transparent;color:var(--accent-ink)}
+.step__n{width:26px;height:26px;border-radius:999px;background:var(--cyan);color:var(--cyan-deep);display:grid;place-items:center;font-size:12px;font-weight:800}
+.step--goal .step__n{background:rgba(255,255,255,.6);color:var(--accent-ink)}
+.arrow{color:var(--fg-muted);font-weight:700}
+
+.hint{font-size:14px;color:var(--fg-muted);margin-top:14px}
+.empty{
+  border:1px dashed var(--border);border-radius:var(--r-box);padding:40px 24px;text-align:center;
+  color:var(--fg-muted);font-size:15px;
+}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+@media (max-width:900px){
+  .grid{grid-template-columns:1fr}
+  .shell{padding:18px;border-radius:20px}
+  .tabs button{flex:none;font-size:14px;padding:10px 15px}
+  .row{grid-template-columns:1fr auto;row-gap:10px}
+  .row .badge{grid-column:2}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <div class="tabs" role="tablist" aria-label="Calculator modes">
+    <button role="tab" id="tab-parents" aria-selected="true"  aria-controls="panel">Find Parents</button>
+    <button role="tab" id="tab-child"   aria-selected="false" aria-controls="panel">Find Child</button>
+    <button role="tab" id="tab-path"    aria-selected="false" aria-controls="panel">Shortest Path</button>
+    <button role="tab" id="tab-pass"    aria-selected="false" aria-controls="panel">Passives</button>
+    <button role="tab" id="tab-mut"     aria-selected="false" aria-controls="panel">Mutations</button>
+  </div>
+
+  <div class="grid" id="panel" role="tabpanel">
+    <div id="controls"></div>
+    <div id="results"><div class="empty">Loading breeding data…</div></div>
+  </div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  const MODES = ['parents', 'child', 'path', 'pass', 'mut'];
+  const TRENDING = ['Anubis', 'Felbat', 'Vanwyrm', 'Azurobe', 'Eidrolon Ignis', 'Valentail'];
+
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const el = (tag, props = {}, ...kids) => {
+    const { dataset, ...rest } = props;
+    // dataset is read-only, so it cannot go through Object.assign with the rest.
+    const n = Object.assign(document.createElement(tag), rest);
+    if (dataset) Object.assign(n.dataset, dataset);
+    kids.flat().forEach((k) => n.append(k?.nodeType ? k : document.createTextNode(String(k))));
+    return n;
+  };
+  const dexLabel = (p) => '#' + String(p.dex).padStart(3, '0');
+
+  const state = { mode: 'parents', pals: [], passives: [], byChild: new Map(), pairChild: new Map(), adj: [], sel: {} };
+
+  // ---------------------------------------------------------------- data ----
+  async function load() {
+    const [pals, passives, combos] = await Promise.all([
+      fetch('../data/pals.json').then((r) => r.json()),
+      fetch('../data/passives.json').then((r) => r.json()),
+      fetch('../data/combos.json').then((r) => r.json()),
+    ]);
+    state.pals = pals;
+    state.passives = passives;
+    state.adj = pals.map(() => []);
+
+    for (const [a, b, c] of combos.combos) {
+      if (!state.byChild.has(c)) state.byChild.set(c, []);
+      state.byChild.get(c).push([a, b]);
+      // Pair key is order-independent, matching how the game treats parents.
+      state.pairChild.set(a * 1000 + b, c);
+      state.adj[a].push([b, c]);
+      if (b !== a) state.adj[b].push([a, c]);
+    }
+    // Gendered pairs (Wixen/Kativa) keep both outcomes so neither is silently dropped.
+    state.gendered = combos.gendered;
+  }
+
+  const childOf = (a, b) => state.pairChild.get(Math.min(a, b) * 1000 + Math.max(a, b));
+  const parentsOf = (c) => state.byChild.get(c) ?? [];
+
+  /** Fewest breeding steps from `from` to `to`, pairing with any Pal at each step. */
+  function shortestPath(from, to) {
+    if (from === to) return [];
+    const prev = new Map([[from, null]]);
+    const queue = [from];
+    for (let head = 0; head < queue.length; head++) {
+      const cur = queue[head];
+      for (const [partner, child] of state.adj[cur]) {
+        if (prev.has(child)) continue;
+        prev.set(child, [cur, partner]);
+        if (child === to) {
+          const steps = [];
+          for (let node = to; prev.get(node); node = prev.get(node)[0]) {
+            const [parent, partner2] = prev.get(node);
+            steps.unshift([parent, partner2, node]);
+          }
+          return steps;
+        }
+        queue.push(child);
+      }
+    }
+    return null;
+  }
+
+  // ------------------------------------------------------------ components --
+  function palRow(i) {
+    const p = state.pals[i];
+    return el('div', { className: 'pal' },
+      el('span', { className: 'pal__avatar', ariaHidden: 'true' }, p.dex),
+      el('span', {},
+        el('span', { className: 'pal__name', textContent: p.name }),
+        el('span', { className: 'pal__no', textContent: `${dexLabel(p)} · Rarity ${p.rarity}` })));
+  }
+
+  /** Searchable Pal picker — name or Paldex number, keyboard navigable. */
+  function palPicker(key, label, onPick) {
+    const input = el('input', {
+      className: 'input', type: 'text', autocomplete: 'off', role: 'combobox',
+      placeholder: 'Search a Pal by name or #number',
+      value: state.sel[key] != null ? state.pals[state.sel[key]].name : '',
+    });
+    const list = el('div', { className: 'combo-list', hidden: true });
+    let matches = [];
+    let active = 0;
+
+    const close = () => { list.hidden = true; };
+    const choose = (i) => {
+      state.sel[key] = i;
+      input.value = state.pals[i].name;
+      close();
+      onPick?.(i);
+    };
+    const render = () => {
+      const q = input.value.trim().toLowerCase();
+      matches = state.pals
+        .map((p, i) => [p, i])
+        .filter(([p]) => !q || p.name.toLowerCase().includes(q) || String(p.dex).includes(q.replace('#', '')))
+        .slice(0, 60);
+      list.replaceChildren(...matches.map(([p, i], n) =>
+        el('button', { type: 'button', dataset: { active: String(n === active) }, onclick: () => choose(i) },
+          el('span', { className: 'dex', textContent: dexLabel(p) }),
+          el('span', { textContent: p.name }),
+          p.variant ? el('span', { className: 'badge badge--variant', textContent: 'Variant' }) : '')));
+      list.hidden = matches.length === 0;
+    };
+
+    input.addEventListener('focus', () => { active = 0; render(); });
+    input.addEventListener('input', () => { active = 0; render(); });
+    input.addEventListener('keydown', (e) => {
+      if (list.hidden) return;
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        active = Math.max(0, Math.min(matches.length - 1, active + (e.key === 'ArrowDown' ? 1 : -1)));
+        render();
+        list.children[active]?.scrollIntoView({ block: 'nearest' });
+      } else if (e.key === 'Enter' && matches[active]) {
+        e.preventDefault();
+        choose(matches[active][1]);
+      } else if (e.key === 'Escape') close();
+    });
+    input.addEventListener('blur', () => setTimeout(close, 150));
+
+    return el('div', { className: 'field' },
+      el('label', { className: 'field__label', textContent: label }), input, list);
+  }
+
+  function trending(onPick) {
+    return el('div', { className: 'trending' },
+      el('h4', { textContent: 'Trending Pals' }),
+      el('div', { className: 'tags' }, TRENDING.map((name) => {
+        const i = state.pals.findIndex((p) => p.name === name);
+        return el('button', { className: 'tag', type: 'button', textContent: name, onclick: () => onPick(i) });
+      })));
+  }
+
+  const empty = (msg) => el('div', { className: 'empty', textContent: msg });
+
+  // ----------------------------------------------------------------- modes --
+  const render = {
+    parents() {
+      const target = state.sel.target ?? state.pals.findIndex((p) => p.name === 'Anubis');
+      state.sel.target = target;
+      const pick = (i) => { state.sel.target = i; draw(); };
+
+      const controls = el('div', {},
+        el('h3', { style: 'font-size:22px;margin-bottom:6px', textContent: 'Find the Parents' }),
+        el('p', { style: 'color:var(--fg-muted);font-size:15px;margin-bottom:20px',
+          textContent: 'Pick the Pal you want to hatch. Every pair that produces it is listed.' }),
+        palPicker('target', 'Target Pal', pick),
+        trending(pick));
+
+      const pairs = parentsOf(target);
+      // Easiest parents first: low combined rarity is the cheapest to actually catch.
+      const sorted = [...pairs].sort((x, y) =>
+        (state.pals[x[0]].rarity + state.pals[x[1]].rarity) - (state.pals[y[0]].rarity + state.pals[y[1]].rarity));
+
+      const results = el('div', {},
+        el('div', { className: 'result-head' },
+          el('h3', { textContent: `Parent combinations for ${state.pals[target].name}` }),
+          el('span', { className: 'pill', textContent: `${pairs.length.toLocaleString()} ${pairs.length === 1 ? 'pair' : 'pairs'}` })),
+        pairs.length
+          ? el('div', { className: 'rows' }, sorted.slice(0, 200).map(([a, b]) =>
+              el('div', { className: 'row' },
+                palRow(a), el('span', { className: 'plus', textContent: '+' }), palRow(b),
+                el('span', { className: 'badge', textContent: `R${state.pals[a].rarity + state.pals[b].rarity}` }))))
+          : empty('No parent pair produces this Pal — it has to be caught in the wild.'),
+        pairs.length > 200
+          ? el('p', { className: 'hint', textContent: `Showing the 200 easiest of ${pairs.length.toLocaleString()} pairs, sorted by combined parent rarity.` })
+          : '');
+
+      return [controls, results];
+    },
+
+    child() {
+      state.sel.a ??= state.pals.findIndex((p) => p.name === 'Grizzbolt');
+      state.sel.b ??= state.pals.findIndex((p) => p.name === 'Relaxaurus');
+
+      const controls = el('div', {},
+        el('h3', { style: 'font-size:22px;margin-bottom:6px', textContent: 'Find the Child' }),
+        el('p', { style: 'color:var(--fg-muted);font-size:15px;margin-bottom:20px',
+          textContent: 'Choose two parents. Order does not matter — the egg is the same either way.' }),
+        palPicker('a', 'Parent 1', draw),
+        palPicker('b', 'Parent 2', draw),
+        trending((i) => { state.sel.a = i; draw(); }));
+
+      const c = childOf(state.sel.a, state.sel.b);
+      const results = c == null
+        ? empty('That pair has no offspring in the v1.0 breeding table.')
+        : (() => {
+            const p = state.pals[c];
+            const names = p.passives.map((i) => state.passives[i].name);
+            return el('div', { className: 'child-card' },
+              el('div', { className: 'child-card__avatar', ariaHidden: 'true' }, dexLabel(p)),
+              el('h3', { textContent: p.name }),
+              el('p', { textContent: `${dexLabel(p)} · Rarity ${p.rarity}${p.variant ? ' · Variant form' : ''}` }),
+              el('div', { className: 'chips' },
+                p.variant ? el('span', { className: 'badge badge--variant', textContent: 'Variant' }) : '',
+                names.map((n) => el('span', { className: 'badge', textContent: n }))),
+              el('p', { className: 'hint',
+                textContent: `${state.pals[state.sel.a].name} + ${state.pals[state.sel.b].name} → ${p.name}` }));
+          })();
+
+      return [controls, results];
+    },
+
+    path() {
+      state.sel.from ??= state.pals.findIndex((p) => p.name === 'Lamball');
+      state.sel.to ??= state.pals.findIndex((p) => p.name === 'Anubis');
+
+      const controls = el('div', {},
+        el('h3', { style: 'font-size:22px;margin-bottom:6px', textContent: 'Shortest Breeding Path' }),
+        el('p', { style: 'color:var(--fg-muted);font-size:15px;margin-bottom:20px',
+          textContent: 'Have one Pal, want another? This searches the whole v1.0 breeding graph for the chain with the fewest eggs.' }),
+        palPicker('from', 'From Pal', draw),
+        palPicker('to', 'To Pal', draw));
+
+      const steps = shortestPath(state.sel.from, state.sel.to);
+      let results;
+      if (steps === null) {
+        results = empty('No breeding chain connects these two Pals.');
+      } else if (steps.length === 0) {
+        results = empty('Same Pal — no breeding needed.');
+      } else {
+        results = el('div', {},
+          el('div', { className: 'result-head' },
+            el('h3', { textContent: `${state.pals[state.sel.from].name} → ${state.pals[state.sel.to].name}` }),
+            el('span', { className: 'pill', textContent: `${steps.length} breeding ${steps.length === 1 ? 'step' : 'steps'}` })),
+          el('div', { className: 'rows' }, steps.map(([parent, partner, child], n) =>
+            el('div', { className: 'row', style: 'grid-template-columns:1fr' },
+              el('div', { className: 'path' },
+                el('span', { className: 'step' },
+                  el('span', { className: 'step__n', textContent: n + 1 }),
+                  `${state.pals[parent].name} + ${state.pals[partner].name}`),
+                el('span', { className: 'arrow', ariaHidden: 'true' }, '→'),
+                el('span', { className: `step${child === state.sel.to ? ' step--goal' : ''}` },
+                  el('span', { className: 'step__n', textContent: child === state.sel.to ? '★' : n + 2 }),
+                  state.pals[child].name))))),
+          el('p', { className: 'hint',
+            textContent: `Each step is one egg. Partners needed: ${[...new Set(steps.map((s) => state.pals[s[1]].name))].join(', ')}.` }));
+      }
+      return [controls, results];
+    },
+
+    pass() {
+      state.sel.passive ??= state.passives.findIndex((p) => p.name === 'Legend');
+      const select = el('select', { className: 'input', onchange: (e) => { state.sel.passive = +e.target.value; draw(); } },
+        ...state.passives.map((p, i) =>
+          el('option', { value: i, selected: i === state.sel.passive, textContent: `${p.name} (rank ${p.rank})` })));
+
+      const controls = el('div', {},
+        el('h3', { style: 'font-size:22px;margin-bottom:6px', textContent: 'Passive Skills Filter' }),
+        el('p', { style: 'color:var(--fg-muted);font-size:15px;margin-bottom:20px',
+          textContent: 'Some Pals always hatch with a passive already attached. Breed one of these and the skill is guaranteed on the egg, no rerolling.' }),
+        el('div', { className: 'field' }, el('label', { className: 'field__label', textContent: 'Guaranteed passive' }), select));
+
+      const carriers = state.pals
+        .map((p, i) => [p, i])
+        .filter(([p]) => p.passives.includes(state.sel.passive));
+
+      const results = el('div', {},
+        el('div', { className: 'result-head' },
+          el('h3', { textContent: `Pals that guarantee ${state.passives[state.sel.passive].name}` }),
+          el('span', { className: 'pill', textContent: `${carriers.length} ${carriers.length === 1 ? 'Pal' : 'Pals'}` })),
+        carriers.length
+          ? el('div', { className: 'rows' }, carriers.map(([p, i]) => {
+              const n = parentsOf(i).length;
+              return el('div', { className: 'row', style: 'grid-template-columns:1fr auto' },
+                palRow(i),
+                el('span', { className: 'badge', textContent: n ? `${n.toLocaleString()} ${n === 1 ? 'pair' : 'pairs'}` : 'Catch only' }));
+            }))
+          : empty('No Pal carries this passive by default.'),
+        el('p', { className: 'hint',
+          textContent: 'Guaranteed passives are inherited like any other, so a carrier parent is the cheapest way into a four-passive project.' }));
+
+      return [controls, results];
+    },
+
+    mut() {
+      const variants = state.pals.map((p, i) => [p, i]).filter(([p]) => p.variant);
+      state.sel.variant ??= variants.find(([p]) => p.name === 'Eidrolon Ignis')?.[1] ?? variants[0][1];
+
+      const select = el('select', { className: 'input', onchange: (e) => { state.sel.variant = +e.target.value; draw(); } },
+        ...variants.map(([p, i]) =>
+          el('option', { value: i, selected: i === state.sel.variant, textContent: `${dexLabel(p)} ${p.name}` })));
+
+      const controls = el('div', {},
+        el('h3', { style: 'font-size:22px;margin-bottom:6px', textContent: 'Mutation Calculator' }),
+        el('p', { style: 'color:var(--fg-muted);font-size:15px;margin-bottom:20px',
+          textContent: `${variants.length} Pals in the v1.0 Paldeck are variant forms — Lux, Cryst, Ignis, Terra, Noct. Every one is breedable; pick one to see the pairs that produce it.` }),
+        el('div', { className: 'field' }, el('label', { className: 'field__label', textContent: 'Variant Pal' }), select));
+
+      const pairs = parentsOf(state.sel.variant);
+      const results = el('div', {},
+        el('div', { className: 'result-head' },
+          el('h3', { textContent: `Pairs that produce ${state.pals[state.sel.variant].name}` }),
+          el('span', { className: 'pill', textContent: `${pairs.length} ${pairs.length === 1 ? 'pair' : 'pairs'}` })),
+        pairs.length
+          ? el('div', { className: 'rows' }, pairs.map(([a, b]) =>
+              el('div', { className: 'row' },
+                palRow(a), el('span', { className: 'plus', textContent: '+' }), palRow(b),
+                el('span', { className: 'badge badge--variant', textContent: 'Variant' }))))
+          : empty('This variant cannot be bred — it has to be caught.'),
+        el('p', { className: 'hint', textContent: 'Variant pairings come straight from the v1.0 breeding table.' }));
+
+      return [controls, results];
+    },
+  };
+
+  // ----------------------------------------------------------------- shell --
+  function draw() {
+    const [controls, results] = render[state.mode]();
+    $('#controls').replaceChildren(controls);
+    $('#results').replaceChildren(results);
+    reportHeight();
+  }
+
+  MODES.forEach((mode) => {
+    $(`#tab-${mode}`).addEventListener('click', () => {
+      state.mode = mode;
+      MODES.forEach((m) => $(`#tab-${m}`).setAttribute('aria-selected', String(m === mode)));
+      draw();
+    });
+  });
+
+  // Tell the host page how tall we are, so the iframe never scrolls internally.
+  let lastHeight = 0;
+  function reportHeight() {
+    const h = Math.ceil(document.documentElement.getBoundingClientRect().height);
+    if (h === lastHeight) return;
+    lastHeight = h;
+    parent.postMessage({ type: 'palbreeding:height', height: h }, '*');
+  }
+  new ResizeObserver(reportHeight).observe(document.documentElement);
+
+  // The host owns the theme; it pushes changes down here.
+  addEventListener('message', (e) => {
+    if (e.data?.type === 'palbreeding:theme') {
+      document.documentElement.setAttribute('data-theme', e.data.theme === 'dark' ? 'dark' : 'light');
+    }
+  });
+
+  load().then(draw).catch((err) => {
+    $('#results').replaceChildren(empty('Could not load breeding data. Reload the page to try again.'));
+    console.error(err);
+  });
+})();
+</script>
+</body>
+</html>

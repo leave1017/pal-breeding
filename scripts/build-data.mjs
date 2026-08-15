@@ -62,6 +62,22 @@ if (dupeSlugs.length) throw new Error(`Slug collision, URLs would clash: ${dupeS
 
 const indexOf = new Map(pals.map((p, i) => [p.internal, i]));
 
+// ---- Passives -------------------------------------------------------------
+// Only the passives some Pal is guaranteed to carry are useful for breeding
+// planning, and the raw list contains unused test entries, so it is filtered
+// down to the ones actually referenced.
+const usedPassiveIds = new Set(db.Pals.flatMap((p) => p.GuaranteedPassivesInternalIds));
+const passives = db.PassiveSkills
+  .filter((s) => usedPassiveIds.has(s.InternalName))
+  .map((s) => ({ internal: s.InternalName, name: s.Name, rank: s.Rank }))
+  .sort((a, b) => b.rank - a.rank || a.name.localeCompare(b.name));
+
+const passiveIndex = new Map(passives.map((s, i) => [s.internal, i]));
+db.Pals.forEach((raw) => {
+  const p = pals[indexOf.get(raw.InternalName)];
+  p.passives = raw.GuaranteedPassivesInternalIds.map((id) => passiveIndex.get(id)).filter((i) => i !== undefined);
+});
+
 // ---- Combos ---------------------------------------------------------------
 // Stored as index triples rather than names: 44k rows of strings is ~9 MB,
 // the same rows as indices are ~500 KB before gzip.
@@ -99,10 +115,12 @@ const meta = {
   variants: pals.filter((p) => p.variant).length,
   combos: uniqueCombos.length,
   genderedCombos: gendered.length,
+  guaranteedPassives: passives.length,
 };
 
 await mkdir(OUT, { recursive: true });
 await writeFile(`${OUT}/pals.json`, JSON.stringify(pals));
+await writeFile(`${OUT}/passives.json`, JSON.stringify(passives));
 await writeFile(`${OUT}/combos.json`, JSON.stringify({ combos: uniqueCombos, gendered }));
 await writeFile(`${OUT}/meta.json`, JSON.stringify(meta, null, 2));
 

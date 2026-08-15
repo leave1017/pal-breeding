@@ -284,6 +284,14 @@ html[data-theme="dark"] .badge--electric{background:#3d3316;color:#fde047}
 .bar{height:8px;border-radius:999px;background:var(--input-bg);overflow:hidden;width:120px;flex:none}
 .bar span{display:block;height:100%;background:linear-gradient(90deg,#7ddcf5,#fceb55)}
 
+/* ============ Calculator embed ============ */
+.calc-frame iframe{
+  width:100%;border:0;display:block;
+  /* Height is driven by a postMessage from the embed so it never scrolls
+     inside its own box; this is the pre-measurement fallback. */
+  min-height:620px;
+}
+
 /* ============ Tool explainers ============ */
 .tool-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
 .tool-card{
@@ -480,269 +488,20 @@ html[data-theme="dark"] .badge--electric{background:#3d3316;color:#fde047}
       <p class="lede">Five breeding tools in one panel. Every result comes straight from the Palworld v1.0 breeding table — no guesswork, no outdated pre-1.0 data.</p>
     </div>
 
-    <div class="calc-shell">
-      <input class="tab-radio" type="radio" name="calctab" id="t-parents" checked>
-      <input class="tab-radio" type="radio" name="calctab" id="t-child">
-      <input class="tab-radio" type="radio" name="calctab" id="t-path">
-      <input class="tab-radio" type="radio" name="calctab" id="t-pass">
-      <input class="tab-radio" type="radio" name="calctab" id="t-mut">
-
-      <div class="tabs" role="tablist">
-        <label for="t-parents">Find Parents</label>
-        <label for="t-child">Find Child</label>
-        <label for="t-path">Shortest Path</label>
-        <label for="t-pass">Passives</label>
-        <label for="t-mut">Mutations</label>
-      </div>
-
-      <div class="panels">
-
-        <!-- ---------- Find Parents ---------- -->
-        <div class="panel" id="p-parents">
-          <div class="calc-grid">
-            <div>
-              <h3 class="h2" style="font-size:22px;margin-bottom:6px">Find the Parents</h3>
-              <p class="lede" style="font-size:15px;margin-bottom:20px">Pick the Pal you want to hatch. We list every pair that can produce it.</p>
-              <div class="field">
-                <label class="field__label" for="target-pal">Target Pal</label>
-                <select class="select" id="target-pal">
-                  <option>#139 Anubis</option>
-                  <option>#065 Felbat</option>
-                  <option>#064 Vanwyrm</option>
-                  <option>#041 Azurobe</option>
-                  <option>#171 Eidrolon Ignis</option>
-                  <option>#162 Valentail</option>
-                </select>
-              </div>
-              <div class="field">
-                <label class="field__label" for="filter-owned">Filter</label>
-                <select class="select" id="filter-owned">
-                  <option>All combinations</option>
-                  <option>Only Pals I own</option>
-                  <option>New in 1.0 only</option>
-                </select>
-              </div>
-              <button class="btn btn--primary btn--block" type="button">Find parent combos</button>
-
-              <div class="trending">
-                <h4>Trending Pals</h4>
-                <div class="tags">
-                  <a class="tag" href="/breeding/anubis">Anubis</a>
-                  <a class="tag" href="/breeding/felbat">Felbat</a>
-                  <a class="tag" href="/breeding/vanwyrm">Vanwyrm</a>
-                  <a class="tag" href="/breeding/azurobe">Azurobe</a>
-                  <a class="tag" href="/breeding/eidrolon-ignis">Eidrolon Ignis</a>
-                  <a class="tag" href="/breeding/valentail">Valentail</a>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <div class="result-head">
-                <h3>Parent combinations for Anubis</h3>
-                <span class="count-pill">234 pairs</span>
-              </div>
-              <div class="result-list">
-                <div class="combo">
-                  <div class="pal"><span class="pal__avatar" aria-hidden="true">🦌</span><span><span class="pal__name">Fenglope Lux</span><span class="pal__no">#083 · Rarity 3</span></span></div>
-                  <span class="plus">+</span>
-                  <div class="pal"><span class="pal__avatar" aria-hidden="true">🛡️</span><span><span class="pal__name">Aegidron</span><span class="pal__no">#184 · Rarity 8</span></span></div>
-                  <span class="badge badge--new">New 1.0</span>
-                </div>
-                <div class="combo">
-                  <div class="pal"><span class="pal__avatar" aria-hidden="true">❄️</span><span><span class="pal__name">Frostplume</span><span class="pal__no">#114 · Rarity 4</span></span></div>
-                  <span class="plus">+</span>
-                  <div class="pal"><span class="pal__avatar" aria-hidden="true">🌻</span><span><span class="pal__name">Dandilord</span><span class="pal__no">#194 · Rarity 8</span></span></div>
-                  <span class="badge badge--dragon">Rarity 8</span>
-                </div>
-                <div class="combo">
-                  <div class="pal"><span class="pal__avatar" aria-hidden="true">🎨</span><span><span class="pal__name">Splatterina</span><span class="pal__no">#153 · Rarity 4</span></span></div>
-                  <span class="plus">+</span>
-                  <div class="pal"><span class="pal__avatar" aria-hidden="true">🔥</span><span><span class="pal__name">Eidrolon Ignis</span><span class="pal__no">#171 · Rarity 8</span></span></div>
-                  <span class="badge badge--fire">Rarity 8</span>
-                </div>
-                <div class="combo">
-                  <div class="pal"><span class="pal__avatar" aria-hidden="true">⚡</span><span><span class="pal__name">Azurmane</span><span class="pal__no">#161 · Rarity 7</span></span></div>
-                  <span class="plus">+</span>
-                  <div class="pal"><span class="pal__avatar" aria-hidden="true">🗡️</span><span><span class="pal__name">Roujay</span><span class="pal__no">#177 · Rarity 5</span></span></div>
-                  <span class="badge badge--water">Rarity 7</span>
-                </div>
-                <div class="combo">
-                  <div class="pal"><span class="pal__avatar" aria-hidden="true">💠</span><span><span class="pal__name">Univolt Cryst</span><span class="pal__no">#054 · Rarity 6</span></span></div>
-                  <span class="plus">+</span>
-                  <div class="pal"><span class="pal__avatar" aria-hidden="true">🔮</span><span><span class="pal__name">Flaracle</span><span class="pal__no">#174 · Rarity 7</span></span></div>
-                  <span class="badge badge--dark">Rarity 7</span>
-                </div>
-              </div>
-              <p class="hint">Showing 5 of 234 pairs. <a href="/breeding/anubis" style="font-weight:700;color:var(--cyan-deep)">View the full Anubis breeding guide →</a></p>
-            </div>
-          </div>
-        </div>
-
-        <!-- ---------- Find Child ---------- -->
-        <div class="panel" id="p-child">
-          <div class="calc-grid">
-            <div>
-              <h3 class="h2" style="font-size:22px;margin-bottom:6px">Find the Child</h3>
-              <p class="lede" style="font-size:15px;margin-bottom:20px">Choose two parents. Order does not matter — the egg is the same either way.</p>
-              <div class="pair-grid">
-                <div class="field">
-                  <label class="field__label" for="parent-a">Parent 1</label>
-                  <select class="select" id="parent-a">
-                    <option>#185 Grizzbolt</option>
-                    <option>#094 Relaxaurus</option>
-                    <option>#083 Fenglope Lux</option>
-                  </select>
-                </div>
-                <span class="pair-x" aria-hidden="true">+</span>
-                <div class="field">
-                  <label class="field__label" for="parent-b">Parent 2</label>
-                  <select class="select" id="parent-b">
-                    <option>#094 Relaxaurus</option>
-                    <option>#184 Aegidron</option>
-                    <option>#028 Rushoar</option>
-                  </select>
-                </div>
-              </div>
-              <button class="btn btn--primary btn--block" type="button">Calculate offspring</button>
-
-              <div class="trending">
-                <h4>Trending Pals</h4>
-                <div class="tags">
-                  <a class="tag" href="/breeding/anubis">Anubis</a>
-                  <a class="tag" href="/breeding/felbat">Felbat</a>
-                  <a class="tag" href="/breeding/vanwyrm">Vanwyrm</a>
-                  <a class="tag" href="/breeding/azurobe">Azurobe</a>
-                  <a class="tag" href="/breeding/eidrolon-ignis">Eidrolon Ignis</a>
-                  <a class="tag" href="/breeding/valentail">Valentail</a>
-                </div>
-              </div>
-            </div>
-
-            <div class="child-card">
-              <div class="child-card__avatar" aria-hidden="true">🐲</div>
-              <h3>Reptyro</h3>
-              <p>#110 · Rarity 8 · from Grizzbolt + Relaxaurus</p>
-              <div class="chip-row">
-                <span class="badge badge--fire">Rarity 8</span>
-                <span class="badge badge--new">Verified v1.0</span>
-              </div>
-              <a class="btn btn--ghost" href="/pals/reptyro">View Reptyro stats &amp; passives</a>
-            </div>
-          </div>
-        </div>
-
-        <!-- ---------- Shortest Path ---------- -->
-        <div class="panel" id="p-path">
-          <div class="calc-grid">
-            <div>
-              <h3 class="h2" style="font-size:22px;margin-bottom:6px">Shortest Breeding Path</h3>
-              <p class="lede" style="font-size:15px;margin-bottom:20px">Have one Pal, want another? We search the whole v1.0 breeding graph and return the chain with the fewest eggs.</p>
-              <div class="field">
-                <label class="field__label" for="from-pal">From Pal</label>
-                <select class="select" id="from-pal"><option>#083 Fenglope Lux</option><option>#114 Frostplume</option></select>
-              </div>
-              <div class="field">
-                <label class="field__label" for="to-pal">To Pal</label>
-                <select class="select" id="to-pal"><option>#139 Anubis</option><option>#171 Eidrolon Ignis</option></select>
-              </div>
-              <button class="btn btn--primary btn--block" type="button">Find shortest path</button>
-            </div>
-            <div>
-              <div class="result-head">
-                <h3>Fenglope Lux → Anubis</h3>
-                <span class="count-pill">2 breeding steps</span>
-              </div>
-              <div class="result-list">
-                <div class="combo" style="grid-template-columns:1fr">
-                  <div class="path">
-                    <span class="step"><span class="step__n">1</span> Fenglope Lux + Frostplume</span>
-                    <span class="arrow" aria-hidden="true">→</span>
-                    <span class="step"><span class="step__n">2</span> Ghangler</span>
-                  </div>
-                </div>
-                <div class="combo" style="grid-template-columns:1fr">
-                  <div class="path">
-                    <span class="step"><span class="step__n">2</span> Ghangler + Aegidron</span>
-                    <span class="arrow" aria-hidden="true">→</span>
-                    <span class="step" style="background:var(--accent);border-color:transparent;color:var(--accent-ink)"><span class="step__n" style="background:rgba(255,255,255,.6)">★</span> Anubis</span>
-                  </div>
-                </div>
-              </div>
-              <p class="hint">Each step is one egg. Cakes needed: 2 · Both parents are catchable in the wild.</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- ---------- Passives ---------- -->
-        <div class="panel" id="p-pass">
-          <div class="calc-grid">
-            <div>
-              <h3 class="h2" style="font-size:22px;margin-bottom:6px">Passive Skills Filter</h3>
-              <p class="lede" style="font-size:15px;margin-bottom:20px">Breeding in 1.0 passes passives from both parents. Pick the passives you are chasing and see which pairs give the best inheritance odds.</p>
-              <div class="field">
-                <label class="field__label" for="passive-1">Wanted passive</label>
-                <select class="select" id="passive-1"><option>Legend</option><option>Swift</option><option>Musclehead</option><option>Ferocious</option></select>
-              </div>
-              <div class="field">
-                <label class="field__label" for="passive-2">Second passive</label>
-                <select class="select" id="passive-2"><option>Runner</option><option>Lucky</option><option>Serious</option></select>
-              </div>
-              <button class="btn btn--primary btn--block" type="button">Show best pairings</button>
-            </div>
-            <div>
-              <div class="result-head">
-                <h3>Best pairs for Legend + Runner</h3>
-                <span class="count-pill">Inheritance odds</span>
-              </div>
-              <div class="result-list">
-                <div class="passive-row"><div><strong>Frostallion + Frostallion</strong><div class="meta">Both parents carry Legend</div></div><div class="bar" aria-hidden="true"><span style="width:82%"></span></div></div>
-                <div class="passive-row"><div><strong>Jormuntide + Suzaku</strong><div class="meta">Legend on parent A, Runner on parent B</div></div><div class="bar" aria-hidden="true"><span style="width:61%"></span></div></div>
-                <div class="passive-row"><div><strong>Anubis + Aegidron</strong><div class="meta">Runner on both, Legend from A</div></div><div class="bar" aria-hidden="true"><span style="width:44%"></span></div></div>
-              </div>
-              <p class="hint">Odds assume no passive-slot conflicts. Four-passive rolls are shown on the full <a href="/guides/passive-breeding" style="font-weight:700;color:var(--cyan-deep)">passive breeding guide</a>.</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- ---------- Mutations ---------- -->
-        <div class="panel" id="p-mut">
-          <div class="calc-grid">
-            <div>
-              <h3 class="h2" style="font-size:22px;margin-bottom:6px">Mutation Calculator</h3>
-              <p class="lede" style="font-size:15px;margin-bottom:20px">85 Pals in the v1.0 Paldeck are variant forms — Lux, Cryst, Ignis, Terra, Noct. Every one of them is breedable. Pick a variant to see the pairs that produce it.</p>
-              <div class="field">
-                <label class="field__label" for="mut-pal">Base Pal</label>
-                <select class="select" id="mut-pal"><option>#171 Eidrolon Ignis</option><option>#083 Fenglope Lux</option><option>#054 Univolt Cryst</option></select>
-              </div>
-              <button class="btn btn--primary btn--block" type="button">Show mutation combos</button>
-            </div>
-            <div>
-              <div class="result-head">
-                <h3>Variant combos — Eidrolon Ignis</h3>
-                <span class="count-pill">2 pairs</span>
-              </div>
-              <div class="result-list">
-                <div class="combo">
-                  <div class="pal"><span class="pal__avatar" aria-hidden="true">🐦</span><span><span class="pal__name">Suzaku</span><span class="pal__no">#122 · Rarity 8</span></span></div>
-                  <span class="plus">+</span>
-                  <div class="pal"><span class="pal__avatar" aria-hidden="true">🦌</span><span><span class="pal__name">Eidrolon</span><span class="pal__no">#171 · Rarity 8</span></span></div>
-                  <span class="badge badge--new">Variant</span>
-                </div>
-                <div class="combo">
-                  <div class="pal"><span class="pal__avatar" aria-hidden="true">🔥</span><span><span class="pal__name">Eidrolon Ignis</span><span class="pal__no">#171 · Variant</span></span></div>
-                  <span class="plus">+</span>
-                  <div class="pal"><span class="pal__avatar" aria-hidden="true">🔥</span><span><span class="pal__name">Eidrolon Ignis</span><span class="pal__no">#171 · Variant</span></span></div>
-                  <span class="badge badge--fire">Self-pair</span>
-                </div>
-              </div>
-              <p class="hint">Variant pairings come straight from the v1.0 breeding table and are re-checked after every patch.</p>
-            </div>
-          </div>
-        </div>
-
-      </div><!-- /panels -->
-    </div><!-- /calc-shell -->
+    <!-- The calculator lives at /tool/calculator.html so the tool and the
+         marketing page can be restyled independently. It is noindex'd; the SEO
+         copy that should rank stays in this document. -->
+    <div class="calc-frame">
+      <iframe id="calcFrame" src="/tool/calculator.html" title="Palworld 1.0 breeding calculator"
+              loading="eager" height="760"></iframe>
+      <noscript>
+        <p class="lede" style="margin-top:16px">
+          The interactive calculator needs JavaScript. You can still
+          <a href="/breeding" style="font-weight:700;color:var(--cyan-deep)">browse the full breeding table</a>,
+          which works without it.
+        </p>
+      </noscript>
+    </div>
   </div>
 </section>
 
@@ -929,7 +688,7 @@ html[data-theme="dark"] .badge--electric{background:#3d3316;color:#fde047}
 <!-- ===================== SOCIAL PROOF ===================== -->
 <section class="section section--cream" style="padding:56px 0">
   <div class="wrap proof">
-    <p>Used by Palworld players on Reddit and Discord to plan breeding projects. Spotted wrong data? <a href="/contact" style="font-weight:700;color:var(--cyan-deep)">Tell us and we will fix it.</a></p>
+    <p>Used by Palworld players on Reddit and Discord to plan breeding projects. Spotted wrong data? <a href="/contact/" style="font-weight:700;color:var(--cyan-deep)">Tell us and we will fix it.</a></p>
   </div>
 </section>
 
@@ -961,10 +720,10 @@ html[data-theme="dark"] .badge--electric{background:#3d3316;color:#fde047}
       <div>
         <h4>Site</h4>
         <ul>
-          <li><a href="/about">About</a></li>
-          <li><a href="/contact">Contact</a></li>
-          <li><a href="/privacy">Privacy</a></li>
-          <li><a href="/terms">Terms</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="/contact/">Contact</a></li>
+          <li><a href="/privacy/">Privacy</a></li>
+          <li><a href="/terms/">Terms</a></li>
         </ul>
       </div>
     </div>
@@ -1024,12 +783,31 @@ html[data-theme="dark"] .badge--electric{background:#3d3316;color:#fde047}
   } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
     root.setAttribute('data-theme', 'dark');
   }
+  var frame = document.getElementById('calcFrame');
+  function pushTheme(theme) {
+    frame && frame.contentWindow &&
+      frame.contentWindow.postMessage({ type: 'palbreeding:theme', theme: theme }, '*');
+  }
+  frame && frame.addEventListener('load', function () {
+    pushTheme(root.getAttribute('data-theme') || 'light');
+  });
+
+  // The embed measures itself and reports back, so the iframe grows with its
+  // content instead of showing an inner scrollbar.
+  window.addEventListener('message', function (e) {
+    if (!frame || e.source !== frame.contentWindow) return;
+    if (e.data && e.data.type === 'palbreeding:height' && e.data.height > 0) {
+      frame.style.height = e.data.height + 'px';
+    }
+  });
+
   var btn = document.getElementById('themeToggle');
   if (btn) {
     btn.addEventListener('click', function () {
       var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
       root.setAttribute('data-theme', next);
       try { localStorage.setItem('theme', next); } catch (e) {}
+      pushTheme(next);
     });
   }
 })();
