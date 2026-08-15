@@ -421,6 +421,44 @@ html[data-theme="dark"] .w-Farming{color:#a3e635}
     return svg;
   };
 
+  /**
+   * Ranks a Pal against a query. Higher is better, 0 means no match.
+   *
+   * Matching is deliberately loose — players half-remember names ("jorm",
+   * "eidro") and often type an element or a job instead of a name — but the
+   * score keeps the obvious hits on top: an exact name beats a prefix, which
+   * beats a substring, which beats scattered letters.
+   */
+  function score(p, q) {
+    const name = p.name.toLowerCase();
+    if (name === q) return 1000;
+    if (name.startsWith(q)) return 900 - name.length;
+    // A word inside the name: "ignis" should find Eidrolon Ignis.
+    if (name.split(' ').some((w) => w.startsWith(q))) return 800 - name.length;
+    if (name.includes(q)) return 700 - name.indexOf(q);
+
+    // Paldex number, with or without the # and leading zeros.
+    const dex = String(p.dex);
+    if (dex === q || String(p.dex).padStart(3, '0') === q) return 950;
+    if (dex.startsWith(q)) return 600;
+
+    // Element or job typed instead of a name: "fire", "dragon", "mining".
+    if ((p.elements ?? []).some((e) => e.toLowerCase().startsWith(q))) return 500;
+    if (Object.keys(p.work).some((w) => WORK_LABEL[w].toLowerCase().startsWith(q))) return 450;
+
+    // Letters in order with gaps: "anb" -> Anubis, "jrmtd" -> Jormuntide.
+    let i = 0;
+    let gaps = 0;
+    for (const ch of name) {
+      if (ch === q[i]) i++;
+      else if (i > 0 && i < q.length) gaps++;
+      if (i === q.length) break;
+    }
+    if (i === q.length) return Math.max(50, 400 - gaps * 4 - name.length);
+
+    return 0;
+  }
+
   /** The row of job icons under a Pal — what it can actually do at your base. */
   function workRow(i) {
     const entries = Object.entries(state.pals[i].work);
@@ -566,12 +604,15 @@ html[data-theme="dark"] .w-Farming{color:#a3e635}
     const label = defs.find(([k]) => k === state.activeSlot)?.[1] ?? null;
     const q = state.query.trim().toLowerCase().replace('#', '');
     const matches = state.pals
-      .map((p, i) => [p, i])
-      .filter(([p]) => (state.mode !== 'mut' || p.variant)
+      .map((p, i) => [p, i, q ? score(p, q) : 1])
+      .filter(([p, , hit]) => hit > 0
+        && (state.mode !== 'mut' || p.variant)
         && (state.rarity === 'all' || p.rarity >= +state.rarity)
         && (state.work === 'all' || p.work[state.work] > 0)
-        && (state.element === 'all' || (p.elements ?? []).includes(state.element))
-        && (!q || p.name.toLowerCase().includes(q) || String(p.dex).padStart(3, '0').includes(q)));
+        && (state.element === 'all' || (p.elements ?? []).includes(state.element)))
+      // Without a query the Paldex order is what players expect; with one, the
+      // best matches have to come first or fuzzy matching is just noise.
+      .sort((a, b) => (q ? b[2] - a[2] || a[0].dex - b[0].dex : 0));
 
     const search = el('input', {
       className: 'input', type: 'search', value: state.query,
