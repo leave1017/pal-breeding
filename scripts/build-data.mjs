@@ -2,7 +2,12 @@
  * Builds the site's breeding dataset from Pal Calc (MIT), whose db.json and
  * breeding.json are generated directly from the Palworld game files.
  *
- *   Source: https://github.com/tylercamp/palcalc  (PalCalc.Model/*.json)
+ *   Breeding, stats, passives: https://github.com/tylercamp/palcalc (MIT)
+ *   Elements: https://github.com/MagitekZed/palworld-helper (scraped from paldb.cc)
+ *
+ * The two sources are joined on the game's internal codename and cross-checked:
+ * their work-suitability values must agree for all 299 Pals or the build fails,
+ * which is what makes the element data from the second source trustworthy.
  *
  * Run: node scripts/build-data.mjs
  * Out: data/pals.json, data/combos.json, data/meta.json
@@ -25,8 +30,12 @@ async function getJson(url) {
   return res.json();
 }
 
+const HELPER =
+  'https://raw.githubusercontent.com/MagitekZed/palworld-helper/main/data/pals_work_suitability.json';
+
 const db = await getJson(`${RAW}/db.json`);
 const breeding = await getJson(`${RAW}/breeding.json`);
+const helper = await getJson(HELPER);
 
 // ---- Pals -----------------------------------------------------------------
 // InternalName is the join key used by the breeding table. PalDexNo is what
@@ -42,6 +51,9 @@ const pals = db.Pals.map((p) => ({
   // Priority breaks ties between two equally-distant candidates.
   power: p.BreedingPower,
   powerPriority: p.BreedingPowerPriority,
+  // Work suitability, non-zero entries only — this is what the grid shows as
+  // icons, and most Pals are good at two or three things out of twelve.
+  work: Object.fromEntries(Object.entries(p.WorkSuitability).filter(([, lvl]) => lvl > 0)),
 })).sort((a, b) => a.dex - b.dex || Number(a.variant) - Number(b.variant));
 
 // A few variants share their base form's display name (#12 Gumoss and its
@@ -61,6 +73,30 @@ const dupeSlugs = [...countSlugs()].filter(([, n]) => n > 1).map(([s]) => s);
 if (dupeSlugs.length) throw new Error(`Slug collision, URLs would clash: ${dupeSlugs.join(', ')}`);
 
 const indexOf = new Map(pals.map((p, i) => [p.internal, i]));
+
+// ---- Elements -------------------------------------------------------------
+// palcalc carries no element field, so elements come from a second dataset,
+// joined on the internal codename. Both sources also carry work suitability;
+// requiring those to match is the check that the join is sound.
+const WORK_ALIASES = { 'Generating Electricity': 'GenerateElectricity', 'Medicine Production': 'MedicineProduction' };
+const normalizeWork = (works = {}) =>
+  Object.fromEntries(Object.entries(works).map(([k, v]) => [WORK_ALIASES[k] ?? k.replace(/ /g, ''), v]));
+
+const helperByCode = new Map(helper.pals.map((p) => [p.code, p]));
+const helperByName = new Map(helper.pals.map((p) => [p.name, p]));
+const mismatches = [];
+
+for (const p of pals) {
+  const match = helperByCode.get(p.internal) ?? helperByName.get(p.name);
+  if (!match) { mismatches.push(`${p.name} (${p.internal}): no element data`); continue; }
+  if (JSON.stringify(normalizeWork(match.works)) !== JSON.stringify(p.work)) {
+    mismatches.push(`${p.name}: work suitability disagrees between sources`);
+  }
+  p.elements = match.elements ?? [];
+}
+if (mismatches.length) {
+  throw new Error(`Element join failed for ${mismatches.length} Pals:\n  ${mismatches.slice(0, 10).join('\n  ')}`);
+}
 
 // ---- Passives -------------------------------------------------------------
 // Only the passives some Pal is guaranteed to carry are useful for breeding
@@ -109,13 +145,18 @@ const uniqueCombos = combos.filter(([a, b]) => {
 // ---- Write ----------------------------------------------------------------
 const meta = {
   generatedAt: new Date().toISOString().slice(0, 10),
-  source: 'https://github.com/tylercamp/palcalc (MIT) — generated from Palworld game files',
+  sources: [
+    'https://github.com/tylercamp/palcalc (MIT) — breeding, stats and passives, generated from the game files',
+    'https://github.com/MagitekZed/palworld-helper — elements, scraped from paldb.cc',
+  ],
   dbVersion: db.Version,
   pals: pals.length,
   variants: pals.filter((p) => p.variant).length,
   combos: uniqueCombos.length,
   genderedCombos: gendered.length,
   guaranteedPassives: passives.length,
+  workTypes: [...new Set(pals.flatMap((p) => Object.keys(p.work)))].length,
+  elements: [...new Set(pals.flatMap((p) => p.elements))].sort(),
 };
 
 await mkdir(OUT, { recursive: true });

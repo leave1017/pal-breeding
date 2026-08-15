@@ -1,10 +1,25 @@
 {
   "generatedAt": "2026-08-15",
-  "source": "https://github.com/tylercamp/palcalc (MIT) — generated from Palworld game files",
+  "sources": [
+    "https://github.com/tylercamp/palcalc (MIT) — breeding, stats and passives, generated from the game files",
+    "https://github.com/MagitekZed/palworld-helper — elements, scraped from paldb.cc"
+  ],
   "dbVersion": "v27",
   "pals": 299,
   "variants": 85,
   "combos": 44849,
   "genderedCombos": 2,
-  "guaranteedPassives": 23
+  "guaranteedPassives": 23,
+  "workTypes": 12,
+  "elements": [
+    "Dark",
+    "Dragon",
+    "Electric",
+    "Fire",
+    "Grass",
+    "Ground",
+    "Ice",
+    "Neutral",
+    "Water"
+  ]
 }

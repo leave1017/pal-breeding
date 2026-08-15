@@ -83,7 +83,10 @@ a{color:var(--cyan-deep);font-weight:700;text-decoration:none}
   display:block;font-weight:800;font-size:15.5px;letter-spacing:-.02em;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
 }
-.slot__no{font-size:11.5px;color:var(--fg-muted);font-weight:600;font-variant-numeric:tabular-nums}
+.slot__meta{display:flex;align-items:center;gap:5px;flex-wrap:nowrap;overflow:hidden}
+.slot__no{font-size:11.5px;color:var(--fg-muted);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.slot .el{width:15px;height:15px;border-radius:5px}
+.slot .el svg{width:10px;height:10px}
 .slot--empty .slot__art{
   border:2px dashed var(--border);background:transparent;
   display:grid;place-items:center;color:var(--fg-muted);font-size:20px;
@@ -122,7 +125,11 @@ a{color:var(--cyan-deep);font-weight:700;text-decoration:none}
 .row:hover{border-color:#67c9e6;box-shadow:var(--shadow-soft)}
 .mini{display:flex;align-items:center;gap:10px;min-width:0}
 .mini__name{font-weight:700;font-size:14.5px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mini__text{min-width:0}
+.mini__meta{display:flex;align-items:center;gap:5px}
 .mini__no{font-size:12px;color:var(--fg-muted);font-weight:600;font-variant-numeric:tabular-nums}
+.mini .el{width:16px;height:16px;border-radius:6px}
+.mini .el svg{width:10px;height:10px}
 .plus{color:var(--fg-muted);font-weight:700}
 .badge{font-size:11px;font-weight:800;padding:4px 10px;border-radius:999px;background:var(--cyan);color:var(--cyan-deep);white-space:nowrap}
 .badge--variant{background:var(--accent);color:var(--accent-ink)}
@@ -147,13 +154,72 @@ a{color:var(--cyan-deep);font-weight:700;text-decoration:none}
 .hint{font-size:13px;color:var(--fg-muted);margin-top:9px}
 .empty{border:1px dashed var(--border);border-radius:var(--r-box);padding:24px 20px;text-align:center;color:var(--fg-muted);font-size:14px}
 
+/* ---------------- elements ---------------- */
+.elements{display:flex;gap:4px;align-items:center;justify-content:center}
+.el{
+  width:19px;height:19px;border-radius:7px;display:grid;place-items:center;flex:none;
+}
+.el svg{width:12px;height:12px}
+.el--fill svg{fill:currentColor;stroke:none}
+.el--line svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.el-Neutral{background:#e2e8f0;color:#475569}
+.el-Fire{background:#ffe4d3;color:#c2410c}
+.el-Water{background:#d6ecfd;color:#0369a1}
+.el-Electric{background:#fdf0c2;color:#a16207}
+.el-Grass{background:#d8f3df;color:#15803d}
+.el-Ground{background:#eee2cf;color:#92400e}
+.el-Ice{background:#d3f1f7;color:#0e7490}
+.el-Dark{background:#e2ddf9;color:#6d28d9}
+.el-Dragon{background:#f7dcf1;color:#a21caf}
+html[data-theme="dark"] .el-Neutral{background:#33415580;color:#cbd5e1}
+html[data-theme="dark"] .el-Fire{background:#7c2d1280;color:#fdba74}
+html[data-theme="dark"] .el-Water{background:#0c4a6e80;color:#7dd3fc}
+html[data-theme="dark"] .el-Electric{background:#71360780;color:#fde047}
+html[data-theme="dark"] .el-Grass{background:#14532d80;color:#86efac}
+html[data-theme="dark"] .el-Ground{background:#78350f80;color:#e5c39a}
+html[data-theme="dark"] .el-Ice{background:#155e7580;color:#67e8f9}
+html[data-theme="dark"] .el-Dark{background:#4c1d9580;color:#c4b5fd}
+html[data-theme="dark"] .el-Dragon{background:#701a7580;color:#f0abfc}
+
+/* ---------------- work suitability ---------------- */
+.work{display:flex;flex-wrap:wrap;gap:5px 7px;justify-content:center;align-items:center}
+.work__item{display:flex;align-items:center;gap:2px;font-size:10.5px;font-weight:800;color:var(--fg-muted);font-variant-numeric:tabular-nums}
+.work__icon{width:14px;height:14px;flex:none}
+/* Filled glyphs vs stroked glyphs, so each reads correctly at 14px. */
+.work__icon--fill{fill:currentColor;stroke:none}
+.work__icon--line{fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.w-Kindling{color:#ea580c}
+.w-Watering{color:#0ea5e9}
+.w-Planting{color:#16a34a}
+.w-GenerateElectricity{color:#ca8a04}
+.w-Handiwork{color:#b45309}
+.w-Gathering{color:#059669}
+.w-Lumbering{color:#92400e}
+.w-Mining{color:#475569}
+.w-MedicineProduction{color:#7c3aed}
+.w-Cooling{color:#0891b2}
+.w-Transporting{color:#a16207}
+.w-Farming{color:#65a30d}
+html[data-theme="dark"] .w-Kindling{color:#fb923c}
+html[data-theme="dark"] .w-Watering{color:#7dd3fc}
+html[data-theme="dark"] .w-Planting{color:#4ade80}
+html[data-theme="dark"] .w-GenerateElectricity{color:#fde047}
+html[data-theme="dark"] .w-Handiwork{color:#fbbf24}
+html[data-theme="dark"] .w-Gathering{color:#34d399}
+html[data-theme="dark"] .w-Lumbering{color:#d6a35c}
+html[data-theme="dark"] .w-Mining{color:#cbd5e1}
+html[data-theme="dark"] .w-MedicineProduction{color:#c4b5fd}
+html[data-theme="dark"] .w-Cooling{color:#67e8f9}
+html[data-theme="dark"] .w-Transporting{color:#e0b872}
+html[data-theme="dark"] .w-Farming{color:#a3e635}
+
 /* ---------------- picker ---------------- */
 .picker{background:var(--bg-cyan);border-radius:18px;padding:16px}
 .picker__head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:11px}
 .picker__head h3{font-size:16px}
 .picker__count{font-size:13px;color:var(--fg-muted);font-weight:600}
 .picker__close{margin-left:auto;font-size:13px;font-weight:800;color:var(--cyan-deep)}
-.filters{display:grid;grid-template-columns:minmax(0,420px) 170px;gap:9px;margin-bottom:12px}
+.filters{display:grid;grid-template-columns:minmax(0,300px) 160px 170px 140px;gap:8px;margin-bottom:12px}
 .input{
   width:100%;background:var(--card);border:1px solid var(--border);border-radius:var(--r-input);
   padding:10px 13px;font-size:14.5px;font-weight:600;color:var(--fg);font-family:inherit;
@@ -174,7 +240,9 @@ a{color:var(--cyan-deep);font-weight:700;text-decoration:none}
 .cell:hover{border-color:#67c9e6;transform:translateY(-2px);box-shadow:var(--shadow-soft)}
 .cell[data-picked="true"]{border-color:var(--cyan-deep);background:var(--cyan)}
 .cell__name{font-size:12.5px;font-weight:700;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.cell__meta{display:flex;align-items:center;gap:6px}
 .cell__no{font-size:11px;color:var(--fg-muted);font-weight:700;font-variant-numeric:tabular-nums}
+.cell .work{margin-top:1px}
 .cell__flag{font-size:9.5px;font-weight:800;letter-spacing:.04em;color:var(--accent-ink);background:var(--accent);padding:2px 7px;border-radius:999px}
 
 @media (max-width:1040px){
@@ -182,7 +250,7 @@ a{color:var(--cyan-deep);font-weight:700;text-decoration:none}
      first screen instead of below the result. */
   .cols{grid-template-columns:1fr;grid-template-areas:"slots" "picker" "results"}
   .grid{max-height:300px}
-  .filters{grid-template-columns:1fr 150px}
+  .filters{grid-template-columns:1fr 1fr;}
 }
 @media (max-width:900px){
   .shell{padding:12px;border-radius:20px}
@@ -200,8 +268,8 @@ a{color:var(--cyan-deep);font-weight:700;text-decoration:none}
   .swap{width:26px;height:26px;font-size:12px}
   .picker{padding:12px}
   .picker__head{margin-bottom:8px}
-  .filters{grid-template-columns:1fr}
-  .grid{grid-template-columns:repeat(4,minmax(0,1fr));max-height:280px}
+  .filters{grid-template-columns:1fr 1fr}
+  .grid{grid-template-columns:repeat(3,minmax(0,1fr));max-height:280px}
   .row{grid-template-columns:1fr auto;row-gap:8px}
   .row .badge{grid-column:2}
 }
@@ -212,6 +280,32 @@ a{color:var(--cyan-deep);font-weight:700;text-decoration:none}
 </style>
 </head>
 <body>
+
+<!-- Work-suitability glyphs, drawn for this site: twelve jobs a Pal can do at
+     a base, each with its own colour so a card reads at a glance. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+  <symbol id="w-Kindling" viewBox="0 0 24 24"><path d="M12 3c1 3.4-.6 4.6-2 6-1.6 1.6-3 3-3 5.4A5 5 0 0 0 12 20a5 5 0 0 0 5-5.6c-.3-2.6-2-3.7-2.4-6.4-1 .8-1.4 1.8-1.5 3C12.4 9 12.8 6 12 3Z"/></symbol>
+  <symbol id="w-Watering" viewBox="0 0 24 24"><path d="M12 3s6 6.4 6 10.2A6 6 0 0 1 6 13.2C6 9.4 12 3 12 3Z"/></symbol>
+  <symbol id="w-Planting" viewBox="0 0 24 24"><path d="M12 21v-7M12 14c0-3.3 2.7-6 6-6 0 3.3-2.7 6-6 6ZM12 15c0-2.8-2.2-5-5-5 0 2.8 2.2 5 5 5Z"/></symbol>
+  <symbol id="w-GenerateElectricity" viewBox="0 0 24 24"><path d="M13.5 2 5 13.4h5.4L9.8 22 19 10.2h-5.6L13.5 2Z"/></symbol>
+  <symbol id="w-Handiwork" viewBox="0 0 24 24"><path d="M14.5 3.5 21 10l-2.6 2.6-2.2-2.2-6.9 6.9L6 21l-3-3 3.7-3.3 6.9-6.9-2.2-2.2L14.5 3.5Z"/></symbol>
+  <symbol id="w-Gathering" viewBox="0 0 24 24"><path d="M20 4c-8 0-13 3.6-13 9.4 0 2 .6 3.6 1.5 4.9C11 15 14 12.4 18 10.6c-3.4 2.2-6.2 5-8 8.4l1.8 1C15 14.6 19.4 10.6 20 4Z"/></symbol>
+  <symbol id="w-Lumbering" viewBox="0 0 24 24"><path d="M4 20 14 10M9.5 4.5 12 2l8 8-2.5 2.5-3-3-3 3-2.5-2.5 3-3-2.5-2.5ZM3 21l1-3 2 2-3 1Z"/></symbol>
+  <symbol id="w-Mining" viewBox="0 0 24 24"><path d="M3 21 12 12M2.5 8C6 5 11 5 14.5 8L13 9.5C10.5 7.5 7 7.5 4.5 9.5L2.5 8ZM21.5 8C18 5 13 5 9.5 8L11 9.5c2.5-2 6-2 8.5 0L21.5 8Z"/></symbol>
+  <symbol id="w-MedicineProduction" viewBox="0 0 24 24"><path d="M9 2h6M10 2v6.5L5.5 17A3 3 0 0 0 8 21.5h8a3 3 0 0 0 2.5-4.5L14 8.5V2M7 15h10"/></symbol>
+  <symbol id="w-Cooling" viewBox="0 0 24 24"><path d="M12 2v20M3.5 7l17 10M20.5 7l-17 10M12 6l-2.5-2.5M12 6l2.5-2.5M12 18l-2.5 2.5M12 18l2.5 2.5"/></symbol>
+  <symbol id="w-Transporting" viewBox="0 0 24 24"><path d="M3 8.5 12 4l9 4.5v7L12 20l-9-4.5v-7ZM3 8.5 12 13m0 0 9-4.5M12 13v7"/></symbol>
+  <symbol id="e-Neutral" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/></symbol>
+  <symbol id="e-Fire" viewBox="0 0 24 24"><path d="M12 3c1 3.4-.6 4.6-2 6-1.6 1.6-3 3-3 5.4A5 5 0 0 0 12 20a5 5 0 0 0 5-5.6c-.3-2.6-2-3.7-2.4-6.4-1 .8-1.4 1.8-1.5 3C12.4 9 12.8 6 12 3Z"/></symbol>
+  <symbol id="e-Water" viewBox="0 0 24 24"><path d="M12 3s6 6.4 6 10.2A6 6 0 0 1 6 13.2C6 9.4 12 3 12 3Z"/></symbol>
+  <symbol id="e-Electric" viewBox="0 0 24 24"><path d="M13.5 2 5 13.4h5.4L9.8 22 19 10.2h-5.6L13.5 2Z"/></symbol>
+  <symbol id="e-Grass" viewBox="0 0 24 24"><path d="M20 4c-8 0-13 3.6-13 9.4 0 2 .6 3.6 1.5 4.9C11 15 14 12.4 18 10.6c-3.4 2.2-6.2 5-8 8.4l1.8 1C15 14.6 19.4 10.6 20 4Z"/></symbol>
+  <symbol id="e-Ground" viewBox="0 0 24 24"><path d="M3 18h18l-4.5-7-3 4-2.5-3.5L3 18Z"/><circle cx="8" cy="7" r="2"/></symbol>
+  <symbol id="e-Ice" viewBox="0 0 24 24"><path d="M12 2v20M3.5 7l17 10M20.5 7l-17 10M12 6l-2.5-2.5M12 6l2.5-2.5M12 18l-2.5 2.5M12 18l2.5 2.5"/></symbol>
+  <symbol id="e-Dark" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"/></symbol>
+  <symbol id="e-Dragon" viewBox="0 0 24 24"><path d="M4 12c0-4 3-7 7-7 3 0 5 1.5 6 3l3-1-1.5 3.2L21 12l-3 1c-1 2.5-3.5 4-6.5 4-1.5 0-2.5.5-3 1.5L7 21l-1-3.5C4.8 16.3 4 14.3 4 12Z"/><circle cx="9.5" cy="10.5" r="1.1"/></symbol>
+  <symbol id="w-Farming" viewBox="0 0 24 24"><path d="M12 21V9M12 9c0-2.5 1.6-4.5 4-5 0 2.5-1.6 4.5-4 5ZM12 9C12 6.5 10.4 4.5 8 4c0 2.5 1.6 4.5 4 5ZM12 15c0-2.2 1.4-4 3.5-4.4 0 2.2-1.4 4-3.5 4.4ZM12 15c0-2.2-1.4-4-3.5-4.4 0 2.2 1.4 4 3.5 4.4Z"/></symbol>
+</defs></svg>
 
 <div class="shell">
   <div class="tabs" role="tablist" aria-label="Calculator modes">
@@ -273,11 +367,64 @@ a{color:var(--cyan-deep);font-weight:700;text-decoration:none}
     activeSlot: null,
     query: '',
     rarity: 'all',
+    work: 'all',
+    element: 'all',
     pals: [], passives: [],
     byChild: new Map(), pairChild: new Map(), adj: [],
   };
 
   const dexLabel = (p) => '#' + String(p.dex).padStart(3, '0');
+
+  // Twelve base jobs, in the order the game lists them. Filled glyphs read
+  // better than stroked ones at this size, hence the two classes.
+  const WORK = [
+    ['Kindling', 'Kindling', 'fill'], ['Watering', 'Watering', 'fill'],
+    ['Planting', 'Planting', 'line'], ['GenerateElectricity', 'Electricity', 'fill'],
+    ['Handiwork', 'Handiwork', 'fill'], ['Gathering', 'Gathering', 'fill'],
+    ['Lumbering', 'Lumbering', 'line'], ['Mining', 'Mining', 'line'],
+    ['MedicineProduction', 'Medicine', 'line'], ['Cooling', 'Cooling', 'line'],
+    ['Transporting', 'Transporting', 'line'], ['Farming', 'Farming', 'line'],
+  ];
+  const WORK_STYLE = Object.fromEntries(WORK.map(([k, , style]) => [k, style]));
+  const WORK_LABEL = Object.fromEntries(WORK.map(([k, label]) => [k, label]));
+
+  // Nine damage types. Filled glyphs except the two that read better as outlines.
+  const ELEMENTS = ['Neutral', 'Fire', 'Water', 'Electric', 'Grass', 'Ground', 'Ice', 'Dark', 'Dragon'];
+  const EL_STYLE = { Ice: 'line', Ground: 'fill' };
+
+  /** Coloured element chips — the fastest way to recognise a Pal in a grid. */
+  function elementRow(i) {
+    const els = state.pals[i].elements ?? [];
+    if (!els.length) return null;
+    return el('span', { className: 'elements' }, els.map((name) =>
+      el('span', { className: `el el--${EL_STYLE[name] ?? 'fill'} el-${name}`, title: name },
+        svgSymbol(`e-${name}`))));
+  }
+
+  const svgSymbol = (id) => {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('aria-hidden', 'true');
+    const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+    use.setAttribute('href', `#${id}`);
+    svg.append(use);
+    return svg;
+  };
+
+  const svgIcon = (key) => {
+    const svg = svgSymbol(`w-${key}`);
+    svg.setAttribute('class', `work__icon work__icon--${WORK_STYLE[key]}`);
+    return svg;
+  };
+
+  /** The row of job icons under a Pal — what it can actually do at your base. */
+  function workRow(i) {
+    const entries = Object.entries(state.pals[i].work);
+    if (!entries.length) return null;
+    return el('div', { className: 'work' }, entries.map(([key, lvl]) =>
+      el('span', { className: `work__item w-${key}`, title: `${WORK_LABEL[key]} ${lvl}` },
+        svgIcon(key), el('span', { textContent: lvl }))));
+  }
   const byName = (name) => state.pals.findIndex((p) => p.name === name);
 
   // -------------------------------------------------------------- artwork --
@@ -350,9 +497,11 @@ a{color:var(--cyan-deep);font-weight:700;text-decoration:none}
   const mini = (i) => {
     const p = state.pals[i];
     return el('div', { className: 'mini' }, art(i, ' art--sm'),
-      el('span', {},
+      el('span', { className: 'mini__text' },
         el('span', { className: 'mini__name', textContent: p.name }),
-        el('span', { className: 'mini__no', textContent: `${dexLabel(p)} · R${p.rarity}` })));
+        el('span', { className: 'mini__meta' },
+          el('span', { className: 'mini__no', textContent: dexLabel(p) }),
+          elementRow(i))));
   };
 
   const comboRow = (a, b, badgeText, variant) => el('div', { className: 'row' },
@@ -372,8 +521,11 @@ a{color:var(--cyan-deep);font-weight:700;text-decoration:none}
       el('span', { className: 'slot__text' },
         el('span', { className: 'slot__label', textContent: label }),
         el('span', { className: 'slot__name', textContent: filled ? state.pals[i].name : 'Choose a Pal' }),
-        el('span', { className: 'slot__no',
-          textContent: filled ? `${dexLabel(state.pals[i])} · Rarity ${state.pals[i].rarity}` : 'Pick one from the list' })));
+        filled
+          ? el('span', { className: 'slot__meta' },
+              el('span', { className: 'slot__no', textContent: `${dexLabel(state.pals[i])} · R${state.pals[i].rarity}` }),
+              elementRow(i))
+          : el('span', { className: 'slot__no', textContent: 'Pick one from the list' })));
   }
 
   function slotRow() {
@@ -406,6 +558,8 @@ a{color:var(--cyan-deep);font-weight:700;text-decoration:none}
       .map((p, i) => [p, i])
       .filter(([p]) => (state.mode !== 'mut' || p.variant)
         && (state.rarity === 'all' || p.rarity >= +state.rarity)
+        && (state.work === 'all' || p.work[state.work] > 0)
+        && (state.element === 'all' || (p.elements ?? []).includes(state.element))
         && (!q || p.name.toLowerCase().includes(q) || String(p.dex).padStart(3, '0').includes(q)));
 
     const search = el('input', {
@@ -420,11 +574,25 @@ a{color:var(--cyan-deep);font-weight:700;text-decoration:none}
       el('option', { value: 'all', selected: state.rarity === 'all', textContent: 'All rarities' }),
       [5, 8, 10, 20].map((r) => el('option', { value: r, selected: state.rarity === String(r), textContent: `Rarity ${r}+` })));
 
+    const element = el('select', {
+      className: 'input', ariaLabel: 'Filter by element',
+      onchange: (e) => { state.element = e.target.value; picker(); },
+    },
+      el('option', { value: 'all', selected: state.element === 'all', textContent: 'All elements' }),
+      ELEMENTS.map((name) => el('option', { value: name, selected: state.element === name, textContent: name })));
+
+    const work = el('select', {
+      className: 'input', ariaLabel: 'Filter by work suitability',
+      onchange: (e) => { state.work = e.target.value; picker(); },
+    },
+      el('option', { value: 'all', selected: state.work === 'all', textContent: 'All work types' }),
+      WORK.map(([key, label]) => el('option', { value: key, selected: state.work === key, textContent: label })));
+
     box.replaceChildren(
       el('div', { className: 'picker__head' },
         el('h3', { textContent: label ? `Choosing ${label}` : 'All Pals' }),
         el('span', { className: 'picker__count', textContent: `${matches.length} of ${state.pals.length} Pals` })),
-      el('div', { className: 'filters' }, search, rarity),
+      el('div', { className: 'filters' }, search, element, work, rarity),
       matches.length
         ? el('div', { className: 'grid' }, matches.map(([p, i]) =>
             el('button', {
@@ -449,8 +617,11 @@ a{color:var(--cyan-deep);font-weight:700;text-decoration:none}
               },
             }, art(i),
               el('span', { className: 'cell__name', textContent: p.name }),
-              el('span', { className: 'cell__no', textContent: dexLabel(p) }),
-              p.variant ? el('span', { className: 'cell__flag', textContent: 'Variant' }) : null)))
+              el('span', { className: 'cell__meta' },
+                el('span', { className: 'cell__no', textContent: dexLabel(p) }),
+                elementRow(i)),
+              p.variant ? el('span', { className: 'cell__flag', textContent: 'Variant' }) : null,
+              workRow(i))))
         : el('div', { className: 'empty', textContent: 'No Pal matches that search.' }));
 
     // Keep focus in the search field while typing filters the grid.
@@ -471,6 +642,8 @@ a{color:var(--cyan-deep);font-weight:700;text-decoration:none}
         art(c, ' art--child'),
         el('h3', { textContent: p.name }),
         el('p', { textContent: `${dexLabel(p)} · Rarity ${p.rarity}${p.variant ? ' · Variant form' : ''}` }),
+        elementRow(c),
+        workRow(c),
         el('div', { className: 'chips' },
           p.variant ? el('span', { className: 'badge badge--variant', textContent: 'Variant' }) : null,
           p.passives.map((i) => el('span', { className: 'badge', textContent: state.passives[i].name }))),
