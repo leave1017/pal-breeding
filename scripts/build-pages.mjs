@@ -37,6 +37,8 @@ const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replac
 const dex = (p) => '#' + String(p.dex).padStart(3, '0');
 const n = (x) => x.toLocaleString('en-US');
 const pairs = (k) => `${n(k)} pair${k === 1 ? '' : 's'}`;
+/** First candidate that fits in a search result, or the shortest one. */
+const fit60 = (candidates) => candidates.find((t) => t.length <= 60) ?? candidates[candidates.length - 1];
 
 // ---- indexes --------------------------------------------------------------
 const byChild = new Map();   // child -> [[a,b], ...]
@@ -694,7 +696,13 @@ function passivePage(skill) {
 `;
 
   return layout({
-    title: `Palworld ${skill.name} Passive — Which Pals Always Have It`,
+    // Six of the passive names are long enough to push the full title past the
+    // ~60 characters Google shows, so take the longest phrasing that fits.
+    title: fit60([
+      `Palworld ${skill.name} Passive — Which Pals Always Have It`,
+      `Palworld ${skill.name} Passive — Which Pals Have It`,
+      `Palworld ${skill.name} Passive Skill`,
+    ]),
     description: `Every Palworld 1.0 Pal that always hatches with the ${skill.name} passive skill, and how to breed the skill into a line. Built from game data.`,
     path: `/passives/${skill.slug}/`,
     crumbs: [{ label: 'Home', href: '/' }, { label: 'Passives', href: '/passives/' }, { label: skill.name }],
