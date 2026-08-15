@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Palworld 1.0 Breeding Calculator — PalBreeding.net</title>
-<meta name="description" content="Free Palworld 1.0 breeding calculator: find any child, every parent combination, the shortest breeding path, passive filters and mutation combos. Try it now.">
+<title>Palworld 1.0 Breeding Calculator — Free, Updated for 2026</title>
+<meta name="description" content="Free Palworld 1.0 breeding calculator, updated for the 2026 patch: find any child, every parent combination and the shortest breeding path. Try it now.">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://palbreeding.net/">
 <link rel="manifest" href="/manifest.json">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="PalBreeding.net">
-<meta property="og:title" content="Palworld 1.0 Breeding Calculator — PalBreeding.net">
+<meta property="og:title" content="Palworld 1.0 Breeding Calculator — Free, Updated for 2026">
 <meta property="og:description" content="Find the child of any two Pals, every parent combo for a target Pal, shortest breeding path, passive skill filters and mutation combos. Built from Palworld v1.0 game data.">
 <meta property="og:url" content="https://palbreeding.net/">
 <meta name="twitter:card" content="summary_large_image">
@@ -296,7 +296,7 @@ html[data-theme="dark"] .badge--electric{background:#3d3316;color:#fde047}
   width:44px;height:44px;border-radius:14px;display:grid;place-items:center;
   background:var(--cyan);color:var(--cyan-deep);margin-bottom:16px;
 }
-.tool-card h2{font-size:20px;margin-bottom:9px;letter-spacing:-.025em}
+.tool-card h3{font-size:20px;margin-bottom:9px;letter-spacing:-.025em}
 .tool-card p{color:var(--fg-muted);font-size:15px;margin-bottom:16px}
 .tool-card__link{margin-top:auto;font-weight:700;font-size:15px;color:var(--cyan-deep)}
 .tool-card--cta{background:var(--accent);border-color:transparent;justify-content:center}
@@ -763,7 +763,7 @@ html[data-theme="dark"] .badge--electric{background:#3d3316;color:#fde047}
   <div class="wrap">
     <div class="section-head">
       <span class="eyebrow">What's inside</span>
-      <p class="h2" style="margin-top:14px;font-size:30px">Every Tool in the Breeding Calculator</p>
+      <h2 class="h2" style="margin-top:14px;font-size:30px">What the Palworld Breeding Calculator Does</h2>
       <p class="lede">Five ways to query the same v1.0 breeding data, depending on what you already know and what you are trying to hatch.</p>
     </div>
 
@@ -772,7 +772,7 @@ html[data-theme="dark"] .badge--electric{background:#3d3316;color:#fde047}
         <div class="tool-card__icon" aria-hidden="true">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3v6a5 5 0 0 0 10 0V3"/><circle cx="12" cy="18" r="3"/></svg>
         </div>
-        <h2>Find the Parents of Any Pal</h2>
+        <h3>Find the Parents of Any Pal</h3>
         <p>Pick the Pal you want and the calculator lists every parent pair that hatches it — Anubis alone has 234 valid combinations. Sort by the parents you already own so you breed with what is sitting in your base instead of farming a new capture.</p>
         <a class="tool-card__link" href="#calculator">Open parent finder →</a>
       </article>
@@ -781,7 +781,7 @@ html[data-theme="dark"] .badge--electric{background:#3d3316;color:#fde047}
         <div class="tool-card__icon" aria-hidden="true">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="3.2"/><circle cx="17" cy="7" r="3.2"/><path d="M7 10.2v3.3h10v-3.3M12 13.5V21"/></svg>
         </div>
-        <h2>Find the Child of Any Two Pals</h2>
+        <h3>Find the Child of Any Two Pals</h3>
         <p>Drop two Pals into the breeding calculator and get the egg they produce. Parent order is irrelevant in Palworld 1.0, so A + B and B + A always return the same child — check a pair once and move on.</p>
         <a class="tool-card__link" href="#calculator">Open child finder →</a>
       </article>
@@ -790,27 +790,27 @@ html[data-theme="dark"] .badge--electric{background:#3d3316;color:#fde047}
         <div class="tool-card__icon" aria-hidden="true">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18h4l4-12h4"/><path d="M16 3l4 3-4 3"/><path d="M16 15l4 3-4 3"/><path d="M12 18h4"/></svg>
         </div>
-        <h2>Shortest Breeding Path</h2>
+        <h3>Shortest Breeding Path</h3>
         <p>Enter a Pal you own and the Pal you want. The shortest path solver walks the entire v1.0 breeding graph and returns the chain with the fewest eggs, along with how many cakes the whole run costs you.</p>
-        <a class="tool-card__link" href="#calculator">Open shortest path →</a>
+        <a class="tool-card__link" href="/tools/shortest-path">Palworld breeding calculator shortest path →</a>
       </article>
 
       <article class="tool-card">
         <div class="tool-card__icon" aria-hidden="true">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18M6 12h12M10 19h4"/></svg>
         </div>
-        <h2>Passive Skills Filter</h2>
+        <h3>Passive Skills Filter</h3>
         <p>Palworld 1.0 rebalanced how passives pass down, and a four-passive Pal now takes real planning. Select the passives you are chasing — Legend, Swift, Musclehead — and see which parent pairs give the best inheritance odds.</p>
-        <a class="tool-card__link" href="#calculator">Open passive filter →</a>
+        <a class="tool-card__link" href="/guides/passive-breeding">Breeding calculator for passives →</a>
       </article>
 
       <article class="tool-card">
         <div class="tool-card__icon" aria-hidden="true">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/><circle cx="12" cy="12" r="3.4"/></svg>
         </div>
-        <h2>Palworld Mutation Calculator</h2>
+        <h3>Mutation Calculator</h3>
         <p>Version 1.0 added mutated eggs to the breeding table. The mutation calculator shows which pairs can roll an alternate form, how often it happens, and which mutations are worth farming for.</p>
-        <a class="tool-card__link" href="#calculator">Open mutation calculator →</a>
+        <a class="tool-card__link" href="/tools/mutation-calculator">Palworld mutation calculator →</a>
       </article>
 
       <article class="tool-card tool-card--cta">
@@ -827,8 +827,8 @@ html[data-theme="dark"] .badge--electric{background:#3d3316;color:#fde047}
   <div class="wrap">
     <div class="section-head">
       <span class="eyebrow">Visual mode</span>
-      <h2 class="h2" style="margin-top:14px">Palworld Breeding Tree</h2>
-      <p class="lede">Expand any Pal into a tree and follow its lineage down two or three generations. Useful when one breeding project feeds another and you want to see the whole chain at once.</p>
+      <h3 class="h2" style="margin-top:14px;font-size:28px">Breeding Tree View</h3>
+      <p class="lede">Expand any Pal into a tree and follow its lineage down two or three generations. Useful when one breeding project feeds another and you want to see the whole chain at once. <a href="/tools/breeding-tree" style="font-weight:700;color:var(--cyan-deep)">Open the full breeding tree →</a></p>
     </div>
     <div class="calc-shell">
       <div class="tree">
@@ -858,7 +858,7 @@ html[data-theme="dark"] .badge--electric{background:#3d3316;color:#fde047}
 <section class="section section--cyan">
   <div class="wrap">
     <div class="section-head">
-      <h2 class="h2">Complete Palworld 1.0 Breeding Combinations</h2>
+      <h2 class="h2">Palworld 1.0 Breeding Combinations</h2>
       <p class="lede">The complete v1.0 breeding table, browsable and searchable — every parent pair, every child, with the pairings added in 1.0 flagged so returning players can spot what changed.</p>
     </div>
     <div class="stat-grid">
