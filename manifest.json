@@ -1,6 +1,6 @@
 {
   "name": "Palworld 1.0 Breeding Calculator",
-  "short_name": "PalBreedLab",
+  "short_name": "PalBreeding.net",
   "description": "Free Palworld 1.0 breeding calculator: find parents, find child, shortest breeding path, passive filters and mutation combos.",
   "start_url": "/",
   "display": "standalone",

@@ -3,15 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Palworld 1.0 Breeding Calculator — Free Pal Breeding Tool</title>
-<meta name="description" content="Free Palworld 1.0 breeding calculator: find offspring from any two parent Pals, see every parent combination for a target Pal, get the shortest breeding path, filter by passive skills and check mutation combos. Built from game data.">
+<title>Palworld 1.0 Breeding Calculator — PalBreeding.net</title>
+<meta name="description" content="Free Palworld 1.0 breeding calculator: find any child, every parent combination, the shortest breeding path, passive filters and mutation combos. Try it now.">
 <meta name="robots" content="index, follow">
-<link rel="canonical" href="https://example.com/">
+<link rel="canonical" href="https://palbreeding.net/">
 <link rel="manifest" href="/manifest.json">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Palworld 1.0 Breeding Calculator — Free Pal Breeding Tool">
+<meta property="og:site_name" content="PalBreeding.net">
+<meta property="og:title" content="Palworld 1.0 Breeding Calculator — PalBreeding.net">
 <meta property="og:description" content="Find the child of any two Pals, every parent combo for a target Pal, shortest breeding path, passive skill filters and mutation combos. Built from Palworld v1.0 game data.">
-<meta property="og:url" content="https://example.com/">
+<meta property="og:url" content="https://palbreeding.net/">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥚</text></svg>">
 
@@ -283,6 +284,26 @@ html[data-theme="dark"] .badge--electric{background:#3d3316;color:#fde047}
 .bar{height:8px;border-radius:999px;background:var(--input-bg);overflow:hidden;width:120px;flex:none}
 .bar span{display:block;height:100%;background:linear-gradient(90deg,#7ddcf5,#fceb55)}
 
+/* ============ Tool explainers ============ */
+.tool-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.tool-card{
+  background:var(--card);border:1px solid var(--border-soft);border-radius:var(--r-card);
+  padding:26px;box-shadow:var(--shadow-soft);height:100%;display:flex;flex-direction:column;
+  transition:all .2s ease-in-out;
+}
+.tool-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lift)}
+.tool-card__icon{
+  width:44px;height:44px;border-radius:14px;display:grid;place-items:center;
+  background:var(--cyan);color:var(--cyan-deep);margin-bottom:16px;
+}
+.tool-card h2{font-size:20px;margin-bottom:9px;letter-spacing:-.025em}
+.tool-card p{color:var(--fg-muted);font-size:15px;margin-bottom:16px}
+.tool-card__link{margin-top:auto;font-weight:700;font-size:15px;color:var(--cyan-deep)}
+.tool-card--cta{background:var(--accent);border-color:transparent;justify-content:center}
+.tool-card--cta h3{font-size:20px;margin-bottom:9px;color:var(--accent-ink)}
+.tool-card--cta p{color:rgba(30,41,59,.75)}
+.tool-card--cta .tool-card__link{color:var(--accent-ink)}
+
 /* ============ Breeding tree ============ */
 .tree{display:grid;gap:18px;margin-top:8px}
 .tree__row{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
@@ -351,6 +372,7 @@ html[data-theme="dark"] .badge--electric{background:#3d3316;color:#fde047}
 @media (max-width:1000px){
   .calc-grid{grid-template-columns:1fr}
   .stat-grid,.link-grid{grid-template-columns:repeat(2,1fr)}
+  .tool-grid{grid-template-columns:repeat(2,1fr)}
   .foot-grid{grid-template-columns:1fr 1fr}
 }
 @media (max-width:820px){
@@ -372,7 +394,7 @@ html[data-theme="dark"] .badge--electric{background:#3d3316;color:#fde047}
   .tree__row--indent-2{padding-left:24px}
 }
 @media (max-width:520px){
-  .stat-grid,.link-grid{grid-template-columns:1fr}
+  .stat-grid,.link-grid,.tool-grid{grid-template-columns:1fr}
   .foot-grid{grid-template-columns:1fr}
 }
 @media (prefers-reduced-motion:reduce){
@@ -388,7 +410,7 @@ html[data-theme="dark"] .badge--electric{background:#3d3316;color:#fde047}
     <nav class="nav" aria-label="Main">
       <a class="brand" href="/">
         <span class="brand__mark" aria-hidden="true">🥚</span>
-        <span>PalBreedLab</span>
+        <span>PalBreeding.net</span>
       </a>
       <div class="nav__links">
         <a href="#calculator">Calculator</a>
@@ -454,7 +476,7 @@ html[data-theme="dark"] .badge--electric{background:#3d3316;color:#fde047}
 <section class="section section--cyan" id="calculator">
   <div class="wrap">
     <div class="section-head">
-      <h2 class="h2">The Calculator</h2>
+      <h2 class="h2">Pal Breeding Calculator 1.0</h2>
       <p class="lede">Five breeding tools in one panel. Every result comes straight from the Palworld v1.0 breeding table — no guesswork, no outdated pre-1.0 data.</p>
     </div>
 
@@ -511,8 +533,10 @@ html[data-theme="dark"] .badge--electric{background:#3d3316;color:#fde047}
                   <a class="tag" href="/breeding/eidrolon-ignis">Eidrolon Ignis</a>
                   <a class="tag" href="/breeding/xenolord">Xenolord</a>
                   <a class="tag" href="/breeding/selyne">Selyne</a>
-                  <a class="tag" href="/breeding/frostallion">Frostallion</a>
-                  <a class="tag" href="/breeding/blazamut-ryu">Blazamut Ryu</a>
+                  <a class="tag" href="/breeding/ophydia">Ophydia</a>
+                  <a class="tag" href="/breeding/bellanoir-libero">Bellanoir Libero</a>
+                  <a class="tag" href="/breeding/necromus">Necromus</a>
+                  <a class="tag" href="/breeding/azurmane">Azurmane</a>
                 </div>
               </div>
             </div>
@@ -595,6 +619,7 @@ html[data-theme="dark"] .badge--electric{background:#3d3316;color:#fde047}
                   <a class="tag" href="/breeding/eidrolon-ignis">Eidrolon Ignis</a>
                   <a class="tag" href="/breeding/xenolord">Xenolord</a>
                   <a class="tag" href="/breeding/selyne">Selyne</a>
+                  <a class="tag" href="/breeding/necromus">Necromus</a>
                 </div>
               </div>
             </div>
@@ -733,8 +758,72 @@ html[data-theme="dark"] .badge--electric{background:#3d3316;color:#fde047}
   </div>
 </section>
 
-<!-- ===================== BREEDING TREE ===================== -->
+<!-- ===================== TOOL EXPLAINERS (one visible H2 per P1 keyword) ===================== -->
 <section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">What's inside</span>
+      <p class="h2" style="margin-top:14px;font-size:30px">Every Tool in the Breeding Calculator</p>
+      <p class="lede">Five ways to query the same v1.0 breeding data, depending on what you already know and what you are trying to hatch.</p>
+    </div>
+
+    <div class="tool-grid">
+      <article class="tool-card">
+        <div class="tool-card__icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3v6a5 5 0 0 0 10 0V3"/><circle cx="12" cy="18" r="3"/></svg>
+        </div>
+        <h2>Find the Parents of Any Pal</h2>
+        <p>Pick the Pal you want and the calculator lists every parent pair that hatches it — Anubis alone has 234 valid combinations. Sort by the parents you already own so you breed with what is sitting in your base instead of farming a new capture.</p>
+        <a class="tool-card__link" href="#calculator">Open parent finder →</a>
+      </article>
+
+      <article class="tool-card">
+        <div class="tool-card__icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="3.2"/><circle cx="17" cy="7" r="3.2"/><path d="M7 10.2v3.3h10v-3.3M12 13.5V21"/></svg>
+        </div>
+        <h2>Find the Child of Any Two Pals</h2>
+        <p>Drop two Pals into the breeding calculator and get the egg they produce. Parent order is irrelevant in Palworld 1.0, so A + B and B + A always return the same child — check a pair once and move on.</p>
+        <a class="tool-card__link" href="#calculator">Open child finder →</a>
+      </article>
+
+      <article class="tool-card">
+        <div class="tool-card__icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18h4l4-12h4"/><path d="M16 3l4 3-4 3"/><path d="M16 15l4 3-4 3"/><path d="M12 18h4"/></svg>
+        </div>
+        <h2>Shortest Breeding Path</h2>
+        <p>Enter a Pal you own and the Pal you want. The shortest path solver walks the entire v1.0 breeding graph and returns the chain with the fewest eggs, along with how many cakes the whole run costs you.</p>
+        <a class="tool-card__link" href="#calculator">Open shortest path →</a>
+      </article>
+
+      <article class="tool-card">
+        <div class="tool-card__icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18M6 12h12M10 19h4"/></svg>
+        </div>
+        <h2>Passive Skills Filter</h2>
+        <p>Palworld 1.0 rebalanced how passives pass down, and a four-passive Pal now takes real planning. Select the passives you are chasing — Legend, Swift, Musclehead — and see which parent pairs give the best inheritance odds.</p>
+        <a class="tool-card__link" href="#calculator">Open passive filter →</a>
+      </article>
+
+      <article class="tool-card">
+        <div class="tool-card__icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/><circle cx="12" cy="12" r="3.4"/></svg>
+        </div>
+        <h2>Palworld Mutation Calculator</h2>
+        <p>Version 1.0 added mutated eggs to the breeding table. The mutation calculator shows which pairs can roll an alternate form, how often it happens, and which mutations are worth farming for.</p>
+        <a class="tool-card__link" href="#calculator">Open mutation calculator →</a>
+      </article>
+
+      <article class="tool-card tool-card--cta">
+        <h3>Works on your phone</h3>
+        <p>No app to install. The calculator runs in any mobile browser, and you can add it to your home screen to check combos while the game is still open on your PC.</p>
+        <a class="tool-card__link" href="#calculator">Start calculating →</a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== BREEDING TREE ===================== -->
+<section class="section section--cream">
   <div class="wrap">
     <div class="section-head">
       <span class="eyebrow">Visual mode</span>
@@ -769,7 +858,7 @@ html[data-theme="dark"] .badge--electric{background:#3d3316;color:#fde047}
 <section class="section section--cyan">
   <div class="wrap">
     <div class="section-head">
-      <h2 class="h2">Palworld 1.0 Breeding Combinations</h2>
+      <h2 class="h2">Complete Palworld 1.0 Breeding Combinations</h2>
       <p class="lede">The complete v1.0 breeding table, browsable and searchable — every parent pair, every child, with the pairings added in 1.0 flagged so returning players can spot what changed.</p>
     </div>
     <div class="stat-grid">
@@ -785,6 +874,10 @@ html[data-theme="dark"] .badge--electric{background:#3d3316;color:#fde047}
       <a class="link-card" href="/breeding/orserk"><span>Orserk breeding<small>118 parent pairs</small></span><span aria-hidden="true">→</span></a>
       <a class="link-card" href="/breeding/jormuntide"><span>Jormuntide breeding<small>96 parent pairs</small></span><span aria-hidden="true">→</span></a>
       <a class="link-card" href="/breeding/eidrolon-ignis"><span>Eidrolon Ignis breeding<small>41 parent pairs</small></span><span aria-hidden="true">→</span></a>
+      <a class="link-card" href="/breeding/selyne"><span>Selyne breeding<small>63 parent pairs</small></span><span aria-hidden="true">→</span></a>
+      <a class="link-card" href="/breeding/xenolord"><span>Xenolord breeding<small>28 parent pairs</small></span><span aria-hidden="true">→</span></a>
+      <a class="link-card" href="/breeding/necromus"><span>Necromus breeding<small>52 parent pairs</small></span><span aria-hidden="true">→</span></a>
+      <a class="link-card" href="/breeding/bellanoir-libero"><span>Bellanoir Libero breeding<small>19 parent pairs</small></span><span aria-hidden="true">→</span></a>
     </div>
   </div>
 </section>
@@ -792,20 +885,22 @@ html[data-theme="dark"] .badge--electric{background:#3d3316;color:#fde047}
 <!-- ===================== SEO COPY ===================== -->
 <section class="section">
   <div class="wrap prose">
-    <h2 class="h2">How breeding works in Palworld 1.0</h2>
-    <p>Breeding in Palworld pairs a male and a female Pal at a Breeding Farm. Give them cake, wait for the egg, and the child is decided by a fixed table rather than chance — which is why a calculator works at all. Parent order does not matter: Orserk + Vixy and Vixy + Orserk hatch the same Pal.</p>
+    <h2 class="h2">How Breeding Works in Palworld 1.0</h2>
+    <p>Breeding in Palworld pairs a male and a female Pal at a Breeding Farm. Feed them cake, wait for the egg, and the child is decided by a fixed table rather than chance — which is why a breeding calculator works at all. Parent order does not matter: Orserk + Vixy and Vixy + Orserk hatch the same Pal.</p>
     <h3>What changed in 1.0</h3>
     <ul>
-      <li>New Pals added to the Paldeck brought roughly 180 new or shifted parent combinations.</li>
-      <li>Mutation variants entered the breeding table, so some pairs can now roll an alternate form.</li>
+      <li>New Pals in the Paldeck brought roughly 180 new or shifted parent combinations — including Eidrolon Ignis, Xenolord, Selyne and Bellanoir Libero.</li>
+      <li>Mutated eggs entered the breeding table, so certain pairs can now roll an alternate form of the usual child.</li>
       <li>Passive skill inheritance was rebalanced, which changes how you chain a four-passive breeding project.</li>
+      <li>Cake cost is unchanged, but longer chains now cost more overall — one more reason to check the shortest path before you start.</li>
     </ul>
     <p>Every table on this site is built from Palworld v1.0 game data and re-checked after each patch, so you are not working from pre-1.0 numbers that quietly stopped being true.</p>
-    <h3>Using the calculator</h3>
+    <h3>Using the Palworld breeding calculator</h3>
     <p>Start from whichever end you know. If you want a specific Pal, open <strong>Find Parents</strong> and pick it — you get every pair that produces it. If you already have two Pals sitting in the ranch, use <strong>Find Child</strong>. If you are somewhere in between, <strong>Shortest Path</strong> works out the fewest eggs from what you own to what you want.</p>
+    <p>Everything on this page runs on the same dataset, so a result you get in the Palworld breeding calculator matches the combination pages and the full breeding list exactly — no second-guessing which number is current.</p>
 
     <div class="faq" style="margin-top:44px">
-      <h2 class="h2" style="margin-bottom:8px">FAQ</h2>
+      <h2 class="h2" style="margin-bottom:8px">Palworld Breeding Calculator FAQ</h2>
       <details open>
         <summary>Is this Palworld breeding calculator updated for 1.0?</summary>
         <p>Yes. All combinations, mutations and passive data come from Palworld v1.0 game files, and the update date in the header reflects the last data refresh.</p>
@@ -821,6 +916,14 @@ html[data-theme="dark"] .badge--electric{background:#3d3316;color:#fde047}
       <details>
         <summary>Can I breed for specific passive skills?</summary>
         <p>Yes. The Passives tab ranks parent pairs by how likely they are to pass the passives you select. Both parents contribute, so pairing two carriers gives the best odds.</p>
+      </details>
+      <details>
+        <summary>Is there a Palworld breeding calculator app?</summary>
+        <p>There is no separate download. This is a web app — open it in any mobile browser and add it to your home screen, and it behaves like an app while staying up to date with every patch.</p>
+      </details>
+      <details>
+        <summary>What are mutated eggs in Palworld 1.0?</summary>
+        <p>Some 1.0 parent pairs can roll a mutated variant instead of the normal child. The Mutations tab lists which pairs can mutate and how likely each outcome is.</p>
       </details>
       <details>
         <summary>Is the calculator free?</summary>
@@ -842,7 +945,7 @@ html[data-theme="dark"] .badge--electric{background:#3d3316;color:#fde047}
   <div class="wrap">
     <div class="foot-grid">
       <div>
-        <a class="brand" href="/"><span class="brand__mark" aria-hidden="true">🥚</span><span>PalBreedLab</span></a>
+        <a class="brand" href="/"><span class="brand__mark" aria-hidden="true">🥚</span><span>PalBreeding.net</span></a>
         <p style="color:var(--fg-muted);font-size:15px;margin-top:12px;max-width:36ch">A free Palworld 1.0 breeding calculator and Pal database. Breeding data extracted from Palworld v1.0 game files.</p>
       </div>
       <div>
@@ -873,7 +976,7 @@ html[data-theme="dark"] .badge--electric{background:#3d3316;color:#fde047}
       </div>
     </div>
     <div class="foot-note">
-      <span>© 2026 PalBreedLab. Data updated August 15, 2026.</span>
+      <span>© 2026 PalBreeding.net. Data updated August 15, 2026.</span>
       <span>Unofficial fan-made tool. Not affiliated with or endorsed by Pocketpair, Inc.</span>
     </div>
   </div>
@@ -884,7 +987,7 @@ html[data-theme="dark"] .badge--electric{background:#3d3316;color:#fde047}
   "@context": "https://schema.org",
   "@type": "WebApplication",
   "name": "Palworld Breeding Calculator",
-  "url": "https://example.com/",
+  "url": "https://palbreeding.net/",
   "applicationCategory": "GameApplication",
   "operatingSystem": "Any (web browser)",
   "description": "Free Palworld 1.0 breeding calculator with 6 tools: parent discovery, child finder, shortest path, passive skills filter, mutation calculator, and breeding tree. Built from game data, updated for latest patch.",
@@ -910,6 +1013,8 @@ html[data-theme="dark"] .badge--electric{background:#3d3316;color:#fde047}
     {"@type":"Question","name":"Does the order of the two parent Pals matter?","acceptedAnswer":{"@type":"Answer","text":"No. The breeding table is order-independent, so A + B and B + A always hatch the same child."}},
     {"@type":"Question","name":"How do I get a specific Pal with the fewest breeding steps?","acceptedAnswer":{"@type":"Answer","text":"Use the Shortest Path tool. Enter a Pal you already own and the one you want, and it searches the whole breeding graph for the chain with the fewest eggs."}},
     {"@type":"Question","name":"Can I breed for specific passive skills?","acceptedAnswer":{"@type":"Answer","text":"Yes. The Passives tab ranks parent pairs by how likely they are to pass the passives you select."}},
+    {"@type":"Question","name":"Is there a Palworld breeding calculator app?","acceptedAnswer":{"@type":"Answer","text":"There is no separate download. This is a web app — open it in any mobile browser and add it to your home screen, and it behaves like an app while staying up to date with every patch."}},
+    {"@type":"Question","name":"What are mutated eggs in Palworld 1.0?","acceptedAnswer":{"@type":"Answer","text":"Some 1.0 parent pairs can roll a mutated variant instead of the normal child. The Mutations tab lists which pairs can mutate and how likely each outcome is."}},
     {"@type":"Question","name":"Is the calculator free?","acceptedAnswer":{"@type":"Answer","text":"Free, no account, no download. It runs in any browser on desktop and mobile."}}
   ]
 }
