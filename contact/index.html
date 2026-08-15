@@ -19,11 +19,13 @@
   <div class="wrap">
     <nav class="nav" aria-label="Main">
       <a class="brand" href="/"><img class="brand__mark" src="/android-chrome-192x192.png" alt="" width="34" height="34"><span>PalBreeding.net</span></a>
-      <div class="nav__links">
-        <a href="/#calculator">Calculator</a>
-        <a href="/breeding">Breeding Combos</a>
-        <a href="/pals">All Pals</a>
-        <a href="/guides">Guide</a>
+      <div class="nav__right">
+        <div class="nav__links">
+          <a href="/">Calculator</a>
+          <a href="/breeding">Breeding</a>
+          <a href="/pals">Pals</a>
+          <a href="/guides">Guides</a>
+        </div>
       </div>
     </nav>
   </div>
@@ -31,7 +33,7 @@
 
 <main>
   <div class="wrap">
-    <p class="crumbs"><a href="/">Home</a> &rsaquo; Contact</p>
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span class="sep" aria-hidden="true">/</span><span aria-current="page">Contact</span></nav>
     <h1>Contact</h1>
     <p class="updated">Last updated: August 15, 2026</p>
     <p>The fastest way to improve the calculator is to tell us when something is wrong. Email is the only
@@ -60,5 +62,25 @@
     <span>Unofficial fan-made tool. Not affiliated with or endorsed by Pocketpair, Inc.</span>
   </div>
 </footer>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://palbreeding.net/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Contact",
+      "item": "https://palbreeding.net/contact/"
+    }
+  ]
+}
+</script>
 </body>
 </html>
