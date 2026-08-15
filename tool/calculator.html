@@ -46,11 +46,13 @@ a{color:var(--cyan-deep);font-weight:700;text-decoration:none}
 /* Two columns so the Pal grid is on screen at the same time as the result,
    instead of the visitor having to scroll to find out the picker exists. */
 .cols{
-  display:grid;grid-template-columns:minmax(0,400px) minmax(0,1fr);gap:14px 18px;
+  display:grid;grid-template-columns:minmax(0,540px) minmax(0,1fr);gap:14px 18px;
   align-items:start;margin-top:12px;
   grid-template-areas:"slots results" "picker picker";
 }
-.cols__slots{grid-area:slots}
+/* Centred against the taller result card, so the short slot row does not
+   leave a block of dead space under it. */
+.cols__slots{grid-area:slots;align-self:center}
 .cols__results{grid-area:results}
 .cols__picker{grid-area:picker}
 
@@ -69,30 +71,30 @@ a{color:var(--cyan-deep);font-weight:700;text-decoration:none}
 .slots{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:stretch}
 .slots--single{grid-template-columns:1fr}
 .slot{
-  background:var(--bg-cyan);border:1px solid transparent;border-radius:16px;padding:10px 12px;
-  display:flex;align-items:center;gap:11px;width:100%;transition:all .2s ease-in-out;text-align:left;
+  background:var(--bg-cyan);border:1px solid transparent;border-radius:18px;padding:14px;
+  display:flex;align-items:center;gap:13px;width:100%;transition:all .2s ease-in-out;text-align:left;
 }
 .slot:hover{border-color:#67c9e6}
 .slot[data-active="true"]{border-color:var(--cyan-deep);background:var(--card);box-shadow:var(--shadow-soft)}
 .slot__text{min-width:0;flex:1}
 .slot__label{
-  display:block;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
-  color:var(--cyan-deep);margin-bottom:1px;
+  display:block;font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--cyan-deep);margin-bottom:2px;
 }
 .slot__name{
-  display:block;font-weight:800;font-size:15.5px;letter-spacing:-.02em;
+  display:block;font-weight:800;font-size:18px;letter-spacing:-.025em;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
 }
 .slot__meta{display:flex;align-items:center;gap:5px;flex-wrap:nowrap;overflow:hidden}
-.slot__no{font-size:11.5px;color:var(--fg-muted);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
-.slot .el{width:15px;height:15px;border-radius:5px}
-.slot .el svg{width:10px;height:10px}
+.slot__no{font-size:12.5px;color:var(--fg-muted);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.slot .el{width:17px;height:17px;border-radius:6px}
+.slot .el svg{width:11px;height:11px}
 .slot--empty .slot__art{
   border:2px dashed var(--border);background:transparent;
   display:grid;place-items:center;color:var(--fg-muted);font-size:20px;
 }
 .swap{
-  width:34px;height:34px;border-radius:999px;background:var(--accent);color:var(--accent-ink);
+  width:38px;height:38px;border-radius:999px;background:var(--accent);color:var(--accent-ink);
   display:grid;place-items:center;font-weight:800;font-size:14px;flex:none;align-self:center;
   transition:transform .2s ease-in-out;
 }
@@ -112,8 +114,8 @@ a{color:var(--cyan-deep);font-weight:700;text-decoration:none}
 .art__no{font-size:15px;font-weight:800;color:var(--fg-muted);font-variant-numeric:tabular-nums}
 .art--sm{width:34px;height:34px;border-radius:11px}
 .art--sm .art__no{font-size:12px}
-.art--lg{width:46px;height:46px;border-radius:14px}
-.art--child{width:54px;height:54px;border-radius:17px}
+.art--lg{width:60px;height:60px;border-radius:18px}
+.art--child{width:64px;height:64px;border-radius:20px}
 
 /* ---------------- results ---------------- */
 .results{padding-top:0}
@@ -139,10 +141,12 @@ a{color:var(--cyan-deep);font-weight:700;text-decoration:none}
 .badge--variant{background:var(--accent);color:var(--accent-ink)}
 
 .child{
-  background:var(--bg-cream);border-radius:16px;padding:14px;text-align:center;
+  /* Capped so the egg does not dwarf the two parents that produced it. */
+  background:var(--bg-cream);border-radius:18px;padding:18px;text-align:center;
   display:flex;flex-direction:column;align-items:center;gap:4px;
+  max-width:340px;margin:0 auto;
 }
-.child h3{font-size:20px}
+.child h3{font-size:21px}
 .child p{color:var(--fg-muted);font-size:13.5px}
 .chips{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:6px}
 
@@ -263,11 +267,11 @@ html[data-theme="dark"] .w-Farming{color:#a3e635}
   /* Slots stay side by side on phones — stacking them pushed the Pal grid off
      the first screen, which is the one thing this layout has to protect. */
   .slots{gap:6px}
-  .slot{padding:8px;gap:8px;border-radius:13px}
-  .slot__name{font-size:13.5px}
+  .slot{padding:9px;gap:9px;border-radius:14px}
+  .slot__name{font-size:14px}
   .slot__label{font-size:9px}
   .slot__no{font-size:10.5px}
-  .art--lg{width:36px;height:36px;border-radius:11px}
+  .art--lg{width:40px;height:40px;border-radius:12px}
   .art--lg .art__no{font-size:11px}
   .swap{width:26px;height:26px;font-size:12px}
   .picker{padding:12px}
@@ -586,7 +590,14 @@ html[data-theme="dark"] .w-Farming{color:#a3e635}
     return el('button', {
       className: `slot${filled ? '' : ' slot--empty'}`, type: 'button',
       dataset: { active: String(state.activeSlot === key) },
-      onclick: () => { state.activeSlot = key; state.query = ''; draw(); },
+      onclick: () => {
+        state.activeSlot = key;
+        state.query = '';
+        // Picking a slot should land the cursor in the grid's search box —
+        // that is what a dropdown would have done, without a second UI.
+        state.focusSearch = true;
+        draw();
+      },
     },
       filled ? art(i, ' art--lg')
              : el('div', { className: 'art art--lg slot__art', ariaHidden: 'true' }, '+'),
@@ -701,8 +712,19 @@ html[data-theme="dark"] .w-Farming{color:#a3e635}
               workRow(i))))
         : el('div', { className: 'empty', textContent: 'No Pal matches that search.' }));
 
-    // Keep focus in the search field while typing filters the grid.
-    if (document.activeElement !== search && state.query) search.focus();
+    // Keep the cursor in the search field while typing filters the grid, and
+    // put it there when a slot was just clicked. Phones are excluded: focusing
+    // an input there pops the keyboard over the grid the visitor wants to see.
+    const isPhone = matchMedia('(max-width: 900px)').matches;
+    if (state.focusSearch && !isPhone) search.focus();
+    else if (document.activeElement !== search && state.query) search.focus();
+
+    if (state.focusSearch) {
+      state.focusSearch = false;
+      // The embed has no scrollbar of its own, so the host page does the
+      // scrolling; it ignores the request when the grid is already visible.
+      parent.postMessage({ type: 'palbreeding:reveal', top: box.offsetTop, height: box.offsetHeight }, '*');
+    }
   }
 
   const empty = (msg) => el('div', { className: 'empty', textContent: msg });

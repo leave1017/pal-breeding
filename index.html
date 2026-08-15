@@ -809,6 +809,17 @@ html[data-theme="dark"] .badge--electric{background:#3d3316;color:#fde047}
     if (e.data && e.data.type === 'palbreeding:height' && e.data.height > 0) {
       frame.style.height = e.data.height + 'px';
     }
+    // The embed asks for part of itself to be brought into view. Scroll the
+    // minimum that shows a couple of rows of the grid — scrolling it to the top
+    // of the screen would push the parent slots and the result out of sight.
+    if (e.data && e.data.type === 'palbreeding:reveal') {
+      var top = frame.getBoundingClientRect().top + window.scrollY + e.data.top;
+      var wanted = Math.min(e.data.height, 300);
+      var missing = (top + wanted) - (window.scrollY + window.innerHeight);
+      if (missing > 8) {
+        window.scrollTo({ top: window.scrollY + missing + 16, behavior: 'smooth' });
+      }
+    }
   });
 
   var btn = document.getElementById('themeToggle');
