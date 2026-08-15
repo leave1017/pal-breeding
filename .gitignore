@@ -1,2 +1,5 @@
 node_modules/
+
+# Screenshots and scratch renders; Pal icons are .webp and are committed.
 *.png
+preview.html

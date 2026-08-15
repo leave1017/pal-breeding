@@ -1,0 +1,41 @@
+name: Fetch Pal icons
+
+# Run from the Actions tab: Fetch Pal icons -> Run workflow.
+# Downloads any missing Pal artwork into assets/pals/ and commits it, so the
+# icon set can be filled without a local checkout. Re-running only fetches what
+# is absent, so an interrupted run is safe to repeat.
+on:
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Re-download icons that are already present'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Download icons
+        run: node scripts/fetch-icons.mjs ${{ inputs.force && '--force' || '' }}
+
+      - name: Commit icons
+        run: |
+          if [ -z "$(git status --porcelain assets/pals)" ]; then
+            echo "No new icons — nothing to commit."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/pals
+          git commit -m "Add Pal icons fetched by workflow"
+          git push
