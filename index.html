@@ -19,6 +19,7 @@
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <meta name="theme-color" content="#fceb55">
+<script src="/assets/theme.js"></script>
 
 <style>
 /* ============ Design tokens — "Soft Modern Utility" ============ */
@@ -814,16 +815,11 @@ html[data-theme="dark"] .badge--electric{background:#3d3316;color:#fde047}
 </script>
 
 <script>
-/* Theme toggle only — all page content is in the HTML and needs no JS to render. */
+/* The theme itself is handled by /assets/theme.js, which every page loads from
+   <head> so the stored choice is applied before first paint. This block only
+   forwards the change into the calculator iframe. */
 (function () {
   var root = document.documentElement;
-  var stored = null;
-  try { stored = localStorage.getItem('theme'); } catch (e) {}
-  if (stored) {
-    root.setAttribute('data-theme', stored);
-  } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    root.setAttribute('data-theme', 'dark');
-  }
   var frame = document.getElementById('calcFrame');
   function pushTheme(theme) {
     frame && frame.contentWindow &&
@@ -853,15 +849,7 @@ html[data-theme="dark"] .badge--electric{background:#3d3316;color:#fde047}
     }
   });
 
-  var btn = document.getElementById('themeToggle');
-  if (btn) {
-    btn.addEventListener('click', function () {
-      var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-      root.setAttribute('data-theme', next);
-      try { localStorage.setItem('theme', next); } catch (e) {}
-      pushTheme(next);
-    });
-  }
+  document.addEventListener('pal:theme', function (e) { pushTheme(e.detail); });
 })();
 </script>
 </body>

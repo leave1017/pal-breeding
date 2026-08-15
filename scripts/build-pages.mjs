@@ -95,6 +95,7 @@ function layout({ title, description, path, crumbs, body, extraLd = [] }) {
 <meta property="og:description" content="${esc(description)}">
 <meta property="og:url" content="${url}">
 <link rel="stylesheet" href="/assets/page.css">
+<script src="/assets/theme.js"></script>
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
@@ -108,7 +109,11 @@ function layout({ title, description, path, crumbs, body, extraLd = [] }) {
         <img class="brand__mark" src="/android-chrome-192x192.png" alt="" width="34" height="34">
         <span>PalLineage</span>
       </a>
-      <div class="nav__right"><div class="nav__links">${nav}</div></div>
+      <div class="nav__right"><div class="nav__links">${nav}</div>
+        <button class="icon-btn" id="themeToggle" type="button" aria-label="Switch color theme">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
+        </button>
+      </div>
     </nav>
   </div>
 </header>
