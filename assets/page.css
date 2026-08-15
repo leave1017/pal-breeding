@@ -295,3 +295,99 @@ a.work:hover{background:var(--cyan);color:var(--fg);text-decoration:none}
   .pal-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:9px}
   .fact{padding:8px 13px;font-size:15px}
 }
+
+
+/* ============ Hub filter bar ============ */
+/* The same shape as the calculator's Choosing panel — search on top, chips
+   below — so the interaction is already familiar by the time you get here. */
+.filterbar{
+  background:var(--bg-cyan);border:1px solid var(--border-soft);border-radius:var(--r-card);
+  padding:18px 20px;margin:6px 0 18px;display:grid;gap:14px;
+}
+.filterbar__top{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.filterbar__search{
+  flex:1 1 260px;min-width:0;
+  border:1px solid var(--border);border-radius:999px;background:var(--card);color:var(--fg);
+  padding:11px 18px;font:inherit;font-size:15px;
+}
+.filterbar__search:focus{outline:2px solid var(--cyan-deep);outline-offset:1px}
+.filterbar__search::placeholder{color:var(--fg-muted)}
+.filterbar__count{
+  font-size:13px;font-weight:700;color:var(--fg-muted);white-space:nowrap;
+  background:var(--card);border-radius:999px;padding:8px 14px;
+}
+.filterbar__count strong{color:var(--fg)}
+.filterbar__row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.filterbar__label{
+  font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--fg-muted);margin-right:4px;flex:none;
+}
+.fchip{
+  font-size:12.5px;font-weight:700;padding:6px 13px;border-radius:999px;
+  border:1px solid transparent;background:var(--card);color:var(--fg-muted);
+  cursor:pointer;transition:all .15s;
+}
+.fchip:hover{color:var(--fg);border-color:var(--border)}
+.fchip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+html[data-theme="dark"] .fchip[aria-pressed="true"]{background:var(--accent);color:#1e293b}
+/* An element chip carries its element colour until it is pressed, then the
+   accent takes over so "selected" reads the same for every filter. The chip
+   palette is repeated here because .fchip would otherwise win on source order. */
+.fchip.chip--neutral{background:#e2e8f0;color:#475569}
+.fchip.chip--fire{background:#ffe4d3;color:#c2410c}
+.fchip.chip--water{background:#d6ecfd;color:#0369a1}
+.fchip.chip--electric{background:#fdf0c2;color:#a16207}
+.fchip.chip--grass{background:#d8f3df;color:#15803d}
+.fchip.chip--ground{background:#eee2cf;color:#92400e}
+.fchip.chip--ice{background:#d3f1f7;color:#0e7490}
+.fchip.chip--dark{background:#e2ddf9;color:#6d28d9}
+.fchip.chip--dragon{background:#f7dcf1;color:#a21caf}
+html[data-theme="dark"] .fchip.chip--neutral{background:#2b3a52;color:#b6c3d6}
+html[data-theme="dark"] .fchip.chip--fire{background:#4a2418;color:#ffb289}
+html[data-theme="dark"] .fchip.chip--water{background:#123047;color:#8fcdf5}
+html[data-theme="dark"] .fchip.chip--electric{background:#42380f;color:#f4d67a}
+html[data-theme="dark"] .fchip.chip--grass{background:#153524;color:#8fdcaa}
+html[data-theme="dark"] .fchip.chip--ground{background:#3b2c17;color:#e0bd88}
+html[data-theme="dark"] .fchip.chip--ice{background:#123840;color:#8ad8e8}
+html[data-theme="dark"] .fchip.chip--dark{background:#2b2350;color:#bda9f5}
+html[data-theme="dark"] .fchip.chip--dragon{background:#42184a;color:#eda2e3}
+.fchip[aria-pressed="true"],html[data-theme="dark"] .fchip[aria-pressed="true"]{
+  background:var(--accent);color:var(--accent-ink);
+}
+.filterbar__reset{
+  margin-left:auto;font-size:12.5px;font-weight:700;color:var(--fg-muted);
+  background:none;border:0;cursor:pointer;padding:6px 4px;text-decoration:underline;
+}
+.filterbar__reset:hover{color:var(--fg)}
+
+/* Row cap: the rows past the fold are clipped, not removed, so every link is
+   still in the document and still crawlable. */
+.reveal{position:relative}
+.reveal.is-capped{max-height:2600px;overflow:hidden}
+.reveal.is-capped::after{
+  content:"";position:absolute;left:0;right:0;bottom:0;height:120px;pointer-events:none;
+  background:linear-gradient(to bottom,transparent,var(--bg));
+}
+.reveal__more{display:flex;justify-content:center;margin:-6px 0 26px}
+.reveal__more button{
+  border:1px solid var(--border);background:var(--card);color:var(--fg);
+  border-radius:999px;padding:11px 26px;font:inherit;font-weight:700;font-size:14.5px;
+  cursor:pointer;transition:all .2s;
+}
+.reveal__more button:hover{border-color:var(--accent);background:var(--bg-cream)}
+.table-empty{
+  background:var(--bg-cyan);border-radius:var(--r-card);padding:26px;text-align:center;
+  color:var(--fg-muted);margin-bottom:16px;
+}
+
+.combo-table th[data-sort]{cursor:pointer;user-select:none;white-space:nowrap}
+.combo-table th[data-sort]:hover{color:var(--cyan-deep)}
+.combo-table th[data-sort]::after{content:" \2195";opacity:.35;font-weight:700}
+.combo-table th[aria-sort="ascending"]::after{content:" \2191";opacity:1}
+.combo-table th[aria-sort="descending"]::after{content:" \2193";opacity:1}
+.combo-table td .chips{white-space:nowrap}
+
+@media (max-width:640px){
+  .filterbar{padding:14px;gap:11px}
+  .reveal.is-capped{max-height:2200px}
+}
