@@ -274,6 +274,10 @@ a.work:hover{background:var(--cyan);color:var(--fg);text-decoration:none}
 .guide-card:hover{box-shadow:var(--shadow-soft);border-color:var(--border);text-decoration:none}
 .guide-card:hover::before{transform:scaleX(1)}
 .guide-card strong{font-size:18px}
+/* When the card title is the section heading, it drops the accent bar the
+   standalone h2 carries — the card already has its own hover stripe. */
+.guide-card--head h2{font-size:18px;margin:0;padding-left:0}
+.guide-card--head h2::before{content:none}
 .guide-card span{color:var(--fg-muted);font-size:14.5px}
 
 .lede{font-size:17px;color:var(--fg-muted);max-width:75ch;margin-bottom:8px}

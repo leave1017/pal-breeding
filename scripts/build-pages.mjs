@@ -407,6 +407,9 @@ ${rows}
       <span class="fact"><small>Bred from one pair only</small>${single.length}</span>
     </div>
 
+    <h2>How to Search Palworld Breeding Combinations</h2>
+    <p>Type a Pal's name or Paldex number to jump straight to it — partial spellings work, so "anb" finds Anubis. The element chips narrow the table by type and stack, so picking two shows only the Pals that carry both. <strong>Variant forms</strong> and <strong>One pair only</strong> isolate the ${pals.filter((p) => p.variant).length} variants and the ${single.length} Pals that cannot be bred from two different species. Any column header sorts the table, and every row opens that Pal's full list of parent pairs.</p>
+
 ${hubTable({
     bar: filterBar({
       search: 'Search by name, number or element…',
@@ -450,7 +453,7 @@ ${hubTable({
 `;
 
   return layout({
-    title: `Palworld Breeding Combinations — All ${n(combos.combos.length)} Pairs for ${pals.length} Pals`,
+    title: `Palworld Breeding Combinations — All ${n(combos.combos.length)} Pairs | PalLineage`,
     description: `Every Palworld 1.0 breeding combination in one searchable table: ${n(combos.combos.length)} parent pairs across ${pals.length} Pals, filterable by element and sortable by how many combinations produce each Pal.`,
     path: '/breeding/',
     pageType: 'CollectionPage',
@@ -518,6 +521,9 @@ ${rows}
       <span class="fact"><small>Work types</small>${Object.keys(WORK_LABEL).length}</span>
     </div>
 
+    <h2>How to Search the Palworld Pal List</h2>
+    <p>Search by name or Paldex number, or type an element or a job — "fire" and "mining" both work as queries. The element and work chips stack with each other, so Dragon plus Kindling narrows ${pals.length} Pals down to four. Sort by name, Paldex number or rarity from the column headers, and open any Pal to see how to breed it.</p>
+
 ${hubTable({
     bar: filterBar({
       search: 'Search by name, number, element or job…',
@@ -553,7 +559,7 @@ ${hubTable({
 `;
 
   return layout({
-    title: `All ${pals.length} Palworld Pals — Elements, Rarity & Work Suitability`,
+    title: `All ${pals.length} Palworld Pals — Elements & Rarity | PalLineage`,
     description: `Every Pal in the Palworld 1.0 Paldeck with element, rarity and all twelve work suitabilities. Searchable and filterable, with each Pal linked to its breeding combinations.`,
     path: '/pals/',
     pageType: 'CollectionPage',
@@ -600,7 +606,7 @@ async function guides() {
   }
 
   written.push(['guides/index.html', layout({
-    title: 'Palworld Breeding Guides',
+    title: 'Palworld Breeding Guides — Formula & Calculator Tips | PalLineage',
     description: 'How breeding works in Palworld 1.0: the formula behind the calculator, and how to plan a breeding project.',
     path: '/guides/',
     pageType: 'CollectionPage',
@@ -608,7 +614,7 @@ async function guides() {
     body: `    <h1>Palworld Breeding Guides</h1>
     <p class="lede">What is actually going on underneath the calculator, and how to use it without wasting eggs.</p>
     <div class="card-list">
-      ${entries.map((g) => `<a class="guide-card" href="/guides/${g.slug}/"><strong>${esc(g.h1)}</strong><span>${esc(g.description)}</span></a>`).join('\n      ')}
+      ${entries.map((g) => `<a class="guide-card guide-card--head" href="/guides/${g.slug}/"><h2>${esc(g.h1)}</h2><span>${esc(g.description)}</span></a>`).join('\n      ')}
     </div>`,
   })]);
   return written;
