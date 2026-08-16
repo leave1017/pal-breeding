@@ -429,10 +429,15 @@ html[data-theme="dark"] .fchip.chip--dragon{background:#42184a;color:#eda2e3}
 .pcard__job{display:inline-flex;align-items:center;gap:2px}
 
 /* The tooltip text lives in an attribute, so it renders instantly, styles with
-   the rest of the site, and adds nothing to the page's word count. */
+   the rest of the site, and adds nothing to the page's word count.
+   It opens downward rather than upward: .reveal clips overflow whenever the
+   grid isn't fully loaded (the default state on first paint), and an
+   upward-opening tooltip on the very first row has nowhere to go but into
+   that clipped edge. Below the card, it opens into space the grid isn't
+   using yet, so row one is never cut off. */
 .pcard[data-tip]::after{
   content:attr(data-tip);
-  position:absolute;left:50%;bottom:calc(100% + 6px);transform:translateX(-50%);
+  position:absolute;left:50%;top:calc(100% + 6px);transform:translateX(-50%);
   min-width:150px;max-width:230px;padding:8px 11px;border-radius:12px;
   background:var(--fg);color:var(--bg);font-size:11.5px;font-weight:600;line-height:1.45;
   opacity:0;visibility:hidden;transition:opacity .14s;pointer-events:none;z-index:10;
