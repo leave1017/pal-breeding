@@ -7,18 +7,28 @@
   --cyan:#ccecf6; --cyan-deep:#0e7490; --border:#e2e8f0; --border-soft:#f1f5f9;
   --shadow-soft:0 10px 40px -10px rgba(15,23,42,.08);
   --r-card:24px; --maxw:820px;
+  /* Section-heading fills. --head-cool is built from tokens that already flip
+     with the theme, so it needs no dark counterpart. --head-warm does: --accent
+     is the one colour that stays bright in both themes, and the heading text is
+     near-white in dark mode, so the light-mode version would put white on
+     bright yellow. The dark end picks up the amber the element badges use. */
+  --head-cool:linear-gradient(90deg,var(--cyan),var(--bg-cyan) 72%);
+  --head-warm:linear-gradient(90deg,var(--accent),var(--bg-cream) 72%);
 }
 html[data-theme="dark"]{
   --bg:#0f172a; --bg-cyan:#101f33; --bg-cream:#1a1a2e; --card:#16213a;
   --fg:#e8eef7; --fg-muted:#94a3b8; --cyan:#1e4a5f; --cyan-deep:#7dd3e8;
   --border:#25344d; --border-soft:#1d2b42;
   --shadow-soft:0 10px 40px -10px rgba(0,0,0,.5);
+  --head-warm:linear-gradient(90deg,#3d3316,var(--bg-cream) 72%);
 }
 @media (prefers-color-scheme:dark){
   html:not([data-theme="light"]){
     --bg:#0f172a; --bg-cyan:#101f33; --bg-cream:#1a1a2e; --card:#16213a;
     --fg:#e8eef7; --fg-muted:#94a3b8; --cyan:#1e4a5f; --cyan-deep:#7dd3e8;
     --border:#25344d; --border-soft:#1d2b42;
+    --shadow-soft:0 10px 40px -10px rgba(0,0,0,.5);
+    --head-warm:linear-gradient(90deg,#3d3316,var(--bg-cream) 72%);
   }
 }
 
@@ -141,22 +151,47 @@ main > .wrap--wide > .sect--wide{max-width:100%}
   background:var(--card);
   border:1px solid var(--border-soft);
   border-radius:var(--r-card);
-  padding:26px 32px 30px;
-  margin:0 0 16px;
+  box-shadow:var(--shadow-soft);
+  padding:26px 32px 32px;
+  margin:0 0 20px;
 }
 .sect--wide > *{max-width:796px;margin-inline:auto}
 .sect--wide > .table-scroll,
 .sect--wide > [data-table-filter],
 .sect--wide > .reveal,
 .sect--wide > .pal-grid{max-width:100%}
-/* margin-block, not the margin shorthand: the shorthand would reset the auto
+/* The heading gets its own tinted box rather than a rule under the text. A
+   hairline says "a topic ended here" only once you are already reading it; a
+   block of colour is visible while scrolling past, which is what makes a page
+   this long feel navigable. The tint and the pill radius are the homepage's —
+   .eyebrow and .tabs use the same cyan — so the two halves of the site read as
+   one design rather than a landing page bolted to a document.
+
+   margin-block, not the margin shorthand: the shorthand would reset the auto
    inline margins that centre this heading inside a full-width section, and the
    h2 would jump to the card edge while its own paragraph stayed on the column. */
 .sect > h2{
-  margin-block:0 18px;padding:0 0 14px 14px;
-  border-bottom:1px solid var(--border-soft);
+  margin-block:0 24px;
+  padding:15px 20px 15px 26px;
+  /* A sweep rather than a flat fill: at full strength across 800px the cyan
+     reads as a slab and competes with the text sitting on it, and at
+     --bg-cyan alone it is too close to white to register while scrolling.
+     Fading one into the other keeps the left edge — where the eye lands —
+     unmistakably coloured and lets the bar breathe out to the right. */
+  background:var(--head-cool);
+  border:1px solid var(--border-soft);
+  border-radius:16px;
 }
-.sect > h2::before{top:.1em;bottom:calc(14px + .28em)}
+.sect > h2::before{left:11px;top:14px;bottom:14px;width:4px}
+
+/* The section holding the table is the one people came for, so it is marked in
+   the warm tint instead — the same split the homepage makes between its cyan
+   panels and the cream one around the result card. */
+.sect--wide{border-color:var(--border)}
+.sect--wide > h2{background:var(--head-warm)}
+/* The marker is the accent everywhere else, which would be invisible against
+   this one — swap it for the deep cyan the links already use. */
+.sect--wide > h2::before{background:var(--cyan-deep)}
 
 /* h3 was 17px and bold, which is also what <strong> looks like mid-sentence —
    sub-headings kept reading as an emphasised first phrase. The cyan tick above
@@ -449,7 +484,10 @@ html[data-theme="dark"] .fchip.chip--dragon{background:#42184a;color:#eda2e3}
 .reveal.is-capped{max-height:2600px;overflow:hidden}
 .reveal.is-capped::after{
   content:"";position:absolute;left:0;right:0;bottom:0;height:120px;pointer-events:none;
-  background:linear-gradient(to bottom,transparent,var(--bg));
+  /* --card, not --bg: the listing sits on a section card now, and in dark mode
+     the two are different colours — fading the last rows out to the page
+     background drew a visible band across the bottom of the card. */
+  background:linear-gradient(to bottom,transparent,var(--card));
 }
 .reveal__more{display:flex;justify-content:center;margin:-6px 0 26px}
 .reveal__more button{
