@@ -111,7 +111,21 @@ function sections(body) {
      that sit inside a card on /guides/ alone — those are link titles, not
      sections of the page. */
   const parts = main.split(/\n(?=[ \t]*<h2[\s>])/);
-  const lead = /^[ \t]*<h2[\s>]/.test(parts[0]) ? '' : parts.shift();
+  let lead = /^[ \t]*<h2[\s>]/.test(parts[0]) ? '' : parts.shift();
+
+  /* On the two hub pages, the lead also carried the search box and filter
+     hub — the thing a visitor actually came to use — after the h1/lede/fact
+     bar but templated ahead of an explanatory "How to search" heading. Boxed
+     into .page-head's reading-width column and sitting below a screen of
+     prose either way, it took a full scroll to reach. Pulling it out here
+     and placing it before the first section is what actually puts the tool
+     on the first screen; the explanatory text follows as normal sections. */
+  let tool = '';
+  const toolStart = lead.search(/<div data-table-filter/);
+  if (toolStart !== -1) {
+    tool = `${lead.slice(toolStart).trimEnd()}\n`;
+    lead = lead.slice(0, toolStart);
+  }
 
   /* The h1 carries its accent underline with display:inline, which makes it
      ignore the max-width that holds the rest of the column — it would run the
@@ -120,7 +134,7 @@ function sections(body) {
      section headings at all, like /guides/, need that box just as much, so it
      is built before the early return rather than after it. */
   const head = lead.trim() ? `    <div class="page-head">\n${lead.replace(/\n+$/, '')}\n    </div>\n` : '';
-  if (!parts.length) return `${head}${tail}`;
+  if (!parts.length) return `${head}${tool}${tail}`;
 
   /* A section holding the filter hub or a combo table needs the full 1180px
      the container allows — six numeric columns do not fit in a reading
@@ -131,7 +145,7 @@ function sections(body) {
     .map((chunk) => `    <section class="sect${isWide(chunk) ? ' sect--wide' : ''}">\n`
       + `${chunk.replace(/\n+$/, '')}\n    </section>`)
     .join('\n');
-  return `${head}${wrapped}\n${tail}`;
+  return `${head}${tool}${wrapped}\n${tail}`;
 }
 
 function layout({ title, description, path, crumbs, body, extraLd = [], scripts = [], pageType = 'WebPage', sprite = false }) {
@@ -540,9 +554,6 @@ ${rankedByPairs.slice(0, SERVER_ROWS).map(({ p, i }) => '              ' + combo
       <span class="fact"><small>Bred from one pair only</small>${singlePair.length}</span>
     </div>
 
-    <h2>How to Search Palworld Breeding Combinations</h2>
-    <p>The table below holds every Palworld breeding combination in the game, so the search box is the fastest way in. Type a name or a Paldeck number and it narrows as you go. Half-remembered spelling is fine — "anb" finds Anubis. The element chips stack, so choosing Ice and then Dragon leaves only the two Pals carrying both. <strong>Variant forms</strong> pulls up the ${pals.filter((p) => p.variant).length} Cryst, Ignis, Noct, Lux and Terra entries; <strong>One pair only</strong> isolates the ${singlePair.length} Pals breeding cannot reach from scratch. Click any column header to sort by it.</p>
-
 ${hubShell({
     src: '/data/hub-breeding.html',
     bar: filterBar({
@@ -551,6 +562,9 @@ ${hubShell({
     }),
     listing,
   })}
+
+    <h2>How to Search Palworld Breeding Combinations</h2>
+    <p>The table above holds every Palworld breeding combination in the game, so the search box is the fastest way in. Type a name or a Paldeck number and it narrows as you go. Half-remembered spelling is fine — "anb" finds Anubis. The element chips stack, so choosing Ice and then Dragon leaves only the two Pals carrying both. <strong>Variant forms</strong> pulls up the ${pals.filter((p) => p.variant).length} Cryst, Ignis, Noct, Lux and Terra entries; <strong>One pair only</strong> isolates the ${singlePair.length} Pals breeding cannot reach from scratch. Click any column header to sort by it.</p>
 
     <h2>How Palworld Breeding Combinations Work</h2>
     <p>Breeding in Palworld is not a dice roll. Put a male and a female in a Breeding Farm, drop cake in the feed box, and the egg that comes out was decided before you started — the game ships a fixed table, and every one of these Palworld breeding combinations is a row in it. That is the only reason a calculator can exist.</p>
@@ -656,9 +670,6 @@ ${pals.slice(0, SERVER_ROWS).map((p, i) => '          ' + palCard(p, i)).join('\
       <span class="fact"><small>Work types</small>${Object.keys(WORK_LABEL).length}</span>
     </div>
 
-    <h2>How to Search the Palworld Pals List</h2>
-    <p>Names, Paldeck numbers, elements and job names all work as queries — type "fire" or "mining" and the grid answers. The chips stack rather than replace each other, so Dragon plus Kindling cuts ${pals.length} Pals down to four. Hover a card for the full read-out of element, rarity and work levels; the icons on the card carry the same information at a glance once you know them.</p>
-
 ${hubShell({
     src: '/data/hub-pals.html',
     bar: filterBar({
@@ -669,6 +680,9 @@ ${hubShell({
     }),
     listing,
   })}
+
+    <h2>How to Search the Palworld Pals List</h2>
+    <p>Names, Paldeck numbers, elements and job names all work as queries — type "fire" or "mining" and the grid above answers. The chips stack rather than replace each other, so Dragon plus Kindling cuts ${pals.length} Pals down to four. Hover a card for the full read-out of element, rarity and work levels; the icons on the card carry the same information at a glance once you know them.</p>
 
     <h2>How to Read a Palworld Pal Card</h2>
     <p>The coloured glyphs under each name are the Pal’s elements. Below them sit its jobs, each with the level it works at. A Pal showing a flame at 3 kindles a furnace faster than one at 1, and that gap is the whole reason people breed for specific Pals instead of catching whatever wanders past.</p>

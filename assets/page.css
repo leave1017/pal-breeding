@@ -145,7 +145,25 @@ main strong{color:var(--fg)}
    at the same x and the wide table reads as one element stepping outside the
    column rather than as a second column. Change one, change the other. */
 main > .wrap--wide > *{max-width:860px;margin-inline:auto}
-main > .wrap--wide > .sect--wide{max-width:100%}
+main > .wrap--wide > .sect--wide,
+main > .wrap--wide > [data-table-filter]{max-width:100%}
+
+/* The search box and filter grid used to render two screens down, after an
+   explanatory heading templated ahead of it — a page whose whole point is
+   "search this list" made you scroll past a paragraph to find the search
+   box. sections() now lifts it out from between the h1 block and the first
+   heading, so it is the first full-width thing on the page. It gets the same
+   card treatment as a .sect so the promotion doesn't read as a layout
+   accident, and the neutral border (not border-soft) marks it as the one
+   thing here that isn't prose, same as .sect--wide does for the table. */
+[data-table-filter]{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--r-card);
+  box-shadow:var(--shadow-soft);
+  padding:28px 32px 32px;
+  margin:0 0 24px;
+}
 
 .sect{
   background:var(--card);
@@ -224,6 +242,7 @@ main > .wrap--wide > .sect--wide{max-width:100%}
 @media (max-width:640px){
   .sect{padding:20px 18px 24px;border-radius:18px;margin-bottom:12px}
   .sect > h2{padding-left:12px;margin-bottom:14px}
+  [data-table-filter]{padding:18px 16px 22px;border-radius:18px;margin-bottom:16px}
 }
 
 .callout{
