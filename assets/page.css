@@ -90,8 +90,15 @@ p,ul,ol{margin:0}
   border:1px solid var(--border);color:var(--fg-muted);background:var(--card);cursor:pointer;
 }
 /* Inserted by theme.js only while the drawer is open. No display property of
-   its own, so the hidden attribute alone controls it. */
-.nav__scrim{position:fixed;inset:0;z-index:55;background:rgba(15,23,42,.18)}
+   its own, so the hidden attribute alone controls it.
+
+   Below the header's 50, never above it. .site-header is sticky with a z-index,
+   so it opens a stacking context — the drawer's own z-index is resolved inside
+   that context, and the header competes with this scrim as a single layer at
+   50. At 55 the scrim covered the drawer it was meant to sit behind, and every
+   tap on a menu item hit the scrim and closed the menu instead of following the
+   link. */
+.nav__scrim{position:fixed;inset:0;z-index:40;background:rgba(15,23,42,.18)}
 .nav__links{
   display:flex;gap:2px;padding:4px;border-radius:999px;
   background:var(--bg-cyan);border:1px solid var(--border-soft);
