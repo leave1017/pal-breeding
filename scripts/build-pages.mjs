@@ -128,6 +128,14 @@ function layout({ title, description, path, crumbs, body, extraLd = [], scripts 
 <meta name="twitter:image" content="${SITE}/og-image.png">
 <link rel="stylesheet" href="/assets/page.css">
 <script src="/assets/theme.js"></script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-8YNVERSW24"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-8YNVERSW24');
+</script>
 ${scripts.map((src) => `<script src="${src}" defer></script>`).join('\n')}
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
