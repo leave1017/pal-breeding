@@ -521,7 +521,7 @@ ${hubShell({
     pageType: 'CollectionPage',
     crumbs: [{ label: 'Home', href: '/' }, { label: 'Breeding Combos' }],
     body,
-    scripts: ['/assets/table-filter.js'],
+    scripts: ['/assets/select.js', '/assets/table-filter.js'],
     extraLd: [{
       '@context': 'https://schema.org', '@type': 'FAQPage',
       mainEntity: faq.map(([q, a]) => ({
@@ -632,7 +632,7 @@ ${hubShell({
     pageType: 'CollectionPage',
     crumbs: [{ label: 'Home', href: '/' }, { label: 'All Pals' }],
     body,
-    scripts: ['/assets/table-filter.js'],
+    scripts: ['/assets/select.js', '/assets/table-filter.js'],
     sprite: true,
     extraLd: [{
       '@context': 'https://schema.org', '@type': 'FAQPage',

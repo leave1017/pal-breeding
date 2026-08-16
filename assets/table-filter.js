@@ -146,7 +146,10 @@
     function reset() {
       state = { q: '', elements: [], work: [], flags: [], sort: null, dir: 1, expanded: false };
       if (input) input.value = '';
-      if (sortSelect) sortSelect.selectedIndex = 0;
+      if (sortSelect) {
+        sortSelect.selectedIndex = 0;
+        if (sortSelect._fselSync) sortSelect._fselSync();
+      }
       [].forEach.call(root.querySelectorAll('[aria-pressed]'), function (b) {
         b.setAttribute('aria-pressed', 'false');
       });

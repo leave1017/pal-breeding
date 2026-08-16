@@ -57,9 +57,10 @@ const icons = Object.fromEntries(await Promise.all(iconFiles.map(async (f) => [
 // The artifact is a single file with no server, so the shared theme script has
 // to be inlined too or the toggle is dead in the preview.
 const themeJs = await readFile(resolve(ROOT, 'assets/theme.js'), 'utf8');
+const selectJs = await readFile(resolve(ROOT, 'assets/select.js'), 'utf8');
 
 const withAssets = inlined
-  .replace('<script src="/assets/theme.js"></script>', `<script>\n${themeJs}\n</script>`)
+  .replace('<script src="/assets/theme.js"></script>', `<script>\n${themeJs}\n</script>\n<script>\n${selectJs}\n</script>`)
   .replace('</head>', `<style>\n/* --- inlined from tool/calculator.html --- */\n${toolCss}\n</style>\n</head>`)
   .replace('</body>', [
     '<script id="paldata" type="application/json">',
