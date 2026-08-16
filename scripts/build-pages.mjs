@@ -310,6 +310,23 @@ const workList = (p) => Object.entries(p.work)
  *  the Paldex number is in the link target and on the Pal's own page. */
 const palCell = (p) => `<a class="p-cell" href="/breeding/${p.slug}/">${icon(p)}${esc(label(p))}</a>`;
 
+/* A column is as wide as the longer of its heading and its widest cell, and
+   these headings are set in uppercase with letter-spacing, so on a phone the
+   headings were winning by a mile: "Breeding power" took 144px to caption a
+   column whose widest number is 40px, and four of the six columns on the hub
+   were sized this way. Between them they held 116px of data in 458px of
+   table — most of the horizontal scrolling was captions.
+
+   Both labels ship, and CSS shows one. display:none takes the other out of
+   the accessibility tree with it, so a screen reader still reads exactly one
+   heading per column — the long one on a desktop, the short one on a phone. */
+const th = (labelText, { short = '', cls = '', attrs = '' } = {}) => {
+  const inner = short && short !== labelText
+    ? `<span class="th-l">${esc(labelText)}</span><span class="th-s">${esc(short)}</span>`
+    : esc(labelText);
+  return `<th${cls ? ` class="${cls}"` : ''}${attrs ? ' ' + attrs : ''}>${inner}</th>`;
+};
+
 // ---- /breeding/<slug>/ ----------------------------------------------------
 function palPage(p, i) {
   const parents = easiestFirst(parentsOf(i));
@@ -318,10 +335,10 @@ function palPage(p, i) {
   const selfOnly = parents.length === 1 && parents[0][0] === i && parents[0][1] === i;
 
   const parentRows = parents.slice(0, MAX_PARENT_ROWS).map(([a, b]) =>
-    `<tr><td>${palCell(pals[a])}</td><td class="op">+</td><td>${palCell(pals[b])}</td><td class="num">${cost([a, b])}</td></tr>`).join('\n');
+    `<tr><td>${palCell(pals[a])}</td><td class="op">+</td><td>${palCell(pals[b])}</td><td class="num col-min">${cost([a, b])}</td></tr>`).join('\n');
 
   const childRows = children.slice(0, MAX_CHILD_ROWS).map(([partner, child]) =>
-    `<tr><td>${palCell(pals[partner])}</td><td class="op">&rarr;</td><td>${palCell(pals[child])}</td><td class="num">${pals[child].rarity}</td></tr>`).join('\n');
+    `<tr><td>${palCell(pals[partner])}</td><td class="op">&rarr;</td><td>${palCell(pals[child])}</td><td class="num col-min">${pals[child].rarity}</td></tr>`).join('\n');
 
   const related = pals
     .filter((q) => q !== p && (q.elements ?? []).some((e) => (p.elements ?? []).includes(e)))
@@ -359,7 +376,7 @@ function palPage(p, i) {
     <div class="table-scroll">
       <table class="combo-table">
         <caption>Parent pairs that produce ${esc(p.name)}${parents.length > MAX_PARENT_ROWS ? ` — showing the ${MAX_PARENT_ROWS} easiest of ${n(parents.length)}` : ''}</caption>
-        <thead><tr><th>Parent 1</th><th></th><th>Parent 2</th><th class="num">Rarity cost</th></tr></thead>
+        <thead><tr><th>Parent 1</th><th></th><th>Parent 2</th>${th('Rarity cost', { short: 'Cost', cls: 'num col-min' })}</tr></thead>
         <tbody>
 ${parentRows}
         </tbody>
@@ -372,7 +389,7 @@ ${parentRows}
     <div class="table-scroll">
       <table class="combo-table">
         <caption>${esc(p.name)} paired with&hellip;</caption>
-        <thead><tr><th>Partner</th><th></th><th>Offspring</th><th class="num">Rarity</th></tr></thead>
+        <thead><tr><th>Partner</th><th></th><th>Offspring</th>${th('Rarity', { short: 'R', cls: 'num col-min' })}</tr></thead>
         <tbody>
 ${childRows}
         </tbody>
@@ -461,8 +478,8 @@ function comboRow(p, i) {
   const kids = new Set(childrenOf(i).map(([, c]) => c)).size;
   const flags = [p.variant ? 'variant' : '', count === 1 ? 'single' : ''].filter(Boolean).join(' ');
   return `<tr ${dataAttrs(p, { pairs: count, kids, flags })}>`
-    + `<td>${palCell(p)}</td><td><span class="chips">${elChips(p)}</span></td>`
-    + `<td class="num">${p.rarity}</td><td class="num">${n(p.power)}</td>`
+    + `<td>${palCell(p)}</td><td class="col-el"><span class="chips">${elChips(p)}</span></td>`
+    + `<td class="num">${p.rarity}</td><td class="num col-pw">${n(p.power)}</td>`
     + `<td class="num">${n(count)}</td><td class="num">${n(kids)}</td></tr>`;
 }
 
@@ -512,12 +529,12 @@ function breedingIndex() {
   const listing = `        <div class="table-scroll">
           <table class="combo-table">
             <thead><tr>
-              <th data-sort="name">Pal</th>
-              <th>Element</th>
-              <th class="num" data-sort="rarity">Rarity</th>
-              <th class="num" data-sort="power" data-desc>Breeding power</th>
-              <th class="num" data-sort="pairs" data-desc>Parent pairs</th>
-              <th class="num" data-sort="kids" data-desc>Breeds into</th>
+              ${th('Pal', { attrs: 'data-sort="name"' })}
+              ${th('Element', { cls: 'col-el' })}
+              ${th('Rarity', { short: 'R', cls: 'num', attrs: 'data-sort="rarity"' })}
+              ${th('Breeding power', { short: 'Power', cls: 'num col-pw', attrs: 'data-sort="power" data-desc' })}
+              ${th('Parent pairs', { short: 'Pairs', cls: 'num', attrs: 'data-sort="pairs" data-desc' })}
+              ${th('Breeds into', { short: 'Into', cls: 'num', attrs: 'data-sort="kids" data-desc' })}
             </tr></thead>
             <tbody data-items>
 ${rankedByPairs.slice(0, SERVER_ROWS).map(({ p, i }) => '              ' + comboRow(p, i)).join('\n')}
@@ -891,7 +908,7 @@ function passivesIndex() {
     return `    <h2>${rankLabel(r)}</h2>
     <div class="table-scroll">
       <table class="combo-table">
-        <thead><tr><th>Passive skill</th><th>Pals that always have it</th><th class="num">Count</th></tr></thead>
+        <thead><tr>${th('Passive skill', { short: 'Passive' })}${th('Pals that always have it', { short: 'Pals' })}${th('Count', { cls: 'num' })}</tr></thead>
         <tbody>
 ${group.map((s) => `          <tr><td><a href="/passives/${s.slug}/">${esc(s.name)}</a></td><td>${s.carriers.slice(0, 4).map(([p]) => `<a href="/breeding/${p.slug}/">${esc(p.name)}</a>`).join(', ')}${s.carriers.length > 4 ? ` <span style="color:var(--fg-muted)">+${s.carriers.length - 4} more</span>` : ''}</td><td class="num">${s.carriers.length}</td></tr>`).join('\n')}
         </tbody>
@@ -969,7 +986,7 @@ function familyPage(f) {
 
   const rows = f.members.map(([p, i]) => {
     const base = pals.find((q) => !q.variant && q.dex === p.dex);
-    return `          <tr><td>${palCell(p)}</td><td>${base ? palCell(base) : '<span style="color:var(--fg-muted)">&mdash;</span>'}</td><td><span class="chips">${elChips(p)}</span></td><td class="num">${p.rarity}</td><td class="num">${n(parentsOf(i).length)}</td></tr>`;
+    return `          <tr><td>${palCell(p)}</td><td>${base ? palCell(base) : '<span style="color:var(--fg-muted)">&mdash;</span>'}</td><td class="col-el"><span class="chips">${elChips(p)}</span></td><td class="num col-min">${p.rarity}</td><td class="num">${n(parentsOf(i).length)}</td></tr>`;
   }).join('\n');
 
   const body = `    <h1>Palworld ${esc(f.name)} Pals — All ${f.members.length} Variants</h1>
@@ -991,7 +1008,7 @@ function familyPage(f) {
     <h2>Every ${esc(f.name)} variant and its base form</h2>
     <div class="table-scroll">
       <table class="combo-table">
-        <thead><tr><th>Variant</th><th>Base Pal</th><th>Element</th><th class="num">Rarity</th><th class="num">Parent pairs</th></tr></thead>
+        <thead><tr><th>Variant</th>${th('Base Pal', { short: 'Base' })}${th('Element', { cls: 'col-el' })}${th('Rarity', { short: 'R', cls: 'num col-min' })}${th('Parent pairs', { short: 'Pairs', cls: 'num' })}</tr></thead>
         <tbody>
 ${rows}
         </tbody>

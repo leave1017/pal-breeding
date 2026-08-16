@@ -398,6 +398,10 @@ a.work:hover{background:var(--cyan);color:var(--fg);text-decoration:none}
   color:var(--fg);padding:9px 18px;border-bottom:1px solid var(--border);white-space:nowrap;
 }
 .combo-table td{padding:6px 18px;border-bottom:1px solid var(--border-soft)}
+/* Long heading on wide screens, short one on phones. Only ever one of the two
+   is displayed, and display:none drops the other out of the accessibility tree
+   as well, so a column is still announced exactly once. */
+.th-s{display:none}
 .combo-table tr:last-child td{border-bottom:0}
 .combo-table tbody tr{box-shadow:inset 3px 0 0 transparent;transition:box-shadow .15s,background .15s}
 .combo-table tbody tr:hover{background:var(--bg-cyan);box-shadow:inset 3px 0 0 var(--accent)}
@@ -463,10 +467,43 @@ a.work:hover{background:var(--cyan);color:var(--fg);text-decoration:none}
 .btn--primary:hover{transform:translateY(-2px);text-decoration:none}
 
 @media (max-width:640px){
-  .combo-table th,.combo-table td{padding:6px 12px}
-  .p-icon{width:32px;height:32px;border-radius:9px}
+  .combo-table th,.combo-table td{padding:6px 8px}
+  /* The + / → between two Pals needs room for one character, not for a word. */
+  .combo-table .op{padding-inline:2px}
+  .p-icon{width:28px;height:28px;border-radius:8px}
+  .p-cell{gap:7px;font-size:13.5px}
   .pal-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:9px}
   .fact{padding:8px 13px;font-size:15px}
+
+  /* A phone gives the table 314 of its 390px: the card it sits in charges
+     18px a side and the page wrapper another 20. The table is the one thing
+     on these pages that genuinely needs the width — the prose does not — so
+     it steps back out of the card padding and runs edge to edge inside it.
+     Worth ~36px, which is most of a column. */
+  /* max-width:none as well as the negative margins: .sect--wide caps its
+     children at 100%, which is the parent's *content* width, and that alone
+     would pull the table straight back inside the padding it just escaped. */
+  .sect > .table-scroll{margin-inline:-18px;max-width:none;border-inline:0;border-radius:0}
+
+  /* The hub table cannot use that trick. Its .reveal clips to overflow:hidden
+     while the list is capped, so a table hanging 16px past the edge simply had
+     that strip cut off — quietly, and off the right, where it took the last
+     digit of every count with it: 97 rendered as 9. The card gives up its side
+     padding instead, and the pieces that still want an inset ask for one. */
+  [data-table-filter]{padding-inline:0}
+  .filterbar,.table-empty{margin-inline:12px}
+  .reveal > .pgrid{margin-inline:12px}
+  .reveal > .table-scroll{margin-inline:0;max-width:none;border-inline:0;border-radius:0}
+  .th-l{display:none}
+  .th-s{display:inline}
+
+  /* Short headings recover most of the width but not all of it, so a phone
+     also drops the columns it can afford to lose. Element is already a filter
+     above the table and is on every Pal's own page; breeding power is the
+     mechanism behind the numbers rather than a number you act on; the trailing
+     rarity figures only restate an order the rows are already sorted in. What
+     is left is the Pal and the two counts the page exists to compare. */
+  .col-el,.col-pw,.col-min{display:none}
 }
 
 
