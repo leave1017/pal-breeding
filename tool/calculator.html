@@ -310,7 +310,15 @@ select.input option{background:var(--card);color:var(--fg);font-weight:600}
 }
 @media (max-width:900px){
   .shell{padding:12px;border-radius:20px}
-  .tabs button{flex:none;font-size:13.5px;padding:9px 13px}
+  /* Six modes need 741px laid out in a row and a phone has about 360. They
+     used to scroll sideways inside the pill, so two were visible and the other
+     four — including Shortest Route and Passives — were effectively invisible;
+     nobody swipes a control they cannot see the edge of. Two columns shows all
+     six at once, which is the whole point of having them. */
+  .tabs{
+    display:grid;grid-template-columns:1fr 1fr;gap:5px;border-radius:18px;overflow:visible;
+  }
+  .tabs button{flex:none;font-size:13.5px;padding:10px 8px;border-radius:13px;white-space:normal}
   .mode-hint{font-size:12.5px;margin:8px 2px 10px}
   /* Slots stay side by side on phones — stacking them pushed the Pal grid off
      the first screen, which is the one thing this layout has to protect. */
@@ -750,6 +758,8 @@ select.input option{background:var(--card);color:var(--fg);font-weight:600}
                 const next = defs.find(([k]) => state.sel[k] == null);
                 if (next) state.activeSlot = next[0];
                 draw();
+                // Nothing left to fill means the answer just changed.
+                if (!next) revealResults();
               },
             }, art(i),
               el('span', { className: 'cell__name', textContent: p.name }),
@@ -900,6 +910,25 @@ select.input option{background:var(--card);color:var(--fg);font-weight:600}
     $('#results').replaceChildren(results[state.mode]());
     picker();
     reportHeight();
+  }
+
+  /* One column puts the Pal grid above the answer, which is right — the grid is
+     what you touch, and it should be the thing under your thumb. The cost is
+     that the moment the last slot is filled, the answer appears below a grid
+     that is taller than the screen, so nothing visibly happens. This asks the
+     host to scroll it into view, reusing the same request the grid itself uses.
+     The host scrolls the minimum needed and ignores it when the element is
+     already on screen, so on a desktop — where the answer sits beside the slots
+     the whole time — this does nothing. */
+  function revealResults() {
+    const box = $('#results');
+    if (!box) return;
+    if (parent !== window) {
+      parent.postMessage(
+        { type: 'palbreeding:reveal', top: box.offsetTop, height: box.offsetHeight }, '*');
+    } else {
+      box.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
   }
 
   MODES.forEach((mode) => {

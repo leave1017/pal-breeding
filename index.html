@@ -166,6 +166,15 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
   border:1px solid var(--border);color:var(--fg-muted);transition:all .2s ease-in-out;background:var(--card);
 }
 .icon-btn:hover{color:var(--fg);border-color:var(--cyan-deep)}
+/* Only ever visible on phones — see the drawer rules in the 820px block. */
+.nav__toggle{
+  display:none;width:40px;height:40px;border-radius:999px;place-items:center;
+  border:1px solid var(--border);color:var(--fg-muted);background:var(--card);
+}
+/* Inserted by theme.js only while the drawer is open. It has to sit over the
+   calculator iframe: a tap inside an iframe never reaches this document, so
+   without it the menu could not be dismissed by tapping the page. */
+.nav__scrim{position:fixed;inset:0;z-index:55;background:rgba(15,23,42,.18)}
 
 /* ============ Hero ============ */
 .hero{position:relative;overflow:hidden;padding:18px 0 10px;text-align:center}
@@ -415,23 +424,42 @@ html[data-theme="dark"] .badge--electric{background:#3d3316;color:#fde047}
   .foot-grid{grid-template-columns:1fr 1fr}
 }
 @media (max-width:820px){
+  /* The hero is the only thing between the header and the calculator, so every
+     pixel it takes is a pixel the tool does not get on a phone. These three
+     rules used to be stated twice in this block, once at phone sizes and again
+     further down at tablet sizes — the later pair won, and the hero rendered at
+     34px/17px on a 390px screen: a two-line title and a three-line standfirst,
+     216px before the tool started. One statement each now. */
   .hero{padding:10px 0 10px}
-  .hero h1{font-size:23px;margin:6px auto 5px;letter-spacing:-.02em}
+  .hero h1{font-size:23px;margin:6px auto 5px;letter-spacing:-.02em;max-width:20ch}
   .hero__sub{font-size:13.5px;line-height:1.45}
   .eyebrow{font-size:10.5px;padding:4px 11px}
-  .nav{height:60px;gap:10px}
-  /* The wordmark gives way to the mark alone so the sections stay reachable —
-     they scroll sideways rather than collapsing behind a menu button. */
+  .nav{height:60px;gap:10px;position:relative}
   .brand span{display:none}
-  .nav__links{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
-  .nav__links::-webkit-scrollbar{display:none}
-  .nav__links a{padding:7px 12px;font-size:13.5px}
   .nav__right{min-width:0}
   .badge-update{display:none}
+  /* The four links need 423px and the bar has 262px. They used to scroll
+     sideways inside the pill, which hid "Guide" entirely and cut "All Pals"
+     mid-word — and a sideways-scrolling nav is not a gesture anyone goes
+     looking for. Behind a button instead: the links stay in the DOM, so they
+     are still crawled and still pass weight, and the top bar stops being a
+     puzzle. */
+  .nav__toggle{display:grid}
+  .nav__links{
+    position:absolute;top:calc(100% + 8px);left:0;right:0;z-index:60;
+    flex-direction:column;gap:3px;padding:8px;
+    background:var(--card);border:1px solid var(--border);border-radius:18px;
+    box-shadow:var(--shadow-lift);
+  }
+  .nav__links:not([data-open]){display:none}
+  .nav__links a{padding:12px 14px;font-size:15px;border-radius:12px}
   .mode-grid{grid-template-columns:1fr}
-  .hero h1{font-size:34px;max-width:20ch}
-  .hero__sub{font-size:17px}
   .section{padding:60px 0}
+  /* .section--tool asks for no top padding so the calculator sits against the
+     hero. It has the same specificity as .section, so this block — being later
+     in the file — was silently handing the padding back and pushing the tool
+     60px further down, which is the opposite of what that class is for. */
+  .section--tool{padding-top:0}
   .h2{font-size:26px}
   .calc-shell{padding:18px;border-radius:20px}
   .tabs label{flex:none;font-size:14px;padding:10px 15px}
@@ -462,7 +490,11 @@ html[data-theme="dark"] .badge--electric{background:#3d3316;color:#fde047}
         <span>PalLineage</span>
       </a>
       <div class="nav__right">
-        <div class="nav__links">
+        <button class="nav__toggle" id="navToggle" type="button"
+                aria-expanded="false" aria-controls="navLinks" aria-label="Menu">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+        <div class="nav__links" id="navLinks">
           <a href="/" aria-current="page">Calculator</a>
           <a href="/breeding/">Breeding Combos</a>
           <a href="/pals/">All Pals</a>

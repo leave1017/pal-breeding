@@ -84,6 +84,14 @@ p,ul,ol{margin:0}
   cursor:pointer;transition:all .2s ease-in-out;
 }
 .icon-btn:hover{color:var(--fg);border-color:var(--cyan-deep)}
+/* Only ever visible on phones — see the drawer rules in the 820px block. */
+.nav__toggle{
+  display:none;width:40px;height:40px;flex:none;border-radius:999px;place-items:center;
+  border:1px solid var(--border);color:var(--fg-muted);background:var(--card);cursor:pointer;
+}
+/* Inserted by theme.js only while the drawer is open. No display property of
+   its own, so the hidden attribute alone controls it. */
+.nav__scrim{position:fixed;inset:0;z-index:55;background:rgba(15,23,42,.18)}
 .nav__links{
   display:flex;gap:2px;padding:4px;border-radius:999px;
   background:var(--bg-cyan);border:1px solid var(--border-soft);
@@ -278,11 +286,21 @@ main > .wrap--wide > [data-table-filter]{max-width:100%}
 }
 
 @media (max-width:820px){
-  .nav{height:60px;gap:10px}
+  .nav{height:60px;gap:10px;position:relative}
   .brand span{display:none}
-  .nav__links{overflow-x:auto;scrollbar-width:none;min-width:0}
-  .nav__links::-webkit-scrollbar{display:none}
-  .nav__links a{padding:7px 12px;font-size:13.5px}
+  /* The four links need more width than the bar has, so they used to scroll
+     sideways inside the pill — which hid the last one entirely and cut the one
+     before it mid-word. Behind a button instead: the links stay in the DOM, so
+     they are still crawled and still pass weight. */
+  .nav__toggle{display:grid}
+  .nav__links{
+    position:absolute;top:calc(100% + 8px);left:0;right:0;z-index:60;
+    flex-direction:column;gap:3px;padding:8px;min-width:0;
+    background:var(--card);border:1px solid var(--border);border-radius:18px;
+    box-shadow:var(--shadow-soft);
+  }
+  .nav__links:not([data-open]){display:none}
+  .nav__links a{padding:12px 14px;font-size:15px;border-radius:12px}
 }
 @media (max-width:640px){
   h1{font-size:28px}
