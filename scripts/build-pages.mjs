@@ -136,6 +136,13 @@ function layout({ title, description, path, crumbs, body, extraLd = [], scripts 
   gtag('js', new Date());
   gtag('config', 'G-8YNVERSW24');
 </script>
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "y31849bdc1");
+</script>
 ${scripts.map((src) => `<script src="${src}" defer></script>`).join('\n')}
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
