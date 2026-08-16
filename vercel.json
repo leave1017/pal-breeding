@@ -2,6 +2,32 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "headers": [
     {
+      "//": "Every deployment answers on a .vercel.app hostname as well as on palbreeding.net, so the whole site exists twice and Google is free to index either copy — pal-breeding-henna.vercel.app plus a fresh hostname for every preview build. robots.txt cannot express this: one file is served byte-identically from both hosts, so the rule has to match on the Host header instead. Matching the whole .vercel.app suffix covers the previews without hardcoding the slug Vercel generates for each one. noindex rather than Disallow, because a blocked URL can still be indexed from inbound links, and a crawler that is not allowed to fetch the page never reads the directive telling it to stay out.",
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": ".*\\.vercel\\.app"
+        }
+      ],
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
+    },
+    {
+      "//": "The calculator is embedded in the homepage through an iframe. It stays crawlable so Googlebot can render the homepage with the tool in place, but it must not rank as a chrome-less page of its own.",
+      "source": "/tool/(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        }
+      ]
+    },
+    {
       "source": "/data/(.*)",
       "headers": [
         {

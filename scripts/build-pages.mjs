@@ -39,6 +39,22 @@ const SPRITE = await readFile(resolve(ROOT, 'assets/sprite.svg'), 'utf8');
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const dex = (p) => '#' + String(p.dex).padStart(3, '0');
+
+/* Two Paldeck entries can share a name: Gumoss and its flower form are both
+   called "Gumoss" and both sit at #012, so a template keyed on the name alone
+   gives the two pages the same <title> and the same description — Google reads
+   that as one page duplicated and keeps whichever it likes. The slug is the
+   only thing that distinguishes them, so borrow the suffix from it. */
+const nameUses = pals.reduce((m, p) => m.set(p.name, (m.get(p.name) ?? 0) + 1), new Map());
+const slugOf = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+const label = (p) => {
+  if (nameUses.get(p.name) === 1) return p.name;
+  const stem = slugOf(p.name);
+  const extra = p.slug.startsWith(`${stem}-`) ? p.slug.slice(stem.length + 1) : '';
+  return extra
+    ? `${p.name} (${extra.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')})`
+    : p.name;
+};
 const n = (x) => x.toLocaleString('en-US');
 const pairs = (k) => `${n(k)} pair${k === 1 ? '' : 's'}`;
 /** First candidate that fits in a search result, or the shortest one. */
@@ -226,7 +242,7 @@ const workList = (p) => Object.entries(p.work)
 
 /** Table rows repeat hundreds of times per page, so they carry name only —
  *  the Paldex number is in the link target and on the Pal's own page. */
-const palCell = (p) => `<a class="p-cell" href="/breeding/${p.slug}/">${icon(p)}${esc(p.name)}</a>`;
+const palCell = (p) => `<a class="p-cell" href="/breeding/${p.slug}/">${icon(p)}${esc(label(p))}</a>`;
 
 // ---- /breeding/<slug>/ ----------------------------------------------------
 function palPage(p, i) {
@@ -247,10 +263,10 @@ function palPage(p, i) {
     .slice(0, 8);
 
   const intro = selfOnly
-    ? `<strong>${esc(p.name)}</strong> cannot be bred from two different Pals. The only pair that produces it is ${esc(p.name)} with another ${esc(p.name)}, so the first one has to be caught in the wild — after that it breeds true.`
-    : `${n(parents.length)} parent ${parents.length === 1 ? 'pair produces' : 'pairs produce'} <strong>${esc(p.name)}</strong> in Palworld 1.0. They are listed cheapest first, by the combined rarity of the two parents, so the easiest way to get one is at the top.`;
+    ? `<strong>${esc(label(p))}</strong> cannot be bred from two different Pals. The only pair that produces it is ${esc(label(p))} with another ${esc(label(p))}, so the first one has to be caught in the wild — after that it breeds true.`
+    : `${n(parents.length)} parent ${parents.length === 1 ? 'pair produces' : 'pairs produce'} <strong>${esc(label(p))}</strong> in Palworld 1.0. They are listed cheapest first, by the combined rarity of the two parents, so the easiest way to get one is at the top.`;
 
-  const body = `    <h1>Palworld ${esc(p.name)} Breeding Combos</h1>
+  const body = `    <h1>Palworld ${esc(label(p))} Breeding Combos</h1>
     <p class="lede">${intro}</p>
 
     <div class="factbar">
@@ -299,15 +315,18 @@ ${childRows}
 
     ${related.length ? `<h2>Other ${esc((p.elements ?? ['similar'])[0])} Pals</h2>
     <div class="pal-grid pal-grid--compact">
-      ${related.map((q) => `<a class="pal-card" href="/breeding/${q.slug}/">${icon(q)}<strong>${esc(q.name)}</strong><small>${pairs(parentsOf(pals.indexOf(q)).length)}</small></a>`).join('\n      ')}
+      ${related.map((q) => `<a class="pal-card" href="/breeding/${q.slug}/">${icon(q)}<strong>${esc(label(q))}</strong><small>${pairs(parentsOf(pals.indexOf(q)).length)}</small></a>`).join('\n      ')}
     </div>` : ''}
 `;
 
   return layout({
-    title: `Palworld ${p.name} Breeding Combos 1.0 — All ${n(parents.length)} Pairs`,
-    description: `Every parent combination that produces ${p.name} in Palworld 1.0 (${dex(p)}), sorted easiest first, plus what ${p.name} breeds into. Built from game data.`,
+    // 28 of these Pals come from a single pair, so the count has to agree with
+    // the noun — "All 1 Pairs" is the sort of thing a reader sees in a search
+    // result and takes as a sign the page was generated and never read.
+    title: `Palworld ${label(p)} Breeding Combos 1.0 — All ${n(parents.length)} Pair${parents.length === 1 ? '' : 's'}`,
+    description: `Every parent combination that produces ${label(p)} in Palworld 1.0 (${dex(p)}), sorted easiest first, plus what ${label(p)} breeds into. Built from game data.`,
     path: `/breeding/${p.slug}/`,
-    crumbs: [{ label: 'Home', href: '/' }, { label: 'Breeding', href: '/breeding/' }, { label: p.name }],
+    crumbs: [{ label: 'Home', href: '/' }, { label: 'Breeding', href: '/breeding/' }, { label: label(p) }],
     body,
   });
 }
@@ -358,9 +377,9 @@ function palCard(p, i) {
     jobs.length ? jobs.map(([k, v]) => `${WORK_LABEL[k]} ${v}`).join(', ') : 'No work suitability',
   ].join(' · ');
 
-  return `<a class="pcard" href="/breeding/${p.slug}/" ${dataAttrs(p, { pairs: parentsOf(i).length, flags: p.variant ? 'variant' : '' })} data-tip="${esc(tip)}" aria-label="${esc(`${p.name}, ${dex(p)}. ${tip}`)}">`
+  return `<a class="pcard" href="/breeding/${p.slug}/" ${dataAttrs(p, { pairs: parentsOf(i).length, flags: p.variant ? 'variant' : '' })} data-tip="${esc(tip)}" aria-label="${esc(`${label(p)}, ${dex(p)}. ${tip}`)}">`
     + `<img class="pcard__art" src="/assets/pals/${p.slug}.webp" alt="" width="64" height="64" loading="lazy">`
-    + `<strong class="pcard__name">${esc(p.name)}</strong>`
+    + `<strong class="pcard__name">${esc(label(p))}</strong>`
     + `<span class="pcard__dex">${dex(p)}</span>`
     + `<span class="pcard__el">${(p.elements ?? []).map((e) =>
         `<span class="el el--${EL_STYLE[e] ?? 'fill'} el-${e}">${glyph(`e-${e}`)}</span>`).join('')}</span>`
@@ -509,7 +528,7 @@ ${hubShell({
     <h2>The ${singlePair.length} Pals Breeding Cannot Give You</h2>
     <p>At the far end sit ${singlePair.length} Pals produced by exactly one pair, and in nearly every case that pair is the Pal with itself. No amount of breeding conjures the first one; you have to catch it. After that the pair sustains itself, which is how people end up with a stable of Frostallions.</p>
     <div class="pal-grid pal-grid--compact">
-      ${singlePair.slice(0, 8).map(({ p, i }) => `<a class="pal-card" href="/breeding/${p.slug}/">${icon(p)}<strong>${esc(p.name)}</strong><small>${pairs(parentsOf(i).length)}</small></a>`).join('\n      ')}
+      ${singlePair.slice(0, 8).map(({ p, i }) => `<a class="pal-card" href="/breeding/${p.slug}/">${icon(p)}<strong>${esc(label(p))}</strong><small>${pairs(parentsOf(i).length)}</small></a>`).join('\n      ')}
     </div>
 
     <h2>Palworld Breeding Combinations by Element</h2>
@@ -531,7 +550,7 @@ ${hubShell({
 
   return layout({
     title: `Palworld Breeding Combinations — All ${n(combos.combos.length)} Pairs | PalLineage`,
-    description: `All ${n(combos.combos.length)} Palworld breeding combinations for v1.0 in one searchable table. Filter by element, sort by how many pairs reach a Pal, and open any Pal for its full list.`,
+    description: `All ${n(combos.combos.length)} Palworld breeding combinations for v1.0 in one searchable table. Filter by element, sort by how many pairs reach a Pal, open any Pal for its list.`,
     path: '/breeding/',
     pageType: 'CollectionPage',
     crumbs: [{ label: 'Home', href: '/' }, { label: 'Breeding Combos' }],
@@ -695,7 +714,7 @@ async function guides() {
   }
 
   written.push(['guides/index.html', layout({
-    title: 'Palworld Breeding Guides — Formula & Calculator Tips | PalLineage',
+    title: 'Palworld Breeding Guides — Formula & Calculator Tips',
     description: 'How breeding works in Palworld 1.0: the formula behind the calculator, and how to plan a breeding project.',
     path: '/guides/',
     pageType: 'CollectionPage',
@@ -737,7 +756,7 @@ const RANK_LABEL = {
 const rankLabel = (r) => RANK_LABEL[r] ?? `Rank ${r}`;
 
 const palCardWithPairs = (p) =>
-  `<a class="pal-card" href="/breeding/${p.slug}/">${icon(p)}<strong>${esc(p.name)}</strong><small>${pairs(parentsOf(pals.indexOf(p)).length)}</small></a>`;
+  `<a class="pal-card" href="/breeding/${p.slug}/">${icon(p)}<strong>${esc(label(p))}</strong><small>${pairs(parentsOf(pals.indexOf(p)).length)}</small></a>`;
 
 function passivePage(skill) {
   const carriers = [...skill.carriers].sort((a, b) => a[0].dex - b[0].dex);
@@ -874,7 +893,7 @@ const familyLede = (f) => f.shared.length
 
 function familyPage(f) {
   const cards = f.members.map(([p, i]) =>
-    `<a class="pal-card" href="/breeding/${p.slug}/">${icon(p)}<strong>${esc(p.name)}</strong><small>${pairs(parentsOf(i).length)}</small></a>`).join('\n      ');
+    `<a class="pal-card" href="/breeding/${p.slug}/">${icon(p)}<strong>${esc(label(p))}</strong><small>${pairs(parentsOf(i).length)}</small></a>`).join('\n      ');
 
   const easiest = [...f.members].sort((a, b) => parentsOf(b[1]).length - parentsOf(a[1]).length)[0];
   const hardest = [...f.members].sort((a, b) => parentsOf(a[1]).length - parentsOf(b[1]).length)[0];
@@ -949,7 +968,7 @@ function mutationsIndex() {
   const section = (f) => `    <h2 id="${f.slug}">${esc(f.name)} — ${f.members.length} variant${f.members.length === 1 ? '' : 's'}</h2>
     <p>${familyLede(f)}.${f.members.length >= FAMILY_MIN ? ` <a href="/mutations/${f.slug}/">All ${f.members.length} ${esc(f.name)} Pals &rarr;</a>` : ''}</p>
     <div class="pal-grid pal-grid--compact">
-      ${f.members.map(([p, i]) => `<a class="pal-card" href="/breeding/${p.slug}/">${icon(p)}<strong>${esc(p.name)}</strong><small>${pairs(parentsOf(i).length)}</small></a>`).join('\n      ')}
+      ${f.members.map(([p, i]) => `<a class="pal-card" href="/breeding/${p.slug}/">${icon(p)}<strong>${esc(label(p))}</strong><small>${pairs(parentsOf(i).length)}</small></a>`).join('\n      ')}
     </div>`;
 
   const body = `    <h1>Palworld Variant Pals — All ${variants.length} Mutations</h1>
@@ -971,7 +990,7 @@ ${big.map(section).join('\n\n')}
     <p>${small.every((f) => f.members.length === 1) ? 'These families have a single member each.' : `Families with fewer than ${FAMILY_MIN} members, listed together.`}</p>
     <div class="pal-grid pal-grid--compact">
       ${small.flatMap((f) => f.members).sort((a, b) => a[0].dex - b[0].dex)
-        .map(([p, i]) => `<a class="pal-card" href="/breeding/${p.slug}/">${icon(p)}<strong>${esc(p.name)}</strong><small>${pairs(parentsOf(i).length)}</small></a>`).join('\n      ')}
+        .map(([p, i]) => `<a class="pal-card" href="/breeding/${p.slug}/">${icon(p)}<strong>${esc(label(p))}</strong><small>${pairs(parentsOf(i).length)}</small></a>`).join('\n      ')}
     </div>
 
     <h2>Breed a variant</h2>
@@ -1028,12 +1047,17 @@ ${urls.map(([loc, priority, freq]) =>
 </urlset>
 `]);
 
+// /tool/calculator.html is deliberately crawlable even though it must never be
+// indexed on its own. The homepage embeds it in an iframe, so a Disallow here
+// would leave Googlebot rendering the homepage around an empty frame; the page
+// is kept out of the index with an X-Robots-Tag header in vercel.json instead,
+// which a crawler can only obey if it is allowed to fetch the file and read it.
+//
+// The preview build and the Vercel deployment URL are the other two copies of
+// this site; both are handled by host-scoped noindex headers rather than here,
+// because robots.txt is served byte-identically from every host.
 files.push(['robots.txt', `User-agent: *
 Allow: /
-
-# The calculator is embedded in the homepage; indexing it separately would put a
-# chrome-less copy of the tool in competition with the page it belongs to.
-Disallow: /tool/
 
 Sitemap: ${SITE}/sitemap.xml
 `]);

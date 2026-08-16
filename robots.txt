@@ -1,8 +1,4 @@
 User-agent: *
 Allow: /
 
-# The calculator is embedded in the homepage; indexing it separately would put a
-# chrome-less copy of the tool in competition with the page it belongs to.
-Disallow: /tool/
-
 Sitemap: https://palbreeding.net/sitemap.xml
