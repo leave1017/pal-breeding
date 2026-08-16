@@ -33,6 +33,17 @@ html[data-theme="dark"]{
 }
 
 *,*::before,*::after{box-sizing:border-box}
+/* The `hidden` attribute is only styled by the browser's own stylesheet, and
+   any author rule beats that no matter how weak its selector — so a single
+   `display:flex` on a class silently cancels it. That is what happened to the
+   /pals/ grid: the filter set node.hidden on 294 of 299 cards and the count
+   read "5 of 299", but .pcard{display:flex} kept every one of them on screen,
+   so searching there appeared to do nothing while the identical code on
+   /breeding/ (plain <tr>, no display rule) worked. Restating the rule here, at
+   author level, makes the attribute mean what it says for every element —
+   including .pgrid and .reveal__more, which are display:grid and display:flex
+   and would have failed the same way. */
+[hidden]{display:none !important}
 /* The same yellow/cyan wash the homepage hero uses, so a Pal page or a legal
    page reads as part of the site rather than as a bare document. */
 body::before{
