@@ -7,9 +7,13 @@
    normal change event, so every existing listener keeps working, and with JS
    off the page falls back to the plain control. */
 (function () {
-  var CHEVRON = '<svg class="fsel__arrow" viewBox="0 0 12 8" fill="none" stroke="currentColor" '
-    + 'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
-    + '<path d="M1 1.5 6 6.5l5-5"/></svg>';
+  // width/height are set as real attributes, not just a CSS class: an <svg>
+  // with no intrinsic size and no CSS falls back to a browser default of
+  // roughly 300x150, which is what happens for a moment on a slow stylesheet
+  // load — this way the arrow is never wrong-sized even before CSS applies.
+  var CHEVRON = '<svg class="fsel__arrow" width="12" height="8" viewBox="0 0 12 8" fill="none" '
+    + 'stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" '
+    + 'aria-hidden="true"><path d="M1 1.5 6 6.5l5-5"/></svg>';
 
   var openOne = null;
 
