@@ -89,6 +89,7 @@
 <main>
   <div class="wrap wrap--wide">
     <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span class="sep" aria-hidden="true">/</span><span aria-current="page">All Pals</span></nav>
+    <div class="page-head">
     <h1>All Palworld Pals</h1>
     <p class="lede">The full v1.0 Paldeck — 299 Palworld Pals including 85 variant forms, each with its element, rarity and every job it can work. Search by name or number, filter by element and job, and open any Pal to see how to breed one.</p>
 
@@ -98,7 +99,8 @@
       <span class="fact"><small>Dual-element</small>88</span>
       <span class="fact"><small>Work types</small>12</span>
     </div>
-
+    </div>
+    <section class="sect sect--wide">
     <h2>How to Search the Palworld Pals List</h2>
     <p>Names, Paldeck numbers, elements and job names all work as queries — type "fire" or "mining" and the grid answers. The chips stack rather than replace each other, so Dragon plus Kindling cuts 299 Pals down to four. Hover a card for the full read-out of element, rarity and work levels; the icons on the card carry the same information at a glance once you know them.</p>
 
@@ -182,32 +184,39 @@
       <p class="table-empty" data-empty hidden>No Pal matches those filters. <button class="filterbar__reset" type="button" data-reset>Clear them</button></p>
       <p class="reveal__more"><button type="button" data-more hidden>Show all 299</button></p>
     </div>
-
+    </section>
+    <section class="sect">
     <h2>How to Read a Palworld Pal Card</h2>
     <p>The coloured glyphs under each name are the Pal’s elements. Below them sit its jobs, each with the level it works at. A Pal showing a flame at 3 kindles a furnace faster than one at 1, and that gap is the whole reason people breed for specific Pals instead of catching whatever wanders past.</p>
     <p>Variants sit in the grid beside their base form rather than replacing it. Jormuntide and Jormuntide Ignis are two different Pals with two different element lines and two different sets of parents — looking up one tells you nothing about the other. All 85 are covered on the <a href="/mutations/">variants page</a>.</p>
 
     <h3>The number under the name</h3>
     <p>That is the Paldeck entry, and it doubles as a search term — typing 139 gets you Anubis without spelling it. Variants share the number of their base form, which is why you will see two cards reading #121 with different art. The Paldeck order is also the default sort here, so the grid opens the way the in-game list does rather than in some ranking you did not ask for.</p>
-
+    </section>
+    <section class="sect">
     <h2>Palworld Pals by Element</h2>
     <p>Nine elements cover the Paldeck, and the Palworld Pals are spread unevenly across them: Neutral (41), Fire (44), Water (48), Electric (25), Grass (48), Ground (45), Ice (38), Dark (73), Dragon (25). Element decides combat matchups, and for two jobs it decides eligibility outright — only a Fire Pal kindles, only a Water Pal waters. 88 Pals carry two, which is where the interesting combinations live: an Ice/Dragon works a cooler and still hits like a dragon.</p>
-
+    </section>
+    <section class="sect">
     <h2>Work Suitability in Palworld 1.0</h2>
     <p>Twelve jobs keep a base running, and 1.0 rebalanced the levels across all 299 Palworld Pals. Coverage is lopsided. Transporting sits at 148 Pals, Gathering sits at 111 Pals, Handiwork sits at 109 Pals — you will never struggle to staff those. At the other end, Cooling (38), Farming (29), Electricity (25) are thin enough that a good one is worth a breeding project of its own. Filter by the job, sort by how easy each option is to breed, and start from the top.</p>
-
+    </section>
+    <section class="sect">
     <h2>Choosing Palworld Pals for a Base Job</h2>
     <p>Most people arrive here with a gap to fill rather than a Pal in mind: the furnace is idle, or nothing on the team can plant. The grid answers that directly — filter by the job, and what is left is every Pal that can do it.</p>
     <p>Then read the levels, because they are not decoration. A Pal working Kindling at 3 feeds a furnace roughly three times as fast as one at 1, and across a full base that difference decides whether production keeps up with you or falls behind. Sort by <em>Easiest to breed</em> once you have the shortlist and the practical candidates rise to the top: among the Palworld Pals that can do a job, the one reachable from hundreds of parent pairs beats the marginally better one you would have to hunt across the map.</p>
     <p>Watch the second job slot too. A Pal covering three jobs at level 2 is often worth more at a base than a specialist at 4, because it keeps working when the queue shifts. The cards show every job a Pal has, so that trade-off is visible before you commit to breeding one.</p>
-
+    </section>
+    <section class="sect">
     <h2>Rarity, and What It Is Not</h2>
     <p>Rarity describes the Pal. It says nothing about how hard one is to hatch, and treating the two as the same thing is the most common mistake people make reading a list of Palworld Pals. Some rarity-8 Pals fall out of hundreds of different pairings while a common one takes a specific recipe. When you are planning, the number that matters is on the <a href="/breeding/">breeding combinations page</a>: how many pairs actually produce it.</p>
-
+    </section>
+    <section class="sect">
     <h2>From the Pal List to a Breeding Plan</h2>
     <p>Finding the Pal you want is the easy half. Getting one is the other half, and it is why every card here links through to that Pal’s breeding page rather than to a stat sheet.</p>
     <p>That page answers the only question that matters once you have chosen: which two Palworld Pals do you put in the farm. Pairs are listed cheapest first by the parents’ combined rarity, so if you already own something near the top you are one egg away. If the Pal you want turns out to come from a single pair — 28 of them do — the page says so plainly, and you know to go catch one instead of wasting cake finding out the hard way.</p>
-
+    </section>
+    <section class="sect">
     <h2>Palworld Pals FAQ</h2>
     <div class="faq-list">
       <h3>How many Pals are in Palworld 1.0?</h3>
@@ -229,8 +238,9 @@
       <h3>Where do the numbers come from?</h3>
       <p>The v1.0 game data tables, joined against a second independent dataset. The build refuses to finish if the two disagree about any Pal’s work suitability, so a bad import fails loudly instead of quietly shipping wrong levels.</p>
     </div>
+    </section>
 
-    <div class="card-list" style="grid-template-columns:repeat(auto-fit,minmax(250px,1fr));margin-top:30px">
+    <div class="card-list card-list--wide">
       <a class="guide-card" href="/breeding/"><strong>Breeding Combinations</strong><span>All 44,849 pairs, by Pal</span></a>
       <a class="guide-card" href="/mutations/"><strong>Variant Pals</strong><span>All 85 mutations, by family</span></a>
       <a class="guide-card" href="/passives/"><strong>Passive Skills</strong><span>The 23 passives guaranteed by species</span></a>

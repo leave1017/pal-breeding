@@ -86,6 +86,54 @@ const WORK_LABEL = {
 // ---- shared chrome --------------------------------------------------------
 const NAV = [['/', 'Calculator'], ['/breeding/', 'Breeding Combos'], ['/pals/', 'All Pals'], ['/guides/', 'Guide']];
 
+/* These pages run long — a dozen <h2>s of prose under the table — and written
+   as one flat column they read as a wall: the only thing separating one topic
+   from the next is a slightly larger line of text, so nothing tells the eye
+   where a section starts or gives it permission to skip one.
+
+   Rather than hand-wrap every template, take each <h2> and everything up to
+   the next one and put it in its own <section>. The CSS turns that into a
+   card, which is what actually makes the page skimmable.
+
+   Anything before the first <h2> — the h1, the lede, the fact bar — is page
+   header and stays out. A body can opt its tail out too, for a closing button
+   or a row of links that belongs to the page rather than to the last topic. */
+const SECTION_END = '<!--/sections-->';
+
+function sections(body) {
+  const [main, tail = ''] = body.split(SECTION_END);
+
+  /* Split on the newline before an indented <h2>, not on the heading itself:
+     anchoring `^\s*` matches both the blank line above the heading and the
+     heading's own line, which yields an empty chunk between every pair.
+     Requiring a literal newline and then only horizontal space gives exactly
+     one split point per heading. Staying line-anchored also leaves the <h2>s
+     that sit inside a card on /guides/ alone — those are link titles, not
+     sections of the page. */
+  const parts = main.split(/\n(?=[ \t]*<h2[\s>])/);
+  const lead = /^[ \t]*<h2[\s>]/.test(parts[0]) ? '' : parts.shift();
+
+  /* The h1 carries its accent underline with display:inline, which makes it
+     ignore the max-width that holds the rest of the column — it would run the
+     full container while the lede beneath it sat narrower. Boxing the page
+     header gives the title a block to be centred inside. Pages with no
+     section headings at all, like /guides/, need that box just as much, so it
+     is built before the early return rather than after it. */
+  const head = lead.trim() ? `    <div class="page-head">\n${lead.replace(/\n+$/, '')}\n    </div>\n` : '';
+  if (!parts.length) return `${head}${tail}`;
+
+  /* A section holding the filter hub or a combo table needs the full 1180px
+     the container allows — six numeric columns do not fit in a reading
+     measure. Everything else is prose and reads better narrow. */
+  const isWide = (chunk) => /data-table-filter|class="table-scroll"/.test(chunk);
+
+  const wrapped = parts
+    .map((chunk) => `    <section class="sect${isWide(chunk) ? ' sect--wide' : ''}">\n`
+      + `${chunk.replace(/\n+$/, '')}\n    </section>`)
+    .join('\n');
+  return `${head}${wrapped}\n${tail}`;
+}
+
 function layout({ title, description, path, crumbs, body, extraLd = [], scripts = [], pageType = 'WebPage', sprite = false }) {
   const url = `${SITE}${path}`;
   // The home link is only current on the home page; the section links are
@@ -186,7 +234,7 @@ ${sprite ? SPRITE : ''}
 <main>
   <div class="wrap wrap--wide">
     <nav class="crumbs" aria-label="Breadcrumb">${trail}</nav>
-${body}
+${sections(body)}
   </div>
 </main>
 
@@ -544,8 +592,8 @@ ${hubShell({
     <div class="faq-list">
       ${faq.map(([q, a]) => `<h3>${esc(q)}</h3>\n      <p>${a}</p>`).join('\n      ')}
     </div>
-
-    <p style="margin-top:30px"><a class="btn btn--primary" href="/#calculator">Open the breeding calculator</a></p>
+${SECTION_END}
+    <p class="page-cta"><a class="btn btn--primary" href="/#calculator">Open the breeding calculator</a></p>
 `;
 
   return layout({
@@ -651,8 +699,8 @@ ${hubShell({
     <div class="faq-list">
       ${faq.map(([q, a]) => `<h3>${esc(q)}</h3>\n      <p>${a}</p>`).join('\n      ')}
     </div>
-
-    <div class="card-list" style="grid-template-columns:repeat(auto-fit,minmax(250px,1fr));margin-top:30px">
+${SECTION_END}
+    <div class="card-list card-list--wide">
       <a class="guide-card" href="/breeding/"><strong>Breeding Combinations</strong><span>All ${n(combos.combos.length)} pairs, by Pal</span></a>
       <a class="guide-card" href="/mutations/"><strong>Variant Pals</strong><span>All ${variantCount} mutations, by family</span></a>
       <a class="guide-card" href="/passives/"><strong>Passive Skills</strong><span>The ${passiveIndex.length} passives guaranteed by species</span></a>

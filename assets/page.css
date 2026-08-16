@@ -112,6 +112,85 @@ main ul{margin:0 0 16px;padding-left:22px;color:var(--fg-muted)}
 main li{margin-bottom:8px}
 main strong{color:var(--fg)}
 
+/* ============ Section cards ============ *
+   Each <h2> and the prose under it is its own card. On the two hub pages that
+   is a dozen topics in a column, and run together they were a single grey
+   slab: a reader could not see where one ended, so there was no obvious place
+   to stop, skip, or come back to.
+
+   Two things do the work. The card edge says where a topic begins and ends.
+   The measure below says how wide a line of prose may be — the container is
+   1180px so that a table of six numeric columns fits, and text left to fill
+   it ran past 140 characters a line, roughly twice what is comfortable to
+   read. The table still gets the full width; only the prose is reined in. */
+/* The container is 1180px wide because one table on the page needs it. Left to
+   fill that, a paragraph ran past 140 characters a line — about twice a
+   comfortable measure, and the main reason the page was tiring rather than
+   merely long. So the reading column is centred at 860px and only the things
+   that genuinely need the width break out of it.
+
+   The two numbers below are a pair: 796 is 860 minus the 32px of card padding
+   on each side. That is what puts the text inside a full-width section on the
+   same axis as the text inside a narrow one, so every h2 down the page starts
+   at the same x and the wide table reads as one element stepping outside the
+   column rather than as a second column. Change one, change the other. */
+main > .wrap--wide > *{max-width:860px;margin-inline:auto}
+main > .wrap--wide > .sect--wide{max-width:100%}
+
+.sect{
+  background:var(--card);
+  border:1px solid var(--border-soft);
+  border-radius:var(--r-card);
+  padding:26px 32px 30px;
+  margin:0 0 16px;
+}
+.sect--wide > *{max-width:796px;margin-inline:auto}
+.sect--wide > .table-scroll,
+.sect--wide > [data-table-filter],
+.sect--wide > .reveal,
+.sect--wide > .pal-grid{max-width:100%}
+/* margin-block, not the margin shorthand: the shorthand would reset the auto
+   inline margins that centre this heading inside a full-width section, and the
+   h2 would jump to the card edge while its own paragraph stayed on the column. */
+.sect > h2{
+  margin-block:0 18px;padding:0 0 14px 14px;
+  border-bottom:1px solid var(--border-soft);
+}
+.sect > h2::before{top:.1em;bottom:calc(14px + .28em)}
+
+/* h3 was 17px and bold, which is also what <strong> looks like mid-sentence —
+   sub-headings kept reading as an emphasised first phrase. The cyan tick above
+   makes the level unambiguous and stays subordinate to the yellow h2 bar. */
+.sect > h3,
+.faq-list h3{
+  font-size:16.5px;margin:30px 0 10px;padding-top:14px;position:relative;
+}
+.sect > h3:first-of-type{margin-top:22px}
+.sect > h3::before,
+.faq-list h3::before{
+  content:"";position:absolute;left:0;top:0;width:26px;height:3px;
+  border-radius:999px;background:var(--cyan);
+}
+
+/* A run of question/answer pairs with nothing between them is the hardest
+   thing on the page to skim, so each question gets a hairline above it. That
+   rule already marks the boundary, so the tick these h3s would otherwise
+   inherit is dropped rather than left to sit on top of the question. */
+.faq-list h3{margin-top:0;padding-top:20px;border-top:1px solid var(--border-soft)}
+.faq-list h3:first-child{border-top:0;padding-top:2px}
+.faq-list h3::before{content:none}
+.faq-list p{margin-bottom:0;padding-bottom:18px}
+.faq-list p:last-child{padding-bottom:0}
+
+/* Trailing calls to action sit after the last section, not inside it. */
+.page-cta{margin:26px 0 0}
+.card-list--wide{grid-template-columns:repeat(auto-fit,minmax(250px,1fr));margin-top:22px}
+
+@media (max-width:640px){
+  .sect{padding:20px 18px 24px;border-radius:18px;margin-bottom:12px}
+  .sect > h2{padding-left:12px;margin-bottom:14px}
+}
+
 .callout{
   background:var(--bg-cyan);border-radius:var(--r-card);padding:22px 26px;margin:28px 0;
   border-left:5px solid var(--accent);

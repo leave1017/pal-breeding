@@ -63,23 +63,29 @@
 <main>
   <div class="wrap wrap--wide">
     <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span class="sep" aria-hidden="true">/</span><a href="/guides/">Guides</a><span class="sep" aria-hidden="true">/</span><span aria-current="page">Breeding formula</span></nav>
+    <div class="page-head">
     <h1>How the Palworld Breeding Formula Works</h1>
     <p class="lede">Breeding in Palworld is not random. The game runs a short piece of arithmetic on two hidden numbers, and the egg follows from it. Here is the formula, and the parts of the table it does not explain.</p>
+    </div>
+    <section class="sect">
     <h2>Every Pal has a hidden breeding power</h2>
     <p>Each Pal carries a value the community calls <strong>CombiRank</strong> — a plain sorting number with nothing to do with combat stats. Powerful late-game Pals sit at the low end, common starters at the high end.</p>
-
+    </section>
+    <section class="sect">
     <h2>The formula</h2>
     <p>Given two parents, the game works out a target:</p>
     <pre class="code">child power = floor((power of parent A + power of parent B + 1) / 2)</pre>
     <p>It then picks the breedable Pal whose own power sits closest to that target. When two are equally close, the one with the higher internal priority wins. That is the whole rule — no dice roll, which is why a calculator can tell you the answer before you spend the cake.</p>
-
+    </section>
+    <section class="sect">
     <h2>Three things override it</h2>
     <ul>
       <li><strong>Same species</strong> — two of the same Pal always produce that Pal, whatever the arithmetic says.</li>
       <li><strong>Fixed recipes</strong> — certain pairs are hard-coded to a specific child and ignore the formula entirely.</li>
       <li><strong>Parent gender</strong> — two pairs in the v1.0 table produce a different child depending on which parent is male.</li>
     </ul>
-
+    </section>
+    <section class="sect sect--wide">
     <h2>How much of the table the formula explains</h2>
     <p>We ran the formula against all 44,849 combinations in the v1.0 data and compared its answer to the game's:</p>
     <div class="table-scroll"><table class="combo-table">
@@ -91,17 +97,19 @@
     </table></div>
     <p>The jump matters: <strong>variant forms are not candidates for the arithmetic</strong>. Lux, Cryst, Ignis, Terra and Noct Pals are reached through fixed recipes, not by averaging. Leave them in the pool and a quarter of your predictions come out wrong.</p>
     <p>The remaining 7.6% are the fixed recipes. There is no pattern to derive there — they have to be looked up, which is why this site ships the full table rather than computing it in your browser.</p>
-
+    </section>
+    <section class="sect">
     <h2>What this means when you are planning</h2>
     <ul>
       <li>Two parents with similar power produce something near them. Reaching a much rarer Pal means pulling the average, which usually takes more than one generation.</li>
       <li>Because the result is fixed, a chain can be planned end to end before you catch anything — that is what <a href="/#calculator">Shortest Route</a> does.</li>
       <li>Parent order is irrelevant everywhere except the two gender-dependent pairs, so a pair only ever needs checking once.</li>
     </ul>
-
+    </section>
+    <section class="sect">
     <h2>Where the numbers come from</h2>
     <p>The breeding table and each Pal's breeding power are generated from the Palworld v1.0 game files, by way of the open-source <a href="https://github.com/tylercamp/palcalc" rel="noopener">Pal Calc</a> project. Element data comes from a second dataset, and the build refuses to run unless both sources agree on work suitability for all 299 Pals. More on that in <a href="/about/">About</a>.</p>
-
+    </section>
 
   </div>
 </main>
