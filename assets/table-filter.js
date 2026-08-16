@@ -62,6 +62,15 @@
     var container = root.querySelector('[data-items]');
     if (!container) return;
 
+    /* The remaining 269 items load on the first interaction, not on load.
+       Fetching them up front put all 299 back into the rendered DOM, which
+       undoes the point of shipping 30: a reader who never touches the
+       controls, and anything measuring the rendered page, would see the full
+       list again. Any of search, a chip, a sort or "Show all" pulls them in,
+       and the controls stay responsive because the fetch resolves long before
+       a second keystroke lands. */
+    var pending = null;
+
     var reveal = root.querySelector('[data-reveal]');
     var moreBtn = root.querySelector('[data-more]');
     var countEl = root.querySelector('[data-count]');
@@ -71,6 +80,7 @@
     var table = container.closest ? container.closest('table') : null;
 
     var rows = [];
+    var total = parseInt(root.getAttribute('data-total'), 10) || 0;
     var state = { q: '', elements: [], work: [], flags: [], sort: null, dir: 1, expanded: false };
 
     function readItems() {
@@ -115,15 +125,18 @@
       rows.forEach(function (r) { r.node.hidden = !shown[r.key]; });
       if (state.sort || q) out.forEach(function (r) { container.appendChild(r.node); });
 
-      reveal.classList.toggle('is-capped', !state.expanded && out.length > CAP);
+      // Until the fragment lands, rows.length is 30 while the page really has
+      // `total` — so report the total and keep the cap on.
+      var loaded = rows.length >= total;
+      reveal.classList.toggle('is-capped', !state.expanded && (out.length > CAP || !loaded));
       if (moreBtn) {
-        moreBtn.hidden = out.length <= CAP;
-        moreBtn.textContent = state.expanded ? 'Show fewer' : 'Show all ' + out.length;
+        moreBtn.hidden = loaded && out.length <= CAP;
+        moreBtn.textContent = state.expanded ? 'Show fewer' : 'Show all ' + (loaded ? out.length : total);
       }
       if (countEl) {
-        countEl.textContent = out.length === rows.length
-          ? String(rows.length)
-          : out.length + ' of ' + rows.length;
+        countEl.textContent = !loaded || out.length === rows.length
+          ? String(total)
+          : out.length + ' of ' + total;
       }
       if (emptyEl) emptyEl.hidden = out.length > 0;
       if (table) table.hidden = out.length === 0;
@@ -143,19 +156,36 @@
       apply();
     }
 
+    function ensureAll(then) {
+      var src = root.getAttribute('data-src');
+      if (!src || !window.fetch || root.hasAttribute('data-loaded')) {
+        then();
+        return;
+      }
+      root.setAttribute('data-loaded', '');
+      pending = fetch(src)
+        .then(function (r) { return r.ok ? r.text() : Promise.reject(r.status); })
+        .then(function (html) {
+          container.insertAdjacentHTML('beforeend', html);
+          readItems();
+        })
+        .catch(function () { /* keep what the server sent */ });
+      pending.then(then);
+    }
+
     function toggle(list, value, btn) {
       var at = list.indexOf(value);
       if (at === -1) list.push(value); else list.splice(at, 1);
       btn.setAttribute('aria-pressed', at === -1 ? 'true' : 'false');
       state.expanded = false;
-      apply();
+      ensureAll(apply);
     }
 
     if (input) {
       input.addEventListener('input', function () {
         state.q = input.value;
         state.expanded = false;
-        apply();
+        ensureAll(apply);
       });
     }
 
@@ -185,7 +215,7 @@
           other.setAttribute('aria-sort',
             other === th ? (state.dir === 1 ? 'ascending' : 'descending') : 'none');
         });
-        apply();
+        ensureAll(apply);
       });
     });
 
@@ -194,15 +224,17 @@
         var parts = sortSelect.value.split(':');
         state.sort = parts[0] || null;
         state.dir = parts[1] === 'desc' ? -1 : 1;
-        apply();
+        ensureAll(apply);
       });
     }
 
     if (moreBtn) {
       moreBtn.addEventListener('click', function () {
         state.expanded = !state.expanded;
-        apply();
-        if (!state.expanded) reveal.scrollIntoView({ block: 'start', behavior: 'smooth' });
+        ensureAll(function () {
+          apply();
+          if (!state.expanded) reveal.scrollIntoView({ block: 'start', behavior: 'smooth' });
+        });
       });
     }
 
@@ -212,20 +244,6 @@
 
     readItems();
     apply();
-
-    // The rest of the Paldeck, rendered by the same generator template and
-    // fetched once. A failure here leaves the server-rendered 30 in place.
-    var src = root.getAttribute('data-src');
-    if (src && window.fetch) {
-      fetch(src)
-        .then(function (r) { return r.ok ? r.text() : Promise.reject(r.status); })
-        .then(function (html) {
-          container.insertAdjacentHTML('beforeend', html);
-          readItems();
-          apply();
-        })
-        .catch(function () { /* keep what the server sent */ });
-    }
   }
 
   ready(function () {

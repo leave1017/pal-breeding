@@ -392,7 +392,7 @@ function filterBar({ search, elements = true, work = false, flags = [], sort = n
       </div>`;
 }
 
-const hubShell = ({ src, bar, listing }) => `    <div data-table-filter data-src="${src}">
+const hubShell = ({ src, bar, listing }) => `    <div data-table-filter data-src="${src}" data-total="${pals.length}">
 ${bar}
       <div class="reveal" data-reveal>
 ${listing}

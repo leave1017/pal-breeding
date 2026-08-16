@@ -229,10 +229,22 @@ html[data-theme="dark"] .w-Farming{color:#a3e635}
 .picker__close{margin-left:auto;font-size:13px;font-weight:800;color:var(--cyan-deep)}
 .filters{display:grid;grid-template-columns:minmax(0,300px) 160px 170px 140px;gap:8px;margin-bottom:12px}
 .input{
-  width:100%;background:var(--card);border:1px solid var(--border);border-radius:var(--r-input);
+  width:100%;background-color:var(--card);border:1px solid var(--border);border-radius:var(--r-input);
   padding:10px 13px;font-size:14.5px;font-weight:600;color:var(--fg);font-family:inherit;
   transition:border-color .2s,box-shadow .2s;
 }
+/* Dropdowns get the site's chrome rather than the browser's: same border,
+   same radius, a drawn chevron instead of the platform arrow. */
+select.input{
+  -webkit-appearance:none;-moz-appearance:none;appearance:none;
+  padding-right:32px;cursor:pointer;
+  background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1.5 6 6.5l5-5'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;
+}
+html[data-theme="dark"] select.input{
+  background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1.5 6 6.5l5-5'/%3E%3C/svg%3E");
+}
+select.input option{background:var(--card);color:var(--fg);font-weight:600}
 .input::placeholder{color:var(--fg-muted);font-weight:500}
 .input:focus{outline:none;border-color:#67c9e6;box-shadow:0 0 0 4px rgba(204,236,246,.55)}
 
@@ -510,13 +522,13 @@ html[data-theme="dark"] .w-Farming{color:#a3e635}
     // Single-file preview builds hand the images over inline; the served site
     // loads them from assets/pals/.
     const inlineIcon = window.__PALICONS__?.[p.slug];
-    const img = el('img', { alt: '', loading: 'lazy', src: inlineIcon ?? `../assets/pals/${p.slug}.webp` });
+    const img = el('img', { alt: '', loading: 'lazy', src: inlineIcon ?? `/assets/pals/${p.slug}.webp` });
     let triedDex = false;
     img.addEventListener('load', () => img.classList.add('is-loaded'));
     img.addEventListener('error', () => {
       if (triedDex) { img.remove(); return; }
       triedDex = true;
-      img.src = `../assets/pals/${String(p.dex).padStart(3, '0')}.webp`;
+      img.src = `/assets/pals/${String(p.dex).padStart(3, '0')}.webp`;
     });
     box.append(img);
     return box;
@@ -530,9 +542,9 @@ html[data-theme="dark"] .w-Farming{color:#a3e635}
     const [pals, passives, combos] = inline
       ? [inline.pals, inline.passives, inline.combos]
       : await Promise.all([
-          fetch('../data/pals.json').then((r) => r.json()),
-          fetch('../data/passives.json').then((r) => r.json()),
-          fetch('../data/combos.json').then((r) => r.json()),
+          fetch('/data/pals.json').then((r) => r.json()),
+          fetch('/data/passives.json').then((r) => r.json()),
+          fetch('/data/combos.json').then((r) => r.json()),
         ]);
     state.pals = pals;
     state.passives = passives;
