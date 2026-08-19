@@ -84,7 +84,18 @@ const WORK_LABEL = {
 };
 
 // ---- shared chrome --------------------------------------------------------
-const NAV = [['/', 'Calculator'], ['/breeding/', 'Breeding Combos'], ['/pals/', 'All Pals'], ['/guides/', 'Guide']];
+/* Mutations and Passives were footer-only on the reasoning that the top bar
+   should carry the core task and not the whole site map. Search data says
+   otherwise: those two rank better than anything else on the site, and were
+   the only pages of their kind with no route in from the header. */
+const NAV = [
+  ['/', 'Calculator'],
+  ['/breeding/', 'Breeding Combos'],
+  ['/pals/', 'All Pals'],
+  ['/mutations/', 'Mutations'],
+  ['/passives/', 'Passives'],
+  ['/guides/', 'Guide'],
+];
 
 /* These pages run long — a dozen <h2>s of prose under the table — and written
    as one flat column they read as a wall: the only thing separating one topic
@@ -524,6 +535,84 @@ const rankedByPairs = pals.map((p, i) => ({ p, i, count: parentsOf(i).length }))
 const singlePair = rankedByPairs.filter((r) => r.count === 1);
 const medianPairs = rankedByPairs[Math.floor(rankedByPairs.length / 2)].count;
 
+/* How many other Pal pages link to each Pal, counted the way a crawler that
+   runs no scripts would see it: a Pal earns links by turning up in somebody
+   else's parent or offspring table, so this walks the same rows palPage()
+   actually prints, caps included.
+
+   The spread is wide — a few hundred links for a common Pal, single digits for
+   the ones that breed only from themselves, because those never appear as
+   anybody's parent. Those are the legendaries, which is to say the pages worth
+   the most and reached the least. The A–Z index gives them the descriptive
+   anchor text and everything else its plain name. */
+const inboundLinks = (() => {
+  const count = new Array(pals.length).fill(0);
+  pals.forEach((_, x) => {
+    const seen = new Set();
+    easiestFirst(parentsOf(x)).slice(0, MAX_PARENT_ROWS)
+      .forEach(([a, b]) => { seen.add(a); seen.add(b); });
+    childrenOf(x).sort((m, n2) => pals[m[1]].dex - pals[n2[1]].dex).slice(0, MAX_CHILD_ROWS)
+      .forEach(([partner, child]) => { seen.add(partner); seen.add(child); });
+    seen.delete(x);
+    seen.forEach((i) => { count[i] += 1; });
+  });
+  return count;
+})();
+
+/* Enough of them to lift the page's keyword density back over 3% — the plain
+   names alone would leave it near 1.8% — and few enough that the index does not
+   read as 299 copies of one template, which is its own signal. */
+const LONG_ANCHORS = 18;
+const needsAnchor = new Set(
+  pals.map((p, i) => [p.slug, inboundLinks[i]])
+    .sort((a, b) => a[1] - b[1])
+    .slice(0, LONG_ANCHORS)
+    .map(([slug]) => slug));
+
+/* Every Pal, alphabetically, rendered into the page rather than fetched.
+   The table above ships 30 rows and pulls the other 269 in on the first
+   interaction, which is right for a reader and useless to a crawler: nothing
+   clicks, so those 269 links do not exist as far as Google is concerned. This
+   hub linked to 38 of the 299 detail pages; the rest were reachable only
+   through each other and the sitemap. */
+function azIndex() {
+  const groups = new Map();
+  [...pals]
+    .sort((a, b) => label(a).localeCompare(label(b), 'en'))
+    .forEach((p) => {
+      const first = label(p).charAt(0).toUpperCase();
+      const key = /[A-Z]/.test(first) ? first : '#';
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(p);
+    });
+
+  const letters = [...groups.keys()];
+  const jump = letters
+    .map((L) => `<a href="#az-${L === '#' ? 'num' : L.toLowerCase()}">${L}</a>`).join('');
+
+  const list = letters.map((L) => {
+    const id = `az-${L === '#' ? 'num' : L.toLowerCase()}`;
+    const items = groups.get(L).map((p) => {
+      const name = esc(label(p));
+      // The descriptive form only where it is worth spending: see needsAnchor.
+      const text = needsAnchor.has(p.slug) ? `${name} breeding combinations` : name;
+      return `<li><a href="/breeding/${p.slug}/">${text}</a></li>`;
+    }).join('');
+    return `      <div class="az__group">
+        <h3 id="${id}">${L}</h3>
+        <ul>${items}</ul>
+      </div>`;
+  }).join('\n');
+
+  return `    <h2>All ${pals.length} Palworld Breeding Combinations A&ndash;Z</h2>
+    <p>Every Pal in the v1.0 Paldeck, alphabetically, each one linking to its own page of Palworld breeding combinations. If you already know the name you are after, this is the shortest way in — quicker than sorting the table above, and it works with scripting switched off. Each page opens on the parent pairs that produce that Pal, cheapest first, followed by what it breeds into when paired with everything else. Worth starting with the ${singlePair.length} Pals that breed only from themselves: no amount of breeding conjures the first one, so their breeding combinations begin with catching one in the wild. Between them these ${pals.length} pages account for all ${n(combos.combos.length)} Palworld breeding combinations in the game.</p>
+    <nav class="az" aria-label="Every Pal from A to Z">
+      <p class="az__jump">${jump}</p>
+${list}
+    </nav>
+`;
+}
+
 function breedingIndex() {
   const top = rankedByPairs.slice(0, 5);
   const listing = `        <div class="table-scroll">
@@ -627,6 +716,8 @@ ${hubShell({
     <div class="faq-list">
       ${faq.map(([q, a]) => `<h3>${esc(q)}</h3>\n      <p>${a}</p>`).join('\n      ')}
     </div>
+
+${azIndex()}
 ${SECTION_END}
     <p class="page-cta"><a class="btn btn--primary" href="/#calculator">Open the breeding calculator</a></p>
 `;

@@ -430,6 +430,31 @@ html[data-theme="dark"] .badge--electric{background:#3d3316;color:#fde047}
   .tool-grid{grid-template-columns:repeat(2,1fr)}
   .foot-grid{grid-template-columns:1fr 1fr}
 }
+/* The nav collapses earlier than the rest of the phone layout. Six links need
+   620px in a row, and once the wordmark, the theme button and the page gutters
+   are paid for the header runs out of room at about 843px — above the 820px
+   everything else switches at. Left together, tablets in between got a header
+   wider than the screen. The links stay in the DOM either way, so they are
+   still crawled and still pass weight. */
+/* The date pill is the first thing to go: it is the only decorative item in
+   the bar, and with six links beside it the header outgrew the screen from
+   about 940px down — while the links themselves still had room to sit in a
+   row until 843. */
+@media (max-width:1000px){
+  .badge-update{display:none}
+}
+@media (max-width:900px){
+  .nav{position:relative}
+  .nav__toggle{display:grid}
+  .nav__links{
+    position:absolute;top:calc(100% + 8px);left:0;right:0;z-index:60;
+    flex-direction:column;gap:3px;padding:8px;
+    background:var(--card);border:1px solid var(--border);border-radius:18px;
+    box-shadow:var(--shadow-lift);
+  }
+  .nav__links:not([data-open]){display:none}
+  .nav__links a{padding:12px 14px;font-size:15px;border-radius:12px}
+}
 @media (max-width:820px){
   /* The hero is the only thing between the header and the calculator, so every
      pixel it takes is a pixel the tool does not get on a phone. These three
@@ -441,25 +466,9 @@ html[data-theme="dark"] .badge--electric{background:#3d3316;color:#fde047}
   .hero h1{font-size:23px;margin:6px auto 5px;letter-spacing:-.02em;max-width:20ch}
   .hero__sub{font-size:13.5px;line-height:1.45}
   .eyebrow{font-size:10.5px;padding:4px 11px}
-  .nav{height:60px;gap:10px;position:relative}
+  .nav{height:60px;gap:10px}
   .brand span{display:none}
   .nav__right{min-width:0}
-  .badge-update{display:none}
-  /* The four links need 423px and the bar has 262px. They used to scroll
-     sideways inside the pill, which hid "Guide" entirely and cut "All Pals"
-     mid-word — and a sideways-scrolling nav is not a gesture anyone goes
-     looking for. Behind a button instead: the links stay in the DOM, so they
-     are still crawled and still pass weight, and the top bar stops being a
-     puzzle. */
-  .nav__toggle{display:grid}
-  .nav__links{
-    position:absolute;top:calc(100% + 8px);left:0;right:0;z-index:60;
-    flex-direction:column;gap:3px;padding:8px;
-    background:var(--card);border:1px solid var(--border);border-radius:18px;
-    box-shadow:var(--shadow-lift);
-  }
-  .nav__links:not([data-open]){display:none}
-  .nav__links a{padding:12px 14px;font-size:15px;border-radius:12px}
   .mode-grid{grid-template-columns:1fr}
   .section{padding:60px 0}
   /* .section--tool asks for no top padding so the calculator sits against the
@@ -505,6 +514,8 @@ html[data-theme="dark"] .badge--electric{background:#3d3316;color:#fde047}
           <a href="/" aria-current="page">Calculator</a>
           <a href="/breeding/">Breeding Combos</a>
           <a href="/pals/">All Pals</a>
+          <a href="/mutations/">Mutations</a>
+          <a href="/passives/">Passives</a>
           <a href="/guides/">Guide</a>
         </div>
         <span class="badge-update"><span class="dot" aria-hidden="true"></span>Updated Aug 2026</span>

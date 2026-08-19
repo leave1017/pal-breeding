@@ -73,8 +73,9 @@
     });
     // Left open on a phone and then rotated to landscape, the drawer would
     // otherwise stay stuck open over a layout that no longer has a button.
+    // 900 to match the breakpoint the drawer appears at in the stylesheets.
     window.addEventListener('resize', function () {
-      if (window.innerWidth > 820) setOpen(false);
+      if (window.innerWidth > 900) setOpen(false);
     });
   }
 
