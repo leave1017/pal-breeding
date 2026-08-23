@@ -104,12 +104,23 @@ const andList = (xs) => xs.length <= 1 ? (xs[0] ?? '')
 
 const palLink = (q) => `<a href="/breeding/${q.slug}/">${esc(label(q))}</a>`;
 
-/** The single easiest pair to make this Pal, as a linked "A + B" phrase. */
+/** The cheapest pair a player can actually start from. A variant that also
+ *  breeds true (its cheapest "pair" being two of itself) can't be *started*
+ *  that way — you'd already need one — so those are skipped in favour of the
+ *  cheapest pair of two other Pals. `skippedSelf` records that a self-pair was
+ *  cheaper, so the prose can say "aside from breeding it with itself". Every
+ *  caller uses this, so the three passages on a page never disagree. */
 function cheapestPairPhrase(i) {
   const ps = easiestFirst(parentsOf(i));
   if (!ps.length) return null;
-  const [a, b] = ps[0];
-  return { a: pals[a], b: pals[b], cost: cost(ps[0]), text: `${palLink(pals[a])} + ${palLink(pals[b])}` };
+  const usable = ps.find(([a, b]) => a !== i && b !== i);
+  const chosen = usable ?? ps[0];
+  const [a, b] = chosen;
+  return {
+    a: pals[a], b: pals[b], cost: cost(chosen),
+    text: `${palLink(pals[a])} + ${palLink(pals[b])}`,
+    skippedSelf: !!usable && (ps[0][0] === i || ps[0][1] === i),
+  };
 }
 
 /** Distinct offspring this Pal can father/mother, richest-first by rarity. */
@@ -163,10 +174,18 @@ function analysisParas(p, i) {
     const closer = parents.length >= medianPairCount
       ? `Sitting at rank ${rank} of ${pals.length} for reachability, it comes from ${reach}, so you very likely own a workable pair already.`
       : `At rank ${rank} of ${pals.length} for reachability it comes from ${reach}, so it is worth starting from the cheapest row rather than a longer chain.`;
+    // When a self-pair was skipped, don't claim "the lowest of all pairs" — say
+    // it's the cheapest one you can breed without already owning a copy.
+    const superlative = cheap.skippedSelf
+      ? `the cheapest pair you can start from without already owning a ${name}`
+      : `the lowest of the ${pairs(parents.length)} that reach it`;
+    const superlative2 = cheap.skippedSelf
+      ? `the easiest to start from`
+      : `the easiest of the ${pairs(parents.length)}`;
     paras.push('<p>' + pick([
-      `The cheapest route to ${name} is ${cheap.text}, whose parents total just ${cheap.cost} in combined rarity — the lowest of the ${pairs(parents.length)} that reach it. ${closer}`,
-      `Of the ${pairs(parents.length)} that hatch ${name}, the easiest is ${cheap.text}, a combined rarity of ${cheap.cost}. ${closer}`,
-      `Start with ${cheap.text}: at a combined rarity of ${cheap.cost} it is the least expensive of the ${pairs(parents.length)} that produce ${name}. ${closer}`,
+      `The cheapest route to ${name} is ${cheap.text}, whose parents total ${cheap.cost} in combined rarity — ${superlative}. ${closer}`,
+      `Of the ${pairs(parents.length)} that hatch ${name}, ${superlative2} is ${cheap.text}, a combined rarity of ${cheap.cost}. ${closer}`,
+      `Start with ${cheap.text}: at a combined rarity of ${cheap.cost} it is ${superlative}. ${closer}`,
     ]) + '</p>');
   }
 
@@ -544,11 +563,15 @@ function palPage(p, i) {
   const rewrite = REWRITE_SLUGS.has(p.slug);
 
   // "How to breed" opener: the old line was byte-identical on all 299 pages.
-  // The rewrite states the same fact keyed to this Pal's own cheapest pair and
-  // its reachability, so it differs page to page.
-  const howToOpener = rewrite && !selfOnly
-    ? `<p>To breed ${esc(p.name)}, pair its two parents in a Breeding Farm with cake in the feed box; parent order never changes the result, so ${esc(pals[parents[0][0]].name)} + ${esc(pals[parents[0][1]].name)} hatches the same egg either way round. With ${reachWord(parents.length)} leading to it, the practical question is which pair is cheapest — ${cheapestPairPhrase(i).text} at a combined rarity of ${cheapestPairPhrase(i).cost}, shown at the top of the table.</p>`
-    : `<p>Pair the two Pals in a Breeding Farm with cake in the feed box. Parent order never matters — ${esc(pals[parents[0][0]].name)} + ${esc(pals[parents[0][1]].name)} and ${esc(pals[parents[0][1]].name)} + ${esc(pals[parents[0][0]].name)} both hatch ${esc(p.name)}.</p>`;
+  // The rewrite keys it to this Pal — its cheapest usable pair, or, for the
+  // self-only legendaries, the plain fact that a mixed pair won't work (the old
+  // template printed "X + X and X + X both hatch X" for those, an obvious tell).
+  const cheap = cheapestPairPhrase(i);
+  const howToOpener = !rewrite
+    ? `<p>Pair the two Pals in a Breeding Farm with cake in the feed box. Parent order never matters — ${esc(pals[parents[0][0]].name)} + ${esc(pals[parents[0][1]].name)} and ${esc(pals[parents[0][1]].name)} + ${esc(pals[parents[0][0]].name)} both hatch ${esc(p.name)}.</p>`
+    : selfOnly
+      ? `<p>${esc(label(p))} is the exception to the usual breeding advice: no mixed pair produces it. Put two ${esc(label(p))} together in a Breeding Farm with cake in the feed box and the egg hatches another ${esc(label(p))}, but there is no combination of other Pals that will — the first one has to be caught.</p>`
+      : `<p>To breed ${esc(label(p))}, pair its parents in a Breeding Farm with cake in the feed box; parent order never changes the result, so ${cheap.text} hatches the same egg either way round. With ${reachWord(parents.length)} leading to it, the practical question is which pair is cheapest — ${cheap.text} at a combined rarity of ${cheap.cost}, shown near the top of the table.</p>`;
 
   const analysis = rewrite ? analysisParas(p, i) : '';
   const rel = rewrite ? relatedLinks(p, i) : null;
