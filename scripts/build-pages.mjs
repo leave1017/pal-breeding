@@ -83,6 +83,184 @@ const WORK_LABEL = {
   Cooling: 'Cooling', Transporting: 'Transporting', Farming: 'Farming',
 };
 
+/* ---- per-Pal analysis --------------------------------------------------- *
+   Every /breeding/<pal>/ page came off one template with the same opening
+   sentence and ~250 words of body, so 260 of the 299 read as near-duplicates
+   and Google stopped indexing them. These helpers write the prose from each
+   Pal's own numbers instead — cheapest route, value as a parent, how its
+   element and rarity shape the chain — so the sentences differ because the
+   facts differ, not because a template swapped a name in. Nothing here is
+   invented; every claim is read off combos.json / pals.json. */
+
+const rankByPairs = pals.map((_, i) => i).sort((a, b) => parentsOf(b).length - parentsOf(a).length);
+const pairRank = new Map(rankByPairs.map((idx, r) => [idx, r + 1]));   // 1 = most reachable
+const medianPairCount = parentsOf(rankByPairs[Math.floor(rankByPairs.length / 2)]).length;
+const powers = pals.map((p) => p.power);
+const POWER_MIN = Math.min(...powers), POWER_MAX = Math.max(...powers);
+
+/** Grammatical list: [a] → "a", [a,b] → "a and b", [a,b,c] → "a, b and c". */
+const andList = (xs) => xs.length <= 1 ? (xs[0] ?? '')
+  : xs.slice(0, -1).join(', ') + ' and ' + xs[xs.length - 1];
+
+const palLink = (q) => `<a href="/breeding/${q.slug}/">${esc(label(q))}</a>`;
+
+/** The single easiest pair to make this Pal, as a linked "A + B" phrase. */
+function cheapestPairPhrase(i) {
+  const ps = easiestFirst(parentsOf(i));
+  if (!ps.length) return null;
+  const [a, b] = ps[0];
+  return { a: pals[a], b: pals[b], cost: cost(ps[0]), text: `${palLink(pals[a])} + ${palLink(pals[b])}` };
+}
+
+/** Distinct offspring this Pal can father/mother, richest-first by rarity. */
+function bestOffspring(i, k = 3) {
+  const seen = new Set();
+  const out = [];
+  for (const [, child] of childrenOf(i)) {
+    if (child === i || seen.has(child)) continue;
+    seen.add(child);
+    out.push(pals[child]);
+  }
+  return out.sort((a, b) => b.rarity - a.rarity || b.power - a.power).slice(0, k);
+}
+
+/** How this Pal's reachability reads in words, anchored to the real median. */
+function reachWord(count) {
+  if (count === 1) return 'a single pair';
+  if (count >= medianPairCount * 2) return 'an unusually large number of pairs';
+  if (count >= medianPairCount) return 'more pairs than the average Pal';
+  if (count >= medianPairCount / 2) return 'a moderate number of pairs';
+  return 'only a handful of pairs';
+}
+
+/* The analysis paragraphs. The hard part is that two Pals with a similar data
+   shape (say two dual-element variants of comparable rarity) must not come out
+   reading alike, or the rewrite is just a second template. So each paragraph
+   keeps several phrasings and the *data* picks which one — a legendary that
+   breeds only from itself, a common Pal reachable from hundreds of pairs, and a
+   mid-rarity variant each travel a different sentence, because the fact that
+   selects the sentence is itself different. `pick` spreads ties deterministically
+   by dex so same-shaped Pals still diverge. Every clause is read off the data;
+   nothing is invented. */
+function analysisParas(p, i) {
+  const paras = [];
+  const parents = easiestFirst(parentsOf(i));
+  const selfOnly = parents.length === 1 && parents[0][0] === i && parents[0][1] === i;
+  const rank = pairRank.get(i);
+  const name = esc(label(p));
+  const pick = (arr) => arr[p.dex % arr.length];   // stable per-Pal variety on ties
+
+  // 1 — the cheapest realistic route to obtaining this Pal.
+  if (selfOnly) {
+    paras.push('<p>' + pick([
+      `There is no breeding shortcut to a first ${name}. It cannot be produced from two different Pals, so you have to catch one in the wild; after that, pairing it with another ${name} breeds true and the line sustains itself.`,
+      `${name} is one of the Pals breeding cannot hand you from scratch — the only pair that yields it is two of its own kind. Catch the first, and every ${name} after that comes from the ranch.`,
+      `You will not hatch ${name} from a mixed pair; breeding only reproduces it once you already own one. The first has to come from the wild, which is the whole cost — it breeds true from then on.`,
+    ]) + '</p>');
+  } else {
+    const cheap = cheapestPairPhrase(i);
+    const reach = reachWord(parents.length);
+    const closer = parents.length >= medianPairCount
+      ? `Sitting at rank ${rank} of ${pals.length} for reachability, it comes from ${reach}, so you very likely own a workable pair already.`
+      : `At rank ${rank} of ${pals.length} for reachability it comes from ${reach}, so it is worth starting from the cheapest row rather than a longer chain.`;
+    paras.push('<p>' + pick([
+      `The cheapest route to ${name} is ${cheap.text}, whose parents total just ${cheap.cost} in combined rarity — the lowest of the ${pairs(parents.length)} that reach it. ${closer}`,
+      `Of the ${pairs(parents.length)} that hatch ${name}, the easiest is ${cheap.text}, a combined rarity of ${cheap.cost}. ${closer}`,
+      `Start with ${cheap.text}: at a combined rarity of ${cheap.cost} it is the least expensive of the ${pairs(parents.length)} that produce ${name}. ${closer}`,
+    ]) + '</p>');
+  }
+
+  // 2 — value as a parent: what keeping one around lets you breed next.
+  const kids = bestOffspring(i);
+  const uniqueKids = new Set(childrenOf(i).map(([, c]) => c).filter((c) => c !== i)).size;
+  if (uniqueKids > 0) {
+    const kidNames = andList(kids.map((q) => palLink(q)));
+    const scale = uniqueKids >= 90 ? 'an unusually wide range of' : uniqueKids >= 40 ? 'a broad range of' : 'a modest set of';
+    paras.push('<p>' + pick([
+      `Kept as a parent, ${name} feeds into ${uniqueKids} different offspring${kids.length ? `, the pick of them ${kidNames}` : ''} — ${scale} lines, which is worth remembering before you release a spare.`,
+      `As a parent ${name} earns its box slot: it contributes to ${uniqueKids} distinct offspring${kids.length ? `, most usefully ${kidNames}` : ''}. Re-catching one later costs more than the slot it holds now.`,
+      `Pair ${name} across the roster and it produces ${uniqueKids} different Pals${kids.length ? `; the ones worth breeding for are ${kidNames}` : ''}. That reach — ${scale} results — is the case for keeping one on hand.`,
+    ]) + '</p>');
+  }
+
+  // 3 — how element and rarity position it in the breeding graph.
+  const els = p.elements ?? [];
+  if (els.length) {
+    const elClause = els.length === 2
+      ? `${name} is dual-typed, ${andList(els.map((e) => esc(e)))}, which puts it in the minority that carry two elements and makes it a useful bridge toward other dual-typed Pals`
+      : `${name} is a pure ${esc(els[0])}-type`;
+    const rarityClause = p.rarity >= 8
+      ? `at rarity ${p.rarity} it sits near the top of the scale, so most routes to it pass through other high-rarity parents`
+      : p.rarity <= 3
+        ? `at rarity ${p.rarity} it is common enough to serve as a cheap parent elsewhere`
+        : `at rarity ${p.rarity} it sits mid-scale, cheap to breed freely yet still useful as a parent`;
+    paras.push('<p>' + pick([
+      `${elClause}. Typing never decides what an egg becomes — a hidden breeding-power value does, and ${name}'s is ${n(p.power)} on a ${n(POWER_MIN)}–${n(POWER_MAX)} scale — but ${rarityClause}.`,
+      `On the breeding graph, ${elClause}. What hatches from a pair is set by breeding power (${name} carries ${n(p.power)}, within the ${n(POWER_MIN)}–${n(POWER_MAX)} range) rather than element, and ${rarityClause}.`,
+    ]) + '</p>');
+  }
+
+  // 4 — the variant trap, only for variant forms (a real, common mistake).
+  if (p.variant) {
+    const base = pals.find((q) => !q.variant && q.dex === p.dex);
+    const baseName = base ? esc(label(base)) : 'the base form';
+    const baseRef = base ? palLink(base) : 'its base form';
+    paras.push('<p>' + pick([
+      `One trap worth flagging: ${name} is a variant, a separate Paldeck entry from ${baseRef}, and shares none of its breeding pairs. Reading off ${baseName} and assuming the pairs carry over is the usual mistake — only the pairs on this page hatch ${name}.`,
+      `Because ${name} is a variant form of ${baseRef}, its combinations are entirely its own; the base Pal's pairs will not produce it. That mismatch catches people out constantly, so treat this page as the only source for ${name}.`,
+    ]) + '</p>');
+  }
+
+  return paras.join('\n    ');
+}
+
+/** 10–20 genuinely related links, replacing the 77–190 the page used to carry
+ *  (anchor text alone ran 6× the body, which is what buried the real content).
+ *  The picks are meaningful: the easiest parents, the best offspring, and a few
+ *  same-element neighbours — the links a reader would actually follow. */
+function relatedLinks(p, i) {
+  const seen = new Set([i]);
+  const take = (idx) => { if (seen.has(idx)) return false; seen.add(idx); return true; };
+  const out = [];
+  easiestFirst(parentsOf(i)).slice(0, 12).forEach(([a, b]) => {
+    if (take(a)) out.push(a); if (out.length < 8 && take(b)) out.push(b);
+  });
+  const parentsPart = out.slice(0, 8);
+  const kidsPart = [];
+  bestOffspring(i, 6).forEach((q) => { const idx = pals.indexOf(q); if (take(idx)) kidsPart.push(idx); });
+  return { parents: parentsPart, kids: kidsPart };
+}
+
+/* The B1+B2+B3 slugs from the queue — variants, plus pages that already draw
+   impressions. These get the rewritten body; the remaining ~200 keep the old
+   template so the two groups can be compared in GSC after a few weeks. When the
+   comparison confirms the rewrite lifts indexing, drop the gate and every page
+   gets it. Sourced from palbreeding-收录队列.json batches B1/B2/B3. */
+const REWRITE_SLUGS = new Set([
+  // B1 — unindexed variant pages
+  'azurobe-cryst', 'beakon-cryst', 'blazamut-ryu', 'blazehowl-noct', 'broncherry-aqua',
+  'bushi-noct', 'caprity-noct', 'celaray-lux', 'celesdir-noct', 'chillet-ignis',
+  'cryolinx-terra', 'dualith-noct', 'eidrolon-ignis', 'eikthyrdeer-terra', 'elgrove-cryst',
+  'elphidran-aqua', 'faleris-aqua', 'fenglope-lux', 'finsider-ignis', 'foxparks-cryst',
+  'frostallion-noct', 'fuack-ignis', 'ghangler-ignis', 'gloopie-primo', 'gobfin-ignis',
+  'gorirat-terra', 'hangyu-cryst', 'helzephyr-lux', 'incineram-noct', 'jolthog-cryst',
+  'katress-ignis', 'kelpsea-ignis', 'killamari-primo', 'kitsun-noct', 'knocklem-ignis',
+  'leezpunk-ignis', 'loupmoon-cryst', 'mammorest-cryst', 'mau-cryst', 'menasting-terra',
+  'mossanda-lux', 'nitemary-botan', 'pengullet-lux', 'penking-lux', 'petallia-ignis',
+  'pierdon-cryst', 'prixter-lux', 'pyrin-noct', 'quivern-botan', 'rayhound-cryst',
+  'reptyro-cryst', 'ribbuny-botan', 'robinquill-terra', 'sibelyx-primo', 'skutlass-ignis',
+  'smokie-cryst', 'snock-lux', 'solmora-lux', 'suzaku-aqua', 'tanzee-ignis',
+  'turtacle-terra', 'univolt-cryst', 'vanwyrm-cryst', 'warsect-terra', 'whalaska-ignis',
+  'wixen-noct', 'woolipop-terra', 'wumpo-botan',
+  // B2 — has impressions, ranked 50+
+  'jormuntide-ignis', 'lunaris', 'jormuntide', 'flopie', 'dumud-gild', 'mozzarina',
+  'nox', 'shroomer-noct', 'croajiro-noct', 'kingpaca-cryst', 'robinquill', 'surfent-terra',
+  'dazzi-noct', 'prixter',
+  // B3 — has impressions, ranked 20–50
+  'necromus', 'dumud', 'shadowbeak', 'grizzbolt', 'lyleen-noct', 'clovee',
+  'dinossom-lux', 'polapup-terra', 'relaxaurus-lux',
+]);
+
 // ---- shared chrome --------------------------------------------------------
 /* Mutations and Passives were footer-only on the reasoning that the top bar
    should carry the core task and not the whole site map. Search data says
@@ -360,6 +538,21 @@ function palPage(p, i) {
     ? `<strong>${esc(label(p))}</strong> cannot be bred from two different Pals. The only pair that produces it is ${esc(label(p))} with another ${esc(label(p))}, so the first one has to be caught in the wild — after that it breeds true.`
     : `${n(parents.length)} parent ${parents.length === 1 ? 'pair produces' : 'pairs produce'} <strong>${esc(label(p))}</strong> in Palworld 1.0. They are listed cheapest first, by the combined rarity of the two parents, so the easiest way to get one is at the top.`;
 
+  // The rewrite (per-Pal analysis, trimmed links) applies to the queued slugs
+  // only; every other Pal keeps the original template so the two form a
+  // controlled before/after group in GSC. Remove the gate once it's confirmed.
+  const rewrite = REWRITE_SLUGS.has(p.slug);
+
+  // "How to breed" opener: the old line was byte-identical on all 299 pages.
+  // The rewrite states the same fact keyed to this Pal's own cheapest pair and
+  // its reachability, so it differs page to page.
+  const howToOpener = rewrite && !selfOnly
+    ? `<p>To breed ${esc(p.name)}, pair its two parents in a Breeding Farm with cake in the feed box; parent order never changes the result, so ${esc(pals[parents[0][0]].name)} + ${esc(pals[parents[0][1]].name)} hatches the same egg either way round. With ${reachWord(parents.length)} leading to it, the practical question is which pair is cheapest — ${cheapestPairPhrase(i).text} at a combined rarity of ${cheapestPairPhrase(i).cost}, shown at the top of the table.</p>`
+    : `<p>Pair the two Pals in a Breeding Farm with cake in the feed box. Parent order never matters — ${esc(pals[parents[0][0]].name)} + ${esc(pals[parents[0][1]].name)} and ${esc(pals[parents[0][1]].name)} + ${esc(pals[parents[0][0]].name)} both hatch ${esc(p.name)}.</p>`;
+
+  const analysis = rewrite ? analysisParas(p, i) : '';
+  const rel = rewrite ? relatedLinks(p, i) : null;
+
   const body = `    <h1>Palworld ${esc(label(p))} Breeding Combos</h1>
     <p class="lede">${intro}</p>
 
@@ -374,15 +567,14 @@ function palPage(p, i) {
     ${Object.keys(p.work).length ? `<p class="worklist"><span class="worklist__label">Work suitability</span>${workList(p)}</p>` : ''}
 
     ${(p.passives ?? []).length ? `<p class="worklist"><span class="worklist__label">Always hatches with</span>${(p.passives ?? []).map((x) => `<a class="work" href="/passives/${passiveIndex[x].slug}/">${esc(passiveIndex[x].name)}</a>`).join('')}</p>` : ''}
-    ${p.variant ? (() => {
+    ${p.variant && !rewrite ? (() => {
       const f = families.find((x) => x.members.some(([q]) => q === p));
       return f && f.members.length >= FAMILY_MIN
         ? `<p class="note"><strong>${esc(p.name)}</strong> is a variant form. See <a href="/mutations/${f.slug}/">all ${f.members.length} ${esc(f.name)} Pals</a> or the <a href="/mutations/">full list of ${variants.length} variants</a>.</p>`
         : `<p class="note"><strong>${esc(p.name)}</strong> is a variant form — see the <a href="/mutations/">full list of ${variants.length} variants</a>.</p>`;
     })() : ''}
-
-    <h2>How to breed ${esc(p.name)}</h2>
-    <p>Pair the two Pals in a Breeding Farm with cake in the feed box. Parent order never matters — ${esc(pals[parents[0][0]].name)} + ${esc(pals[parents[0][1]].name)} and ${esc(pals[parents[0][1]].name)} + ${esc(pals[parents[0][0]].name)} both hatch ${esc(p.name)}.</p>
+${rewrite ? `    <h2>How to get ${esc(label(p))}</h2>\n    ${analysis}\n\n` : ''}    <h2>How to breed ${esc(p.name)}</h2>
+    ${howToOpener}
 
     <div class="table-scroll">
       <table class="combo-table">
@@ -406,11 +598,18 @@ ${childRows}
         </tbody>
       </table>
     </div>
-
-    ${related.length ? `<h2>Other ${esc((p.elements ?? ['similar'])[0])} Pals</h2>
+${rewrite && rel ? `
+    <h2>Where ${esc(label(p))} fits in the breeding chain</h2>
+    ${rel.parents.length ? `<p>Cheapest parents that lead to ${esc(label(p))}: ${andList(rel.parents.map((idx) => palLink(pals[idx])))}.</p>` : ''}
+    ${rel.kids.length ? `<p>Most valuable Pals it breeds into: ${andList(rel.kids.map((idx) => palLink(pals[idx])))}.</p>` : ''}
+    ${p.variant ? (() => {
+      const f = families.find((x) => x.members.some(([q]) => q === p));
+      return f && f.members.length >= FAMILY_MIN
+        ? `<p>See also <a href="/mutations/${f.slug}/">all ${f.members.length} ${esc(f.name)} variants</a> or the <a href="/mutations/">full list of ${variants.length}</a>.</p>` : '';
+    })() : ''}` : (related.length ? `    <h2>Other ${esc((p.elements ?? ['similar'])[0])} Pals</h2>
     <div class="pal-grid pal-grid--compact">
       ${related.map((q) => `<a class="pal-card" href="/breeding/${q.slug}/">${icon(q)}<strong>${esc(label(q))}</strong><small>${pairs(parentsOf(pals.indexOf(q)).length)}</small></a>`).join('\n      ')}
-    </div>` : ''}
+    </div>` : '')}
 `;
 
   return layout({
