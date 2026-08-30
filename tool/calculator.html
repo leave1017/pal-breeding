@@ -8,6 +8,19 @@
      document stays out of the index while still passing links through. -->
 <meta name="robots" content="noindex, follow">
 
+<!-- Microsoft Clarity — same project as the main site (y31849bdc1). The
+     calculator was previously an analytics blind spot; this closes it. Custom
+     tags are set from the script below (calc_tab / calc_search / calc_result).
+     No GA4 here on purpose: a gtag inside the iframe would fire a second
+     page_view and pollute the parent's baseline. -->
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "y31849bdc1");
+</script>
+
 <style>
 /* Tokens mirror the parent page so the embed reads as one surface.
    Keep this block in sync with index.html if the palette changes. */
@@ -415,6 +428,25 @@ select.input option{background:var(--card);color:var(--fg);font-weight:600}
   };
 
   const $ = (s, r = document) => r.querySelector(s);
+
+  // Clarity custom tags. Wrapped so a blocked or slow tracker can never throw
+  // into the calculator — the tool has to work whether or not analytics loads.
+  const track = (...args) => {
+    try { if (window.clarity) window.clarity(...args); } catch (e) { /* never break the tool */ }
+  };
+  // Tab id → the slug the data side reads. Deliberately NOT set on load:
+  // tab-child is the default, so tagging it on init would stamp every session
+  // with parents-to-child and erase the "user actively switched" signal. Only
+  // the real click handler below fires calc_tab.
+  const TAB_TRACK = {
+    child:   'parents-to-child',
+    parents: 'target-to-parents',
+    one:     'one-parent-to-all',
+    path:    'shortest-route',
+    pass:    'passives',
+    mut:     'mutations',
+  };
+
   const el = (tag, props = {}, ...kids) => {
     const { dataset, ...rest } = props;
     // dataset is read-only, so it cannot go through Object.assign with the rest.
@@ -743,6 +775,8 @@ select.input option{background:var(--card);color:var(--fg);font-weight:600}
               className: 'cell', type: 'button',
               dataset: { picked: String(state.sel[state.activeSlot] === i) },
               onclick: () => {
+                // Which Pal the visitor reached for, regardless of mode.
+                track('set', 'calc_search', p.slug);
                 if (!state.activeSlot) {
                   // Passives has no slot of its own, so a Pal click is most
                   // useful as "show me how to breed this one".
@@ -751,6 +785,7 @@ select.input option{background:var(--card);color:var(--fg);font-weight:600}
                   state.activeSlot = 'target';
                   MODES.forEach((m) => $(`#tab-${m}`).setAttribute('aria-selected', String(m === 'parents')));
                   draw();
+                  track('event', 'calc_result'); // parent pairs now on screen
                   return;
                 }
                 state.sel[state.activeSlot] = i;
@@ -759,7 +794,7 @@ select.input option{background:var(--card);color:var(--fg);font-weight:600}
                 if (next) state.activeSlot = next[0];
                 draw();
                 // Nothing left to fill means the answer just changed.
-                if (!next) revealResults();
+                if (!next) { revealResults(); track('event', 'calc_result'); }
               },
             }, art(i),
               el('span', { className: 'cell__name', textContent: p.name }),
@@ -938,6 +973,9 @@ select.input option{background:var(--card);color:var(--fg);font-weight:600}
       state.query = '';
       MODES.forEach((m) => $(`#tab-${m}`).setAttribute('aria-selected', String(m === mode)));
       draw();
+      // Fired here, in the click handler only — a session with no calc_tab
+      // means the visitor stayed on the default tab, which is the point.
+      track('set', 'calc_tab', TAB_TRACK[mode]);
     });
   });
 
