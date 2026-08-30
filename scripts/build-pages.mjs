@@ -179,9 +179,12 @@ function analysisParas(p, i) {
     const superlative = cheap.skippedSelf
       ? `the cheapest pair you can start from without already owning a ${name}`
       : `the lowest of the ${pairs(parents.length)} that reach it`;
+    // Variant 2 already opens with "Of the N pairs", so its inner phrase must
+    // not repeat the count — it reads "…, the easiest is A + B". Only the
+    // self-skip case needs the extra qualifier there.
     const superlative2 = cheap.skippedSelf
-      ? `the easiest to start from`
-      : `the easiest of the ${pairs(parents.length)}`;
+      ? `the easiest you can start from`
+      : `the easiest`;
     paras.push('<p>' + pick([
       `The cheapest route to ${name} is ${cheap.text}, whose parents total ${cheap.cost} in combined rarity — ${superlative}. ${closer}`,
       `Of the ${pairs(parents.length)} that hatch ${name}, ${superlative2} is ${cheap.text}, a combined rarity of ${cheap.cost}. ${closer}`,
@@ -278,6 +281,21 @@ const REWRITE_SLUGS = new Set([
   // B3 — has impressions, ranked 20–50
   'necromus', 'dumud', 'shadowbeak', 'grizzbolt', 'lyleen-noct', 'clovee',
   'dinossom-lux', 'polapup-terra', 'relaxaurus-lux',
+
+  // ── Batch 2 (2026-08-30): 47 base-form Pals, no variants ──
+  // Same per-Pal-analysis treatment. Batch 1 was 79/91 variants; these are all
+  // base forms, which appear as parents in far more pairs — so the value here
+  // leans on what each one breeds into, handled by the same analysis code.
+  // A — already indexed, ranking low
+  'azurobe', 'broncherry', 'dupin', 'ophydia', 'incineram', 'reptyro',
+  'surfent', 'fenglope', 'needoll', 'nitemary', 'sootseer', 'swee',
+  // B — not yet indexed
+  'amione', 'anubis', 'arsox', 'astegon', 'azurmane', 'bakemi', 'bastigor',
+  'beakon', 'beegarde', 'bellanoir', 'blazamut', 'blazehowl', 'blue-slime',
+  'braloha', 'bristla', 'bulldosu', 'bushi', 'caprity', 'carnibora', 'cattiva',
+  'cawgnito', 'celaray', 'celesdir', 'chikipi', 'chillet', 'cinnamoth', 'cremis',
+  'croajiro', 'cryolinx', 'daedream', 'dazemu', 'dazzi', 'demon-eye',
+  'dinossom', 'direhowl',
 ]);
 
 // ---- shared chrome --------------------------------------------------------
