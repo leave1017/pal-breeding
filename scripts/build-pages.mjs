@@ -420,7 +420,7 @@ function layout({ title, description, path, crumbs, body, extraLd = [], scripts 
 <link rel="canonical" href="${url}">
 <link rel="manifest" href="/manifest.json">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="PalLineage">
+<meta property="og:site_name" content="PalBreeding">
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(description)}">
 <meta property="og:url" content="${url}">
@@ -963,7 +963,7 @@ ${SECTION_END}
 `;
 
   return layout({
-    title: `Palworld Breeding Combinations — All ${n(combos.combos.length)} Pairs | PalLineage`,
+    title: `Palworld Breeding Combinations — All ${n(combos.combos.length)} Pairs | PalBreeding`,
     description: `All ${n(combos.combos.length)} Palworld breeding combinations for v1.0 in one searchable table. Filter by element, sort by how many pairs reach a Pal, open any Pal for its list.`,
     path: '/breeding/',
     pageType: 'CollectionPage',
@@ -1074,7 +1074,7 @@ ${SECTION_END}
 `;
 
   return layout({
-    title: `All ${pals.length} Palworld Pals — Elements & Rarity | PalLineage`,
+    title: `All ${pals.length} Palworld Pals — Elements & Rarity | PalBreeding`,
     description: `Every Pal in the Palworld 1.0 Paldeck with element, rarity and all twelve work suitabilities, searchable and filterable, each linked to its breeding combinations.`,
     path: '/pals/',
     pageType: 'CollectionPage',
