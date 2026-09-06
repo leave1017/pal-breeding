@@ -1,0 +1,182 @@
+{
+  "说明": "改写前的 GSC 基线存档。141+20 页全部改完后天然对照组即消失,届时将无法归因『改写到底有没有用』。本文件是这轮工作唯一能留下的因果证据,必须在任何改写提交之前先行提交。",
+  "数据来源": "Google Search Console,页面级与查询词级导出",
+  "数据周期": "2026-08-08 ~ 2026-09-04 (28 天)",
+  "拉取日期": "2026-09-06",
+  "存档日期": "2026-09-06",
+  "依据方案": "palbreeding 整改方案 2026-09-06 定稿 v2",
+
+  "数据盲区": {
+    "说明": "全站 1540 个可见查询词只覆盖 2522 次曝光,而全站共 7579 次 —— 67% 的曝光落在 GSC 匿名化的低频词里,拉不到。",
+    "影响": "所有基于查询词的基线(P0 的词频与头部词排名)只对可见部分成立。页面级排名不受此影响,故 P1/P2/P3 的分批依据均采用页面级数据。"
+  },
+
+  "P0_mutations枢纽页": {
+    "页面": "/mutations/",
+    "改动": "title / h1 / description 三处,详见方案 P0",
+    "基线": {
+      "页面级加权排名_全部查询词": 20.1,
+      "头部词加权排名_4到10名区间": 7.8,
+      "该区间曝光": 159,
+      "点击": 5,
+      "CTR": 0.0314
+    },
+    "回滚检查点": [
+      {
+        "指标": "页面级加权排名(全部查询词)",
+        "基线": 20.1,
+        "判定日期": "2026-09-27",
+        "触发线": "劣化到 26 以外 → 回滚"
+      },
+      {
+        "指标": "头部词加权排名(4-10 名区间的 159 次曝光)",
+        "基线": 7.8,
+        "判定日期": "2026-09-27",
+        "触发线": "劣化到 12 以外 → 回滚"
+      },
+      {
+        "指标": "CTR",
+        "基线": 0.0314,
+        "判定日期": "2026-11-01",
+        "触发线": "8 周后再判",
+        "为何不能3周判": "基线是 159 曝光 / 5 次点击。3 周约 119 次曝光,期望点击 3.7 次,而 4 次点击的泊松波动是 ±2。该样本量下真实提升与随机波动无法区分,更无法判定劣化 —— 3 周设 CTR 触发线等于在噪声上回滚。区分 3.14% 与 8% 需要约 6~8 周。"
+      }
+    ],
+    "改动前原文": {
+      "title": "Palworld Variant Pals — All 85 Mutations in 1.0",
+      "h1": "Palworld Variant Pals — All 85 Mutations",
+      "description": "Every variant Pal in Palworld 1.0 — Cryst, Ignis, Noct, Lux, Terra and the rest — with its element, rarity and how many parent pairs produce it."
+    }
+  },
+
+  "P1_从未进过队列的20页": {
+    "说明": "原队列文件只有 279 页,而线上 sitemap 有 299 个 /breeding/ 详情页。差的这 20 页从未进过队列,从未被 check_indexing.py 统计,在此前所有对照实验中均为隐形。全部为 1.0 新 Pal,竞争最薄。",
+    "分组基线": {
+      "页数": 20,
+      "收录率": 1.0,
+      "排名区间": "5.5 ~ 19.6(无一例外)",
+      "合计曝光": 298,
+      "合计点击": 5
+    },
+    "性质警告": "这批已经在赢,任务是别把它弄坏。排名好不是因为内容好,是因为没人抢 —— 改写有真实的下行风险,故分两步走。",
+    "P1a_试点6页": {
+      "验收": "2 周后(约 2026-09-20)复测这 6 页排名。任一页劣化超过 8 名 → 停止推广本批并回滚,不进 P1-b。",
+      "页面": [
+        { "slug": "neptilius",        "曝光": 62, "点击": 1, "排名": 16.0 },
+        { "slug": "bellanoir-libero", "曝光": 47, "点击": 0, "排名": 16.6 },
+        { "slug": "dandilord",        "曝光": 35, "点击": 0, "排名": 8.4 },
+        { "slug": "silvance",         "曝光": 25, "点击": 0, "排名": 7.5 },
+        { "slug": "selyne",           "曝光": 25, "点击": 0, "排名": 10.9 },
+        { "slug": "aegidron",         "曝光": 21, "点击": 2, "排名": 7.7 }
+      ],
+      "小计": { "曝光": 215, "点击": 3 }
+    },
+    "P1b_其余14页": {
+      "前置条件": "P1-a 试点通过后才执行",
+      "逐页数据": "方案未提供逐页曝光/排名,仅有分组数据",
+      "分组小计": { "曝光": 83, "点击": 2, "排名区间": "5.5 ~ 19.6" },
+      "页面": [
+        "cave-bat", "depresso", "digtoise", "eidrolon", "hartalis",
+        "moldron-cryst", "muffly", "needoll-noct", "prunelia", "purple-slime",
+        "renjishi", "starryon-primo", "tetroise-primo", "univolt"
+      ]
+    },
+    "待办_不在本仓库": "把这 20 页补进 palbreeding-收录队列.json(279 → 299),否则 check_indexing.py 会一直漏统计。该文件不在本仓库内,需方案作者侧执行。"
+  },
+
+  "P2_有曝光的46页": {
+    "说明": "已被 Google 收录并给了排名,改写打的是排名,有基线可比、2 周内可验证。",
+    "小计": { "页数": 46, "曝光": 391, "点击": 3 },
+    "页面": [
+      { "slug": "frostallion",     "曝光": 51, "排名": 44.5 },
+      { "slug": "knocklem",        "曝光": 29, "排名": 61.4 },
+      { "slug": "foxcicle",        "曝光": 19, "排名": 59.1 },
+      { "slug": "elphidran",       "曝光": 19, "排名": 64.6 },
+      { "slug": "xenogard",        "曝光": 18, "排名": 47.5 },
+      { "slug": "faleris",         "曝光": 18, "排名": 64.1 },
+      { "slug": "lovander",        "曝光": 18, "排名": 71.3 },
+      { "slug": "xenolord",        "曝光": 15, "排名": 35.4 },
+      { "slug": "maraith",         "曝光": 13, "排名": 51.1 },
+      { "slug": "xenovader",       "曝光": 13, "排名": 59.4 },
+      { "slug": "vanwyrm",         "曝光": 13, "排名": 66.9 },
+      { "slug": "nitewing",        "曝光": 13, "排名": 67.1 },
+      { "slug": "kelpsea",         "曝光": 12, "排名": 57.6 },
+      { "slug": "grintale",        "曝光": 10, "排名": 41.8 },
+      { "slug": "loupmoon",        "曝光": 10, "排名": 62.6 },
+      { "slug": "teafant",         "曝光": 8,  "排名": 57.4 },
+      { "slug": "paladius",        "曝光": 8,  "排名": 47.5 },
+      { "slug": "valentail",       "曝光": 8,  "排名": 7.0 },
+      { "slug": "mimog",           "曝光": 7,  "排名": 21.1 },
+      { "slug": "lullu",           "曝光": 7,  "排名": 57.4 },
+      { "slug": "mau",             "曝光": 7,  "排名": 67.7 },
+      { "slug": "wixen",           "曝光": 6,  "排名": 55.7 },
+      { "slug": "hoocrates",       "曝光": 6,  "排名": 59.8 },
+      { "slug": "kingpaca",        "曝光": 6,  "排名": 62.5 },
+      { "slug": "snugloo",         "曝光": 5,  "排名": 14.8 },
+      { "slug": "turtacle",        "曝光": 5,  "排名": 26.6 },
+      { "slug": "omascul",         "曝光": 5,  "排名": 32.6 },
+      { "slug": "tarantriss",      "曝光": 5,  "排名": 35.2 },
+      { "slug": "smokie",          "曝光": 4,  "排名": 61.2 },
+      { "slug": "lifmunk",         "曝光": 4,  "排名": 36.5 },
+      { "slug": "mammorest",       "曝光": 3,  "排名": 40.7 },
+      { "slug": "nyafia",          "曝光": 3,  "排名": 9.7 },
+      { "slug": "solenne",         "曝光": 3,  "排名": 7.7 },
+      { "slug": "enchanted-sword", "曝光": 3,  "排名": 7.0 },
+      { "slug": "panthalus",       "曝光": 3,  "排名": 6.7 },
+      { "slug": "rainbow-slime",   "曝光": 2,  "排名": 10.5 },
+      { "slug": "tanzee",          "曝光": 2,  "排名": 47.0 },
+      { "slug": "palumba",         "曝光": 2,  "排名": 8.0 },
+      { "slug": "herbil",          "曝光": 1,  "排名": 54.0 },
+      { "slug": "vaelet",          "曝光": 1,  "排名": 56.0 },
+      { "slug": "eikthyrdeer",     "曝光": 1,  "排名": 58.0 },
+      { "slug": "dualith",         "曝光": 1,  "排名": 8.0 },
+      { "slug": "shaolong",        "曝光": 1,  "排名": 3.0 },
+      { "slug": "lapure",          "曝光": 1,  "排名": 5.0 },
+      { "slug": "tetroise",        "曝光": 1,  "排名": 5.0 },
+      { "slug": "loomen",          "曝光": 1,  "排名": 6.0 }
+    ]
+  },
+
+  "P3_无曝光的95页": {
+    "说明": "打的是收录,基线即『曝光 0』。必须与 P2 间隔至少 2 周提交,否则两批排名变化无法归因。",
+    "小计": { "页数": 95, "曝光": 0, "点击": 0 },
+    "验收标准": "用收录率验收,不要用点击数。配种详情页实测单页产出 0.062 次点击/页/28 天(145 页 → 9 次点击),加权排名 45.9;这 95 页的合理预期是 +1.4 ~ +3.3 次点击/月。",
+    "页面": [
+      "dogen", "dynamoff", "elgrove", "elizabee", "eye-of-cthulhu", "felbat",
+      "finsider", "flambelle", "flaracle", "foxparks", "frostplume", "fuack",
+      "fuddler", "galeclaw", "ghangler", "gildane", "gildra", "gloopie",
+      "gobfin", "gorirat", "green-slime", "gumoss", "gumoss-flower", "hangyu",
+      "helzephyr", "hoodle", "icelyn", "illuminant-bat", "illuminant-slime",
+      "jelliette", "jellroy", "jetragon", "jolthog", "katress", "kikit",
+      "killamari", "kitsun", "lamball", "lapiron", "leafan", "leezpunk",
+      "lyleen", "majex", "melpaca", "menasting", "moldron", "mossanda",
+      "munchill", "mycora", "orserk", "pengullet", "penking", "petallia",
+      "pierdon", "polapup", "puffolt", "pupperai", "pyrin", "quivern",
+      "ragnahawk", "rayhound", "red-slime", "reindrix", "relaxaurus", "ribbuny",
+      "rooby", "roujay", "rushoar", "sekhmet", "shroomer", "sibelyx",
+      "silvegis", "skutlass", "slowatt", "snock", "solmora", "souffline",
+      "sparkit", "splatterina", "starryon", "suzaku", "sweepa", "tocotoco",
+      "tombat", "tropicaw", "venusa", "verdash", "vixy", "warsect",
+      "whalaska", "wispaw", "wistella", "woolipop", "wumpo", "yakumo"
+    ]
+  },
+
+  "分组对照_改写前": {
+    "说明": "这三组的收录率差异是本轮实验的核心对照。改写后应重新测量同样三组。",
+    "从未进队列的20页": { "页数": 20, "收录率": 1.0,   "加权排名": "5.5 ~ 19.6", "是否被改写过": false },
+    "已整改138页":       { "页数": 138, "收录率": 0.572, "加权排名": 46,          "是否被改写过": true  },
+    "未整改对照141页":   { "页数": 141, "收录率": 0.326, "加权排名": null,        "是否被改写过": false }
+  },
+
+  "页型竞争度基线": {
+    "说明": "同一域名同一批人写的页,表现差 5~8 倍 —— 不是权重不够,是竞争度差异。优先级按竞争薄→厚排,不按页数排。",
+    "条目": [
+      { "页型": "1.0 新 Pal 配种页(P1)", "页数": 20,  "加权排名": "5.5 ~ 19.6", "备注": "竞争最薄" },
+      { "页型": "/passives/ 详情",       "页数": 11,  "加权排名": 8.5,          "备注": "palworld <passive> 几乎没人做" },
+      { "页型": "/mutations/ 详情",      "页数": 4,   "加权排名": 13.2,         "备注": "" },
+      { "页型": "/mutations/ 枢纽",      "页数": 1,   "加权排名": 20.1,         "备注": "" },
+      { "页型": "/breeding/ 详情(老 Pal)", "页数": 145, "加权排名": 45.9,       "备注": "被 game8/fandom/ign 占满" },
+      { "页型": "/breeding/ 枢纽",       "页数": 1,   "加权排名": 59.5,         "备注": "" }
+    ]
+  }
+}
