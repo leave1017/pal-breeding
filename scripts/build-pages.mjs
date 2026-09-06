@@ -1385,7 +1385,7 @@ function mutationsIndex() {
       ${f.members.map(([p, i]) => `<a class="pal-card" href="/breeding/${p.slug}/">${icon(p)}<strong>${esc(label(p))}</strong><small>${pairs(parentsOf(i).length)}</small></a>`).join('\n      ')}
     </div>`;
 
-  const body = `    <h1>Palworld Variant Pals — All ${variants.length} Mutations</h1>
+  const body = `    <h1>All ${variants.length} Mutated Pals in Palworld 1.0</h1>
     <p class="lede">Palworld 1.0 has ${variants.length} variant forms across ${families.length} families. Each one is its own Paldeck entry with its own element, stats and breeding pairs — a Cryst form is not an Ice-coated version of the base Pal, it is a different Pal that you breed for directly.</p>
 
     <div class="factbar">
@@ -1412,8 +1412,13 @@ ${big.map(section).join('\n\n')}
 `;
 
   return layout({
-    title: `Palworld Variant Pals — All ${variants.length} Mutations in 1.0`,
-    description: `Every variant Pal in Palworld 1.0 — Cryst, Ignis, Noct, Lux, Terra and the rest — with its element, rarity and how many parent pairs produce it.`,
+    // Title carries all four high-frequency query terms — mutated (82),
+    // variant (53), list (50), mutations (31). Held to 55 characters: at 62
+    // the tail truncates in the results page, and the tail is where "List"
+    // sits. "in ... 1.0" was dropped because the mutations-family queries
+    // almost never carry "1.0" — see reports/改写基线-20260906.json.
+    title: `All ${variants.length} Mutated Pals — Palworld Mutations & Variant List`,
+    description: `The full list of all ${variants.length} mutated Pals in Palworld 1.0 — every Cryst, Ignis, Noct, Lux and Terra variant with its element, rarity and the parent pairs that produce it.`,
     path: '/mutations/',
     pageType: 'CollectionPage',
     crumbs: [{ label: 'Home', href: '/' }, { label: 'Mutations' }],
