@@ -296,6 +296,16 @@ const REWRITE_SLUGS = new Set([
   'cawgnito', 'celaray', 'celesdir', 'chikipi', 'chillet', 'cinnamoth', 'cremis',
   'croajiro', 'cryolinx', 'daedream', 'dazemu', 'dazzi', 'demon-eye',
   'dinossom', 'direhowl',
+
+  // ── B3-a (2026-09-06): 6-page pilot from the 20 Pals that were never in
+  // the queue at all — the queue file held 279 entries while the sitemap has
+  // 299, so these were invisible to every earlier experiment. All 20 are
+  // indexed and rank 5.5-19.6: 1.0 Pals that game8/fandom have not covered
+  // yet. Unlike every prior batch this one is not fixing thin content, it is
+  // touching pages that already win, so it ships as a pilot. Baselines and
+  // the rollback rule (any page losing more than 8 positions by 2026-09-20
+  // stops the batch) are in reports/改写基线-20260906.json.
+  'neptilius', 'bellanoir-libero', 'dandilord', 'silvance', 'selyne', 'aegidron',
 ]);
 
 // ---- shared chrome --------------------------------------------------------
